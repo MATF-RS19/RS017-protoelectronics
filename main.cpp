@@ -1,7 +1,8 @@
 #include <iostream>
 #include <vector>
+#include <memory>
 #include "components.hpp"
-
+#include "logical_components.hpp"
 
 int main() {
 	Resistor *R1 = new Resistor(2000),
@@ -43,5 +44,13 @@ int main() {
 		std::cout << "----------------------" << std::endl;
 	}
 
+    double in_1 = 5.0;
+    double in_2 = 1;
+    std::shared_ptr<InputComponent> in1 =  std::make_shared<InputComponent>(in_1);
+    std::shared_ptr<InputComponent> in2 =  std::make_shared<InputComponent>(in_2);
+    std::shared_ptr<ANDComponent> and1  = std::make_shared<ANDComponent>(in1, in2); 
+    std::shared_ptr<ORComponent> or1 = std::make_shared<ORComponent>(and1,in1);
+    XORComponent xor1 = XORComponent(or1, in1);
+    std::cout << "Result: " << xor1.voltage() << std::endl;
 	return 0;
 }
