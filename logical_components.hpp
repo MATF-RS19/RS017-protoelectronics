@@ -22,36 +22,43 @@ public:
   LOGComponent(double in1 = 0, double in2 = 0)
       :m_in1(std::make_shared<InputComponent>(in1)),m_in2(std::make_shared<InputComponent>(in2))
   {}
+  LOGComponent(std::shared_ptr<Component> in1, double in2)
+      :m_in1(in1),m_in2(std::make_shared<InputComponent>(in2))
+  {}
+  LOGComponent(double in1, std::shared_ptr<Component> in2)
+      :m_in1(std::make_shared<InputComponent>(in1)), m_in2(in2)
+  {}
 
 
 protected:
   std::shared_ptr<Component>  m_in1, m_in2;
 };
-
+// Every class which is derived from LOGComponent is template class,
+// and in LOGComponent are defined possible types and combination of the types
 class ANDComponent : public LOGComponent {
 public:
-    ANDComponent(std::shared_ptr<Component> in1, std::shared_ptr<Component> in2)
+    ANDComponent(auto in1, auto  in2)
         : LOGComponent(in1, in2)
     {}
     double voltage() const;
 };
 class ORComponent : public LOGComponent {
 public:
-    ORComponent(std::shared_ptr<Component> in1, std::shared_ptr<Component> in2)
+    ORComponent(auto in1, auto in2)
         : LOGComponent(in1, in2)
     {}
     double voltage() const;
 };
 class XORComponent : public LOGComponent {
 public:
-    XORComponent(std::shared_ptr<Component> in1, std::shared_ptr<Component> in2)
+    XORComponent(auto in1, auto in2)
         : LOGComponent(in1, in2)
     {}
     double voltage() const;
 };
 class NOTComponent : public LOGComponent {
 public:
-    NOTComponent(std::shared_ptr<Component> in)
+    NOTComponent(auto in)
         : LOGComponent(in)
     {}
 
@@ -60,21 +67,21 @@ public:
 };
 class NANDComponent : public LOGComponent {
 public:
-    NANDComponent(std::shared_ptr<Component> in1, std::shared_ptr<Component> in2)
+    NANDComponent(auto in1, auto in2)
         : LOGComponent(in1, in2)
     {}
     double voltage() const;
 };
 class NORComponent : public LOGComponent {
 public:
-    NORComponent(std::shared_ptr<Component> in1, std::shared_ptr<Component> in2)
+    NORComponent(auto in1, auto in2)
         : LOGComponent(in1, in2)
     {}
     double voltage() const;
 };
 class NXORComponent : public LOGComponent {
 public:
-    NXORComponent(std::shared_ptr<Component> in1, std::shared_ptr<Component> in2)
+    NXORComponent(auto in1, auto in2)
         : LOGComponent(in1, in2)
     {}
     double voltage() const;

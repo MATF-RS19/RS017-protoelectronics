@@ -51,6 +51,7 @@ int main() {
     std::shared_ptr<ANDComponent> and1  = std::make_shared<ANDComponent>(in1, in2); 
     std::shared_ptr<ORComponent> or1 = std::make_shared<ORComponent>(and1,in1);
     XORComponent xor1 = XORComponent(or1, in1);
-    std::cout << "Result: " << xor1.voltage() << std::endl;
+    NXORComponent nxor1(std::make_shared<XORComponent>(xor1), 2.0); 
+    std::cout << "Result: " << nxor1.voltage() << std::endl;
 	return 0;
 }
