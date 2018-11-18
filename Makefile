@@ -1,7 +1,7 @@
 PROGRAM = protoElectronics
 LIB = components
 CC = g++
-CPPFLAGS = -Wall -Wextra -std=c++11
+CPPFLAGS = -Wall -Wextra -std=c++17
 
 $(PROGRAM): main.o components.o logical_components.o
 	$(CC) $(CPPFLAGS) -o $@ $^
