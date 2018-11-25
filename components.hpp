@@ -1,164 +1,125 @@
 #ifndef __COMPONENTS_H__
 #define __COMPONENTS_H__ 1
 
-#include <cassert>
+#include <string>
+#include <vector>
+#include <memory>
 
-class ASTComponent {
+
+class Component;
+
+class Node {
 public:
-	ASTComponent(double voltage = 0, double current = 0)
-		:_voltage(voltage), _current(current)
-	{}
+	double _v;
+
+	Node(int x, int y);
+
+	int x() const;
+	int y() const;
+
+	int nodeID() const;
+
+	static int numOfNodes() {
+		return nodes_num;
+	}
+
+	void addComponent(const std::shared_ptr<Component>& e);
+
+	std::vector<std::shared_ptr<Component>> components() const;
+
+private:
+	static int nodes_num;
+	int _id;
+	int _x, _y;
+	std::vector<std::shared_ptr<Component>> _components;
+};
+
+
+class Component {
+public:
+	Component(std::string name, std::vector<std::shared_ptr<Node>> nodes);
+
+	Component(std::string name,
+			std::shared_ptr<Node> node1);
+	Component(std::string name,
+			std::shared_ptr<Node> node1,
+			std::shared_ptr<Node> node2);
+
+	Component(std::string name,
+			std::shared_ptr<Node> node1,
+			std::shared_ptr<Node> node2,
+			std::shared_ptr<Node> node3);
+
+	virtual ~Component();
+
+	std::string name() const;
 
 	virtual double voltage() const = 0;
 	virtual double current() const = 0;
-	virtual double resistance() const = 0;
 
-	virtual ~ASTComponent() {
-
-	}
-
-	void setVoltage(double voltage);
-
-	void setCurrent(double current);
-
-	void update(double voltage = 0, double current = 0);
-
-	double getVoltage();
-
-	double getCurrent();
-
-protected:
-	double _voltage, _current;
-};
-
-
-class PassiveComponent : public ASTComponent {
-public:
-	PassiveComponent(double voltage, double current)
-		:ASTComponent(voltage, current)
-	{}
-};
-
-
-class IOComponent : public ASTComponent {
-public:
-	IOComponent(double voltage, double current)
-		:ASTComponent(voltage, current)
-	{}
-};
-
-
-class Connection : public ASTComponent {
-public:
-	Connection(ASTComponent* elem1, ASTComponent* elem2, double voltage = 0, double current = 0)
-		:ASTComponent(voltage, current), _elem1(elem1), _elem2(elem2)
-	{}
-
-	~Connection();
-
-protected:
-	ASTComponent *_elem1, *_elem2;
-
-//TODO implemet
 private:
-	Connection(const Connection& c);
-	Connection& operator=(const Connection& c);
+	std::string _name;
+protected:
+	std::vector<std::shared_ptr<Node>> _nodes;
 };
 
 
-class SerialConnection : public Connection {
+class Ground : public Component {
 public:
-	SerialConnection(ASTComponent*  elem1, ASTComponent* elem2, double voltage = 0, double current = 0)
-		:Connection(elem1, elem2, voltage, current)
-	{}
+	Ground(std::string name,
+		std::shared_ptr<Node> node);
 
 	double voltage() const override;
 
 	double current() const override;
-
-	double resistance() const override;
 };
 
-class ParallelConnection : public Connection {
+
+class Wire : public Component {
 public:
-	ParallelConnection(ASTComponent*  elem1, ASTComponent* elem2, double voltage = 0, double current = 0)
-		:Connection(elem1, elem2, voltage, current)
-	{}
+	Wire(std::string name,
+		std::shared_ptr<Node> node1,
+		std::shared_ptr<Node> node2);
 
 	double voltage() const override;
 
 	double current() const override;
-
-	double resistance() const override;
 };
 
 
-class Resistor : public PassiveComponent {
+class Resistor : public Component {
 public:
-	Resistor(double r, double voltage = 0, double current = 0)
-		:PassiveComponent(voltage, current), _resistance(r)
-	{}
+	Resistor(std::string name, double resistance,
+			std::shared_ptr<Node> node1,
+			std::shared_ptr<Node> node2);
+
+	double resistance() const;
 
 	double voltage() const override;
 
 	double current() const override;
-
-	double resistance() const override;
-
-	double power() const;
 
 private:
 	double _resistance;
 };
 
 
-class DCVoltage : public IOComponent {
+class DCVoltage : public Component {
 public:
-	DCVoltage(ASTComponent* elem, double voltage = 5)
-		:IOComponent(voltage, 0), _elem(elem)
-	{
-		_elem->setVoltage(voltage);
-	}
+	DCVoltage(std::string name, double voltage,
+			std::shared_ptr<Node> node1,
+			std::shared_ptr<Node> node2);
 
-	~DCVoltage();
+	DCVoltage(std::string name, double voltage,
+			std::shared_ptr<Node> node);
 
 	double voltage() const override;
 
 	double current() const override;
 
-	double resistance() const override;
-
-//TODO implement
 private:
-	ASTComponent* _elem;
-
-	DCVoltage(const DCVoltage& v);
-	DCVoltage& operator=(const DCVoltage& v);
+	double _voltage;
 };
 
-
-class DCCurrent : public IOComponent {
-public:
-	DCCurrent(ASTComponent* elem, double current = 0.01)
-		:IOComponent(0, current), _elem(elem)
-	{
-		_elem->setCurrent(current);
-	}
-
-	~DCCurrent();
-
-	double voltage() const override;
-
-	double current() const override;
-
-	double resistance() const override;
-
-//TODO implement
-private:
-	ASTComponent* _elem;
-
-	DCCurrent(const DCCurrent& v);
-	DCCurrent& operator=(const DCCurrent& v);
-};
 
 #endif /* __COMPONENTS_H__ */

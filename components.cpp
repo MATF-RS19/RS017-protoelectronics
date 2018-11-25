@@ -1,167 +1,168 @@
 #include "components.hpp"
+#include <iostream>
 
-void ASTComponent::update(double voltage, double current) {
-	setVoltage(voltage);
-	setCurrent(current);
+
+//Node
+int Node::nodes_num = 0;
+
+Node::Node(int x, int y)
+:_x(x), _y(y)
+{
+	_id = ++nodes_num;
 }
 
-double ASTComponent::getVoltage() {
-	return _voltage;
+int Node::x() const { return _x; }
+
+int Node::y() const { return _y; }
+
+int Node::nodeID() const {
+	return _id;
 }
 
-double ASTComponent::getCurrent() {
-	return _current;
+void Node::addComponent(const std::shared_ptr<Component>& e){
+	_components.push_back(e);
 }
 
-void ASTComponent::setVoltage(double voltage) {
-	_voltage = voltage;
-}
-
-void ASTComponent::setCurrent(double current) {
-	_current = current;
-}
-
-
-Connection::~Connection() {
-	delete _elem1;
-	delete _elem2;
+std::vector<std::shared_ptr<Component>> Node::components() const{
+	return _components;
 }
 
 
-double SerialConnection::voltage() const {
-	double r1 = _elem1->resistance();
-	double r2 = _elem2->resistance();
+//Component
+Component::Component(std::string name, std::vector<std::shared_ptr<Node>> nodes):
+	_name(name), _nodes(nodes)
+{}
 
-	if (_voltage) {
-		_elem1->setVoltage(_voltage * r1 / (r1 + r2));
-		_elem2->setVoltage(_voltage * r2 / (r1 + r2));
+Component::Component(std::string name,
+		std::shared_ptr<Node> node1)
+	:_name(name)
+{
+	_nodes.resize(0);
+	_nodes.push_back(node1);
+}
+
+Component::Component(std::string name,
+		std::shared_ptr<Node> node1,
+		std::shared_ptr<Node> node2)
+	:_name(name)
+{
+	_nodes.resize(0);
+	_nodes.push_back(node1);
+	_nodes.push_back(node2);
+}
+
+Component::Component(std::string name,
+		std::shared_ptr<Node> node1,
+		std::shared_ptr<Node> node2,
+		std::shared_ptr<Node> node3)
+	:_name(name)
+{
+	_nodes.resize(0);
+	_nodes.push_back(node1);
+	_nodes.push_back(node2);
+	_nodes.push_back(node3);
+}
+
+Component::~Component()
+{}
+
+std::string Component::name() const {
+	return _name;
+}
+
+
+//Ground
+Ground::Ground(std::string name,
+	std::shared_ptr<Node> node)
+	:Component(name, node)
+{
+	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<Ground>(*this));
+
+	if (_nodes[0]->_v != 0) {
+		std::cerr << "Error! Short circuit!" << std::endl;
 	}
-	else {
-		_elem1->setVoltage(_current * r1);
-		_elem2->setVoltage(_current * r2);
-	}
-
-	return _elem1->voltage() + _elem2->voltage();
+	_nodes[0]->_v = 0;
 }
 
-double SerialConnection::current() const {
-	if (_current) {
-		_elem1->setCurrent(_current);
-		_elem2->setCurrent(_current);
-	}
-	else {
-		double current = _voltage / this->resistance();
-		_elem1->setCurrent(current);
-		_elem2->setCurrent(current);
-	}
-
-	double i1 = _elem1->current();
-	double i2 = _elem2->current();
-
-	assert(i1 == i2);
-	return i1;
+double Ground::voltage() const {
+	return 0;
 }
 
-double SerialConnection::resistance() const {
-	return _elem1->resistance() + _elem2->resistance();
+//TODO
+double Ground::current() const {
+	return 0;
 }
 
 
-double ParallelConnection::voltage() const {
-	if (_voltage) {
-		_elem1->setVoltage(_voltage);
-		_elem2->setVoltage(_voltage);
-	}
-	else {
-		double r1 = _elem1->resistance();
-		double r2 = _elem2->resistance();
-
-		_elem1->setVoltage(_current * (r1 + r2) / r1);
-		_elem2->setVoltage(_current * (r1 + r2) / r2);
-	}
-
-	double v1 = _elem1->voltage();
-	double v2 = _elem2->voltage();
-
-	assert(v1 == v2);
-	return v1;
+//Wire
+Wire::Wire(std::string name,
+	std::shared_ptr<Node> node1,
+	std::shared_ptr<Node> node2)
+	:Component(name, node1, node2)
+{
+	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<Wire>(*this));
+	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<Wire>(*this));
 }
 
-double ParallelConnection::current() const {
-	double r1 = _elem1->resistance();
-	double r2 = _elem2->resistance();
-
-	if(_current) {
-		_elem1->setCurrent(_current * r2 / (r1 + r2));
-		_elem2->setCurrent(_current * r1 / (r1 + r2));
-	}
-	else {
-		_elem1->setCurrent(_voltage / r1);
-		_elem2->setCurrent(_voltage / r2);
-	}
-
-	return _elem1->current() + _elem2->current();
+double Wire::voltage() const {
+	return 0;
 }
 
-double ParallelConnection::resistance() const {
-	double r1 = _elem1->resistance();
-	double r2 = _elem2->resistance();
-	return r1 * r2 / (r1 + r2);
+//TODO
+double Wire::current() const {
+	return 0;
 }
 
 
-double Resistor::voltage() const {
-	return _voltage ? _voltage : _current * _resistance;
-}
-
-double Resistor::current() const {
-	return _current ? _current : _voltage / _resistance;
+//Resistor
+Resistor::Resistor(std::string name, double resistance,
+		std::shared_ptr<Node> node1,
+		std::shared_ptr<Node> node2)
+	:Component(name, node1, node2), _resistance(resistance)
+{
+	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<Resistor>(*this));
+	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<Resistor>(*this));
 }
 
 double Resistor::resistance() const {
 	return _resistance;
 }
 
-double Resistor::power() const {
-	return _voltage * _current;
+double Resistor::voltage() const {
+	return _nodes[1]->_v - _nodes[0]->_v;
+}
+
+double Resistor::current() const {
+	return voltage() / _resistance;
 }
 
 
-DCVoltage::~DCVoltage() {
-	delete _elem;
+//DCVoltage
+DCVoltage::DCVoltage(std::string name, double voltage,
+		std::shared_ptr<Node> node1,
+		std::shared_ptr<Node> node2):
+	Component(name, node1, node2), _voltage(voltage)
+{
+	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<DCVoltage>(*this));
+	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<DCVoltage>(*this));
+	//TODO
+}
+
+DCVoltage::DCVoltage(std::string name, double voltage,
+		std::shared_ptr<Node> node):
+	Component(name, node), _voltage(voltage)
+{
+	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<DCVoltage>(*this));
+	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<DCVoltage>(*this));
+
+	_nodes[0]->_v = voltage;
 }
 
 double DCVoltage::voltage() const {
-	return _elem->voltage();
+	return _voltage;
 }
 
+//TODO
 double DCVoltage::current() const {
-	double i = _elem->current();
-	_elem->setCurrent(i);
-	return i;
+	return 0;
 }
-
-double DCVoltage::resistance() const {
-	return _elem->resistance();
-}
-
-
-
-DCCurrent::~DCCurrent() {
-	delete _elem;
-}
-
-double DCCurrent::voltage() const {
-	double u = _elem->voltage();
-	_elem->setVoltage(u);
-	return u;
-}
-
-double DCCurrent::current() const {
-	return _elem->current();
-}
-
-double DCCurrent::resistance() const {
-	return _elem->resistance();
-}
-
