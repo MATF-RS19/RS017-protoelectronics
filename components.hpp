@@ -41,6 +41,7 @@ public:
 
 	Component(std::string name,
 			std::shared_ptr<Node> node1);
+
 	Component(std::string name,
 			std::shared_ptr<Node> node1,
 			std::shared_ptr<Node> node2);
@@ -56,6 +57,7 @@ public:
 
 	virtual double voltage() const = 0;
 	virtual double current() const = 0;
+	virtual double power() const;
 
 private:
 	std::string _name;
@@ -84,6 +86,9 @@ public:
 	double voltage() const override;
 
 	double current() const override;
+
+	std::shared_ptr<Node> otherNode(int id);
+
 };
 
 
@@ -120,6 +125,31 @@ public:
 private:
 	double _voltage;
 };
+
+
+class Circuit {
+public:
+	Circuit(std::vector<std::shared_ptr<Node>> nodes);
+
+	void addNode(std::shared_ptr<Node> node);
+
+	void addComponent(std::shared_ptr<Component> component);
+
+	std::vector<std::shared_ptr<Node>> nodes() const;
+
+	std::vector<std::shared_ptr<Component>> components(std::shared_ptr<Node> node) const;
+	
+	std::vector<std::shared_ptr<Component>> components(std::shared_ptr<Node> node, char componentType) const;
+
+	int numOfDCVoltages() const;
+
+private:
+	std::vector<std::shared_ptr<Node>> _nodes;
+};
+
+
+
+std::ostream& operator<<(std::ostream& out, const Component& r);
 
 
 #endif /* __COMPONENTS_H__ */

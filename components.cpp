@@ -1,6 +1,15 @@
 #include "components.hpp"
 #include <iostream>
+#include <algorithm>
 
+
+std::ostream& operator<<(std::ostream& out, const Component& c) {
+	out << c.name() << std::endl
+		<< "U = " << c.voltage() << " V" << std::endl
+		<< "I = " << c.current() << " A" << std::endl
+		<< "P = " << c.power() << " W";
+	return out;
+}
 
 //Node
 int Node::nodes_num = 0;
@@ -70,6 +79,10 @@ std::string Component::name() const {
 	return _name;
 }
 
+double Component::power() const {
+	return voltage() * current();
+}
+
 
 //Ground
 Ground::Ground(std::string name,
@@ -111,6 +124,10 @@ double Wire::voltage() const {
 //TODO
 double Wire::current() const {
 	return 0;
+}
+
+std::shared_ptr<Node> Wire::otherNode(int id) {
+	return _nodes[0]->nodeID() == id ? _nodes[1] : _nodes[0];
 }
 
 
@@ -165,4 +182,53 @@ double DCVoltage::voltage() const {
 //TODO
 double DCVoltage::current() const {
 	return 0;
+}
+
+Circuit::Circuit(std::vector<std::shared_ptr<Node>> nodes)
+	:_nodes(nodes)
+{}
+
+void Circuit::addNode(std::shared_ptr<Node> node) {
+	_nodes.push_back(node);
+}
+
+void Circuit::addComponent(std::shared_ptr<Component> component) {
+	(void)component;
+	//TODO
+}
+
+std::vector<std::shared_ptr<Node>> Circuit::nodes() const {
+	return _nodes;
+}
+
+std::vector<std::shared_ptr<Component>> Circuit::components(std::shared_ptr<Node> node) const {
+	return node->components();
+}
+
+std::vector<std::shared_ptr<Component>> Circuit::components(std::shared_ptr<Node> node, char componentType) const {
+	std::vector<std::shared_ptr<Component>> filterd;
+
+	auto components = node->components();
+	for (auto component : components ) { 
+		if (component->name()[0] == componentType) {
+			filterd.push_back(component);
+		}
+	}
+	return filterd;
+}
+
+int Circuit::numOfDCVoltages() const {
+	int num = 0;
+
+	for (unsigned i = 0; i < _nodes.size(); ++i) {
+		auto components = _nodes[i]->components();
+		auto j = std::find_if(components.cbegin(), components.cend(),
+				[](std::shared_ptr<Component> c) -> bool {return c->name()[0] == 'U' ? true : false;});
+		if (j != components.cend()) {
+			//std::cout << (*j)->name() << std::endl;
+			num++;
+		}
+	}
+
+	return num;
 }

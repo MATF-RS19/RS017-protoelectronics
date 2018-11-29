@@ -17,10 +17,12 @@ int main() {
 	std::shared_ptr<Wire> w = std::make_shared<Wire>("W1", n3, n1);
 	std::shared_ptr<Ground> gnd = std::make_shared<Ground>("gnd", n1);
 
-	//calculete voltage, current...
-	std::cout << "I" << r1->name() << ": " << r1->current() << std::endl;
-	std::cout << "U" << r1->name() << ": " << r1->voltage() << std::endl;
-	std::cout << "U" << r2->name() << ": " << r2->voltage() << std::endl;
+	std::vector<std::shared_ptr<Node>> nodes = {n1, n2, n3};
+
+	//calculate voltage, current...
+	std::cout << *r1 << std::endl;
+	std::cout << *r2 << std::endl;
+	std::cout << *u << std::endl;
 
 
 	std::cout << "Resistors on node n2:" << std::endl;
@@ -30,6 +32,29 @@ int main() {
 				<< ": "
 				<< std::static_pointer_cast<Resistor>(component)->resistance()
 				<< std::endl;
+	}
+
+
+	for (auto node : nodes) {
+		std::cout << "Node" << node->nodeID() << std::endl;
+		for (auto component : node->components()) {
+			std::cout << component->name() << std::endl;
+			if (component->name()[0] == 'W') {
+				std::cout << "Connected with: "
+					<< std::static_pointer_cast<Wire>(component)->otherNode(node->nodeID())->nodeID()
+					<< std::endl;
+			}
+		}
+	}
+
+	Circuit sim(nodes);
+	std::cout << "DCVoltages: " << sim.numOfDCVoltages() << std::endl;
+
+	std::cout << std::endl << "Resistors on node n2:" << std::endl;
+	auto resistorsN2 = sim.components(sim.nodes()[1], 'R');
+	for (auto component : resistorsN2) {
+		std::cout << component->name() << ": ";
+		std::cout << std::static_pointer_cast<Resistor>(component)->resistance() << std::endl;
 	}
 
 
