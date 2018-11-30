@@ -6,9 +6,30 @@
 #include <memory>
 
 
+template <class T>
+class Counter {
+protected:
+	Counter() {
+		_id = ++_counter;
+	}
+
+	static int _counter;
+	int _id;
+
+public:
+	static int counter() {
+		return _counter;
+	}
+
+	int id() const {
+		return _id;
+	}
+};
+
+
 class Component;
 
-class Node {
+class Node : public Counter<Node> {
 public:
 	double _v;
 
@@ -17,27 +38,22 @@ public:
 	int x() const;
 	int y() const;
 
-	int nodeID() const;
-
-	static int numOfNodes() {
-		return nodes_num;
-	}
-
 	void addComponent(const std::shared_ptr<Component>& e);
 
 	std::vector<std::shared_ptr<Component>> components() const;
 
+
 private:
-	static int nodes_num;
-	int _id;
 	int _x, _y;
+
 	std::vector<std::shared_ptr<Component>> _components;
 };
 
 
 class Component {
 public:
-	Component(std::string name, std::vector<std::shared_ptr<Node>> nodes);
+	Component(std::string name,
+			std::vector<std::shared_ptr<Node>> nodes);
 
 	Component(std::string name,
 			std::shared_ptr<Node> node1);
@@ -66,21 +82,20 @@ protected:
 };
 
 
-class Ground : public Component {
+class Ground : public Component, public Counter<Ground> {
 public:
-	Ground(std::string name,
-		std::shared_ptr<Node> node);
+	Ground(std::shared_ptr<Node> node);
 
 	double voltage() const override;
 
 	double current() const override;
+
 };
 
 
-class Wire : public Component {
+class Wire : public Component, public Counter<Wire> {
 public:
-	Wire(std::string name,
-		std::shared_ptr<Node> node1,
+	Wire(std::shared_ptr<Node> node1,
 		std::shared_ptr<Node> node2);
 
 	double voltage() const override;
@@ -92,9 +107,9 @@ public:
 };
 
 
-class Resistor : public Component {
+class Resistor : public Component, public Counter<Resistor> {
 public:
-	Resistor(std::string name, double resistance,
+	Resistor(double resistance,
 			std::shared_ptr<Node> node1,
 			std::shared_ptr<Node> node2);
 
@@ -109,13 +124,13 @@ private:
 };
 
 
-class DCVoltage : public Component {
+class DCVoltage : public Component, public Counter<DCVoltage> {
 public:
-	DCVoltage(std::string name, double voltage,
+	DCVoltage(double voltage,
 			std::shared_ptr<Node> node1,
 			std::shared_ptr<Node> node2);
 
-	DCVoltage(std::string name, double voltage,
+	DCVoltage(double voltage,
 			std::shared_ptr<Node> node);
 
 	double voltage() const override;
@@ -138,7 +153,7 @@ public:
 	std::vector<std::shared_ptr<Node>> nodes() const;
 
 	std::vector<std::shared_ptr<Component>> components(std::shared_ptr<Node> node) const;
-	
+
 	std::vector<std::shared_ptr<Component>> components(std::shared_ptr<Node> node, char componentType) const;
 
 	int numOfDCVoltages() const;

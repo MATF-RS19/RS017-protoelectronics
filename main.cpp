@@ -11,11 +11,11 @@ int main() {
 	std::shared_ptr<Node> n3 = std::make_shared<Node>(2, 4);
 
 	//add components
-	std::shared_ptr<Resistor> r1 = std::make_shared<Resistor>("R1", 1000, n1, n2);
-	std::shared_ptr<DCVoltage> u = std::make_shared<DCVoltage>("U1", 5, n2);
-	std::shared_ptr<Resistor> r2 = std::make_shared<Resistor>("R2", 2000, n2, n3);
-	std::shared_ptr<Wire> w = std::make_shared<Wire>("W1", n3, n1);
-	std::shared_ptr<Ground> gnd = std::make_shared<Ground>("gnd", n1);
+	std::shared_ptr<Resistor> r1 = std::make_shared<Resistor>(1000, n1, n2);
+	std::shared_ptr<DCVoltage> u = std::make_shared<DCVoltage>(5, n2);
+	std::shared_ptr<Resistor> r2 = std::make_shared<Resistor>(2000, n2, n3);
+	std::shared_ptr<Wire> w = std::make_shared<Wire>(n3, n1);
+	std::shared_ptr<Ground> gnd = std::make_shared<Ground>(n1);
 
 	std::vector<std::shared_ptr<Node>> nodes = {n1, n2, n3};
 
@@ -24,24 +24,13 @@ int main() {
 	std::cout << *r2 << std::endl;
 	std::cout << *u << std::endl;
 
-
-	std::cout << "Resistors on node n2:" << std::endl;
-	for (auto component : n2->components()) {
-		if(component->name()[0] == 'R')
-			std::cout << component->name()
-				<< ": "
-				<< std::static_pointer_cast<Resistor>(component)->resistance()
-				<< std::endl;
-	}
-
-
 	for (auto node : nodes) {
-		std::cout << "Node" << node->nodeID() << std::endl;
+		std::cout << "Node" << node->id() << std::endl;
 		for (auto component : node->components()) {
 			std::cout << component->name() << std::endl;
 			if (component->name()[0] == 'W') {
 				std::cout << "Connected with: "
-					<< std::static_pointer_cast<Wire>(component)->otherNode(node->nodeID())->nodeID()
+					<< std::static_pointer_cast<Wire>(component)->otherNode(node->id())->id()
 					<< std::endl;
 			}
 		}
@@ -57,6 +46,9 @@ int main() {
 		std::cout << std::static_pointer_cast<Resistor>(component)->resistance() << std::endl;
 	}
 
+	std::cout << r2->name() << std::endl;
+	std::cout << r2->id() << std::endl;
+	std::cout << r2->counter() << std::endl;
 
     /*Logic
 	double in_1 = 5.0;

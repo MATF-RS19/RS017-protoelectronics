@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm>
 
+template<typename T>
+int Counter<T>::_counter(0);
 
 std::ostream& operator<<(std::ostream& out, const Component& c) {
 	out << c.name() << std::endl
@@ -12,21 +14,14 @@ std::ostream& operator<<(std::ostream& out, const Component& c) {
 }
 
 //Node
-int Node::nodes_num = 0;
-
 Node::Node(int x, int y)
 :_x(x), _y(y)
 {
-	_id = ++nodes_num;
 }
 
 int Node::x() const { return _x; }
 
 int Node::y() const { return _y; }
-
-int Node::nodeID() const {
-	return _id;
-}
 
 void Node::addComponent(const std::shared_ptr<Component>& e){
 	_components.push_back(e);
@@ -38,9 +33,11 @@ std::vector<std::shared_ptr<Component>> Node::components() const{
 
 
 //Component
-Component::Component(std::string name, std::vector<std::shared_ptr<Node>> nodes):
+Component::Component(std::string name,
+		std::vector<std::shared_ptr<Node>> nodes):
 	_name(name), _nodes(nodes)
-{}
+{
+}
 
 Component::Component(std::string name,
 		std::shared_ptr<Node> node1)
@@ -85,9 +82,8 @@ double Component::power() const {
 
 
 //Ground
-Ground::Ground(std::string name,
-	std::shared_ptr<Node> node)
-	:Component(name, node)
+Ground::Ground(std::shared_ptr<Node> node)
+	:Component("GND" + std::to_string(_counter+1), node)
 {
 	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<Ground>(*this));
 
@@ -108,10 +104,9 @@ double Ground::current() const {
 
 
 //Wire
-Wire::Wire(std::string name,
-	std::shared_ptr<Node> node1,
-	std::shared_ptr<Node> node2)
-	:Component(name, node1, node2)
+Wire::Wire(std::shared_ptr<Node> node1,
+		std::shared_ptr<Node> node2)
+	:Component("W" + std::to_string(_counter+1), node1, node2)
 {
 	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<Wire>(*this));
 	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<Wire>(*this));
@@ -127,15 +122,15 @@ double Wire::current() const {
 }
 
 std::shared_ptr<Node> Wire::otherNode(int id) {
-	return _nodes[0]->nodeID() == id ? _nodes[1] : _nodes[0];
+	return _nodes[0]->id() == id ? _nodes[1] : _nodes[0];
 }
 
 
 //Resistor
-Resistor::Resistor(std::string name, double resistance,
+Resistor::Resistor(double resistance,
 		std::shared_ptr<Node> node1,
 		std::shared_ptr<Node> node2)
-	:Component(name, node1, node2), _resistance(resistance)
+	:Component("R" + std::to_string(_counter+1), node1, node2), _resistance(resistance)
 {
 	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<Resistor>(*this));
 	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<Resistor>(*this));
@@ -155,19 +150,19 @@ double Resistor::current() const {
 
 
 //DCVoltage
-DCVoltage::DCVoltage(std::string name, double voltage,
+DCVoltage::DCVoltage(double voltage,
 		std::shared_ptr<Node> node1,
 		std::shared_ptr<Node> node2):
-	Component(name, node1, node2), _voltage(voltage)
+	Component("U" + std::to_string(_counter+1), node1, node2), _voltage(voltage)
 {
 	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<DCVoltage>(*this));
 	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<DCVoltage>(*this));
 	//TODO
 }
 
-DCVoltage::DCVoltage(std::string name, double voltage,
+DCVoltage::DCVoltage(double voltage,
 		std::shared_ptr<Node> node):
-	Component(name, node), _voltage(voltage)
+	Component("U" + std::to_string(_counter+1), node), _voltage(voltage)
 {
 	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<DCVoltage>(*this));
 	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<DCVoltage>(*this));
@@ -209,7 +204,7 @@ std::vector<std::shared_ptr<Component>> Circuit::components(std::shared_ptr<Node
 	std::vector<std::shared_ptr<Component>> filterd;
 
 	auto components = node->components();
-	for (auto component : components ) { 
+	for (auto component : components ) {
 		if (component->name()[0] == componentType) {
 			filterd.push_back(component);
 		}
