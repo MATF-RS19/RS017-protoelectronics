@@ -17,38 +17,43 @@ int main() {
 	std::shared_ptr<Wire> w = std::make_shared<Wire>(n3, n1);
 	std::shared_ptr<Ground> gnd = std::make_shared<Ground>(n1);
 
-	std::vector<std::shared_ptr<Node>> nodes = {n1, n2, n3};
+	//n1->connectTo(n3);
+	//n1->disconnectAll();
+	//n1 = nullptr;
 
-	//calculate voltage, current...
+	std::vector<std::shared_ptr<Node>> nodes;
+	if (n1 != nullptr) nodes.push_back(n1);
+	if (n2 != nullptr) nodes.push_back(n2);
+	if (n3 != nullptr) nodes.push_back(n3);
+
+	//Calculate some voltage, current...
 	std::cout << *r1 << std::endl;
 	std::cout << *r2 << std::endl;
 	std::cout << *u << std::endl;
 
-	for (auto node : nodes) {
-		std::cout << "Node" << node->id() << std::endl;
-		for (auto component : node->components()) {
-			std::cout << component->name() << std::endl;
-			if (component->name()[0] == 'W') {
-				std::cout << "Connected with: "
-					<< std::static_pointer_cast<Wire>(component)->otherNode(node->id())->id()
-					<< std::endl;
-			}
-		}
-	}
-
+	//Simulation is vector of nodes
 	Circuit sim(nodes);
-	std::cout << "DCVoltages: " << sim.numOfDCVoltages() << std::endl;
 
-	std::cout << std::endl << "Resistors on node n2:" << std::endl;
+	std::cout << "Reconnect R1:" << std::endl;
+	r1->reconnectTo(n1, n3);
+	std::cout << *r1 << std::endl;
+
+	std::cout << std::endl << "-----Resistors on node n2:-----" << std::endl;
 	auto resistorsN2 = sim.components(sim.nodes()[1], 'R');
 	for (auto component : resistorsN2) {
 		std::cout << component->name() << ": ";
 		std::cout << std::static_pointer_cast<Resistor>(component)->resistance() << std::endl;
 	}
 
-	std::cout << r2->name() << std::endl;
-	std::cout << r2->id() << std::endl;
-	std::cout << r2->counter() << std::endl;
+	std::cout << std::endl << "-----All components on nodes:-----" << std::endl;
+	for (auto n : sim.nodes()) {
+		std::cout << *n << std::endl;
+	}
+	std::cout << std::endl;
+
+	std::cout << "Number of nodes: " << Node::counter() << std::endl;
+	std::cout << "Number of resistors: " << Resistor::counter() << std::endl;
+	std::cout << "Number of voltage sources: " << DCVoltage::counter() << std::endl;
 
     /*Logic
 	double in_1 = 5.0;

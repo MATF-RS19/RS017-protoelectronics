@@ -38,31 +38,33 @@ public:
 	int x() const;
 	int y() const;
 
-	void addComponent(const std::shared_ptr<Component>& e);
+	void addComponent(std::shared_ptr<Component> e);
 
 	std::vector<std::shared_ptr<Component>> components() const;
 
+	void connectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2);
+
+	void disconnectAll();
 
 private:
 	int _x, _y;
-
 	std::vector<std::shared_ptr<Component>> _components;
 };
 
 
 class Component {
 public:
-	Component(std::string name,
+	Component(const std::string &name,
 			std::vector<std::shared_ptr<Node>> nodes);
 
-	Component(std::string name,
+	Component(const std::string &name,
 			std::shared_ptr<Node> node1);
 
-	Component(std::string name,
+	Component(const std::string &name,
 			std::shared_ptr<Node> node1,
 			std::shared_ptr<Node> node2);
 
-	Component(std::string name,
+	Component(const std::string &name,
 			std::shared_ptr<Node> node1,
 			std::shared_ptr<Node> node2,
 			std::shared_ptr<Node> node3);
@@ -70,6 +72,12 @@ public:
 	virtual ~Component();
 
 	std::string name() const;
+
+	std::vector<std::shared_ptr<Node>> nodes() const;
+
+	//reconnect component from node n1 to node n2
+	//for all leads connected to n1
+	virtual void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) = 0;
 
 	virtual double voltage() const = 0;
 	virtual double current() const = 0;
@@ -90,6 +98,7 @@ public:
 
 	double current() const override;
 
+	void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) override;
 };
 
 
@@ -102,8 +111,9 @@ public:
 
 	double current() const override;
 
-	std::shared_ptr<Node> otherNode(int id);
+	void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) override;
 
+	std::shared_ptr<Node> otherNode(int id);
 };
 
 
@@ -118,6 +128,8 @@ public:
 	double voltage() const override;
 
 	double current() const override;
+
+	void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) override;
 
 private:
 	double _resistance;
@@ -136,6 +148,8 @@ public:
 	double voltage() const override;
 
 	double current() const override;
+
+	void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) override;
 
 private:
 	double _voltage;
@@ -156,8 +170,6 @@ public:
 
 	std::vector<std::shared_ptr<Component>> components(std::shared_ptr<Node> node, char componentType) const;
 
-	int numOfDCVoltages() const;
-
 private:
 	std::vector<std::shared_ptr<Node>> _nodes;
 };
@@ -166,5 +178,6 @@ private:
 
 std::ostream& operator<<(std::ostream& out, const Component& r);
 
+std::ostream& operator<<(std::ostream& out, const Node& r);
 
 #endif /* __COMPONENTS_H__ */

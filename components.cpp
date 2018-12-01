@@ -7,11 +7,32 @@ int Counter<T>::_counter(0);
 
 std::ostream& operator<<(std::ostream& out, const Component& c) {
 	out << c.name() << std::endl
-		<< "U = " << c.voltage() << " V" << std::endl
+	<< "Nodes: [ ";
+	for (auto n : c.nodes()) {
+		out << n->id() << " ";
+	}
+	out << "]" << std::endl;
+
+	out << "U = " << c.voltage() << " V" << std::endl
 		<< "I = " << c.current() << " A" << std::endl
 		<< "P = " << c.power() << " W";
+
 	return out;
 }
+
+std::ostream& operator<<(std::ostream& out, const Node& n) {
+	out << "*  Node " << n.id() << ":" << std::endl
+		<< "(" << n.x() << ", " << n.y() << ")" << std::endl
+		<< "V = " << n._v << " V" << std::endl
+		<< "Connected components: " << std::endl;
+
+	for (auto c : n.components()) {
+		out << c->name() << "\t";
+	}
+
+	return out;
+}
+
 
 //Node
 Node::Node(int x, int y)
@@ -23,7 +44,7 @@ int Node::x() const { return _x; }
 
 int Node::y() const { return _y; }
 
-void Node::addComponent(const std::shared_ptr<Component>& e){
+void Node::addComponent(std::shared_ptr<Component> e){
 	_components.push_back(e);
 }
 
@@ -31,15 +52,31 @@ std::vector<std::shared_ptr<Component>> Node::components() const{
 	return _components;
 }
 
+void Node::disconnectAll() {
+	for (unsigned i = 0; i < _components.size(); ++i) {
+		_components[i] = nullptr;
+	}
+	_components.resize(0);
+}
+
+//TODO
+void Node::connectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
+	for (unsigned i = 0; i < _components.size(); ++i) {
+		_components[i]->reconnectTo(n1, n2);
+
+		std::cout << _components[i]->name() << " : " << _components[i]->nodes()[0]->id() << std::endl;
+	}
+}
+
 
 //Component
-Component::Component(std::string name,
+Component::Component(const std::string &name,
 		std::vector<std::shared_ptr<Node>> nodes):
 	_name(name), _nodes(nodes)
 {
 }
 
-Component::Component(std::string name,
+Component::Component(const std::string &name,
 		std::shared_ptr<Node> node1)
 	:_name(name)
 {
@@ -47,7 +84,7 @@ Component::Component(std::string name,
 	_nodes.push_back(node1);
 }
 
-Component::Component(std::string name,
+Component::Component(const std::string &name,
 		std::shared_ptr<Node> node1,
 		std::shared_ptr<Node> node2)
 	:_name(name)
@@ -57,7 +94,7 @@ Component::Component(std::string name,
 	_nodes.push_back(node2);
 }
 
-Component::Component(std::string name,
+Component::Component(const std::string &name,
 		std::shared_ptr<Node> node1,
 		std::shared_ptr<Node> node2,
 		std::shared_ptr<Node> node3)
@@ -76,6 +113,10 @@ std::string Component::name() const {
 	return _name;
 }
 
+std::vector<std::shared_ptr<Node>> Component::nodes() const {
+	return _nodes;
+}
+
 double Component::power() const {
 	return voltage() * current();
 }
@@ -90,6 +131,8 @@ Ground::Ground(std::shared_ptr<Node> node)
 	if (_nodes[0]->_v != 0) {
 		std::cerr << "Error! Short circuit!" << std::endl;
 	}
+
+	//set Voltage to 0
 	_nodes[0]->_v = 0;
 }
 
@@ -100,6 +143,16 @@ double Ground::voltage() const {
 //TODO
 double Ground::current() const {
 	return 0;
+}
+
+void Ground::reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
+	for (unsigned i = 0; i < _nodes.size(); ++i) {
+		if (_nodes[i] == n1) {
+			_nodes[i] = n2;
+			n2->addComponent(std::make_shared<Ground>(*this));
+			//TODO osloboditi cvor koji pokazuje na njega
+		}
+	}
 }
 
 
@@ -119,6 +172,16 @@ double Wire::voltage() const {
 //TODO
 double Wire::current() const {
 	return 0;
+}
+
+void Wire::reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
+	for (unsigned i = 0; i < _nodes.size(); ++i) {
+		if (_nodes[i] == n1) {
+			_nodes[i] = n2;
+			n2->addComponent(std::make_shared<Wire>(*this));
+			//TODO osloboditi cvor koji pokazuje na njega
+		}
+	}
 }
 
 std::shared_ptr<Node> Wire::otherNode(int id) {
@@ -146,6 +209,16 @@ double Resistor::voltage() const {
 
 double Resistor::current() const {
 	return voltage() / _resistance;
+}
+
+void Resistor::reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
+	for (unsigned i = 0; i < _nodes.size(); ++i) {
+		if (_nodes[i] == n1) {
+			_nodes[i] = n2;
+			n2->addComponent(std::make_shared<Resistor>(*this));
+			//TODO osloboditi cvor koji pokazuje na njega
+		}
+	}
 }
 
 
@@ -179,6 +252,18 @@ double DCVoltage::current() const {
 	return 0;
 }
 
+void DCVoltage::reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
+	for (unsigned i = 0; i < _nodes.size(); ++i) {
+		if (_nodes[i] == n1) {
+			_nodes[i] = n2;
+			n2->addComponent(std::make_shared<DCVoltage>(*this));
+			//TODO osloboditi cvor koji pokazuje na njega
+		}
+	}
+}
+
+
+//Circuit
 Circuit::Circuit(std::vector<std::shared_ptr<Node>> nodes)
 	:_nodes(nodes)
 {}
@@ -212,18 +297,3 @@ std::vector<std::shared_ptr<Component>> Circuit::components(std::shared_ptr<Node
 	return filterd;
 }
 
-int Circuit::numOfDCVoltages() const {
-	int num = 0;
-
-	for (unsigned i = 0; i < _nodes.size(); ++i) {
-		auto components = _nodes[i]->components();
-		auto j = std::find_if(components.cbegin(), components.cend(),
-				[](std::shared_ptr<Component> c) -> bool {return c->name()[0] == 'U' ? true : false;});
-		if (j != components.cend()) {
-			//std::cout << (*j)->name() << std::endl;
-			num++;
-		}
-	}
-
-	return num;
-}
