@@ -9,7 +9,7 @@ std::ostream& operator<<(std::ostream& out, const Component& c) {
 	out << c.name() << std::endl
 	<< "Nodes: [ ";
 	for (auto n : c.nodes()) {
-		out << n->id() << " ";
+		out << n.lock()->id() << " ";
 	}
 	out << "]" << std::endl;
 
@@ -52,6 +52,14 @@ std::vector<std::shared_ptr<Component>> Node::components() const{
 	return _components;
 }
 
+bool Node::operator==(const Node& n) const {
+	if (this->id() != n.id()) return false;
+	if (this->_x != n.x()) return false;
+	if (this->_y != n.y()) return false;
+
+	return true;
+}
+
 void Node::disconnectAll() {
 	for (unsigned i = 0; i < _components.size(); ++i) {
 		_components[i] = nullptr;
@@ -59,23 +67,36 @@ void Node::disconnectAll() {
 	_components.resize(0);
 }
 
-//TODO
-void Node::connectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
-	for (unsigned i = 0; i < _components.size(); ++i) {
-		_components[i]->reconnectTo(n1, n2);
+void Node::disconnectComponent(const std::shared_ptr<Component>& e) {
+	std::vector<std::vector<std::shared_ptr<Component>>::iterator> forDelete;
 
-		std::cout << _components[i]->name() << " : " << _components[i]->nodes()[0]->id() << std::endl;
+	for (auto i = _components.begin(); i < _components.end(); ++i) {
+		if (**i == *e) {
+			forDelete.push_back(i);
+			*i = nullptr;
+		}
+	}
+
+	for (auto j : forDelete) {
+		_components.erase(j);
 	}
 }
 
-
-//Component
-Component::Component(const std::string &name,
-		std::vector<std::shared_ptr<Node>> nodes):
-	_name(name), _nodes(nodes)
-{
+//TODO
+void Node::connectTo(std::shared_ptr<Node> n2) {
+	auto n1 = std::make_shared<Node>(*this);
+	auto size = _components.size();
+	do {
+		auto i = _components.begin();
+		std::cout << "pocetak: " << **i << std::endl;
+		(*i)->reconnectTo(n1, n2);
+		size = _components.size();
+	} while (size != 0);
 }
 
+
+
+//Component
 Component::Component(const std::string &name,
 		std::shared_ptr<Node> node1)
 	:_name(name)
@@ -108,13 +129,46 @@ Component::Component(const std::string &name,
 
 Component::~Component()
 {}
+void Component::initNodeConnections(const std::shared_ptr<Component>& p) {
+
+	for (auto n : _nodes) {
+		n.lock()->addComponent(p);
+	}
+}
 
 std::string Component::name() const {
 	return _name;
 }
 
-std::vector<std::shared_ptr<Node>> Component::nodes() const {
+std::vector<std::weak_ptr<Node>> Component::nodes() const {
 	return _nodes;
+}
+
+bool Component::operator==(const Component& e) {
+	if (this->_name != e.name()) return false;
+	if (this->_nodes.size() != e.nodes().size()) return false;
+
+	for (unsigned i = 0; i < _nodes.size(); ++i) {
+		if (this->_nodes[i].lock() != e.nodes()[i].lock())
+			return false;
+	}
+
+	return true;
+}
+
+/*
+	reconnect component from nodeFrom to nodeTo
+	for all leads connected to nodeFrom
+*/
+void Component::reconnectTo(const std::shared_ptr<Node>& from, const std::shared_ptr<Node>& to) {
+	auto p = make_shared_ptr();
+	for (unsigned i = 0; i < _nodes.size(); ++i) {
+		if (*_nodes[i].lock() == *from) {
+			_nodes[i].lock()->disconnectComponent(p);
+			_nodes[i] = to;
+			to->addComponent(p);
+		}
+	}
 }
 
 double Component::power() const {
@@ -126,14 +180,15 @@ double Component::power() const {
 Ground::Ground(std::shared_ptr<Node> node)
 	:Component("GND" + std::to_string(_counter+1), node)
 {
-	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<Ground>(*this));
-
-	if (_nodes[0]->_v != 0) {
-		std::cerr << "Error! Short circuit!" << std::endl;
-	}
+	auto p = make_shared_ptr();
+	initNodeConnections(p);
 
 	//set Voltage to 0
-	_nodes[0]->_v = 0;
+	_nodes[0].lock()->_v = 0;
+}
+
+std::shared_ptr<Component> Ground::make_shared_ptr() const {
+	return std::make_shared<Ground>(*this);
 }
 
 double Ground::voltage() const {
@@ -145,15 +200,6 @@ double Ground::current() const {
 	return 0;
 }
 
-void Ground::reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
-	for (unsigned i = 0; i < _nodes.size(); ++i) {
-		if (_nodes[i] == n1) {
-			_nodes[i] = n2;
-			n2->addComponent(std::make_shared<Ground>(*this));
-			//TODO osloboditi cvor koji pokazuje na njega
-		}
-	}
-}
 
 
 //Wire
@@ -161,8 +207,12 @@ Wire::Wire(std::shared_ptr<Node> node1,
 		std::shared_ptr<Node> node2)
 	:Component("W" + std::to_string(_counter+1), node1, node2)
 {
-	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<Wire>(*this));
-	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<Wire>(*this));
+	auto p = make_shared_ptr();
+	initNodeConnections(p);
+}
+
+std::shared_ptr<Component> Wire::make_shared_ptr() const {
+	return std::make_shared<Wire>(*this);
 }
 
 double Wire::voltage() const {
@@ -174,18 +224,8 @@ double Wire::current() const {
 	return 0;
 }
 
-void Wire::reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
-	for (unsigned i = 0; i < _nodes.size(); ++i) {
-		if (_nodes[i] == n1) {
-			_nodes[i] = n2;
-			n2->addComponent(std::make_shared<Wire>(*this));
-			//TODO osloboditi cvor koji pokazuje na njega
-		}
-	}
-}
-
 std::shared_ptr<Node> Wire::otherNode(int id) {
-	return _nodes[0]->id() == id ? _nodes[1] : _nodes[0];
+	return _nodes[0].lock()->id() == id ? _nodes[1].lock() : _nodes[0].lock();
 }
 
 
@@ -195,8 +235,12 @@ Resistor::Resistor(double resistance,
 		std::shared_ptr<Node> node2)
 	:Component("R" + std::to_string(_counter+1), node1, node2), _resistance(resistance)
 {
-	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<Resistor>(*this));
-	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<Resistor>(*this));
+	auto p = make_shared_ptr();
+	initNodeConnections(p);
+}
+
+std::shared_ptr<Component> Resistor::make_shared_ptr() const {
+	return std::make_shared<Resistor>(*this);
 }
 
 double Resistor::resistance() const {
@@ -204,43 +248,27 @@ double Resistor::resistance() const {
 }
 
 double Resistor::voltage() const {
-	return _nodes[1]->_v - _nodes[0]->_v;
+	return _nodes[1].lock()->_v - _nodes[0].lock()->_v;
 }
 
 double Resistor::current() const {
 	return voltage() / _resistance;
 }
 
-void Resistor::reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
-	for (unsigned i = 0; i < _nodes.size(); ++i) {
-		if (_nodes[i] == n1) {
-			_nodes[i] = n2;
-			n2->addComponent(std::make_shared<Resistor>(*this));
-			//TODO osloboditi cvor koji pokazuje na njega
-		}
-	}
-}
-
 
 //DCVoltage
-DCVoltage::DCVoltage(double voltage,
-		std::shared_ptr<Node> node1,
-		std::shared_ptr<Node> node2):
-	Component("U" + std::to_string(_counter+1), node1, node2), _voltage(voltage)
-{
-	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<DCVoltage>(*this));
-	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<DCVoltage>(*this));
-	//TODO
-}
-
 DCVoltage::DCVoltage(double voltage,
 		std::shared_ptr<Node> node):
 	Component("U" + std::to_string(_counter+1), node), _voltage(voltage)
 {
-	if (_nodes[0]) _nodes[0]->addComponent(std::make_shared<DCVoltage>(*this));
-	if (_nodes[1]) _nodes[1]->addComponent(std::make_shared<DCVoltage>(*this));
+	auto p = make_shared_ptr();
+	initNodeConnections(p);
 
-	_nodes[0]->_v = voltage;
+	_nodes[0].lock()->_v = voltage;
+}
+
+std::shared_ptr<Component> DCVoltage::make_shared_ptr() const {
+	return std::make_shared<DCVoltage>(*this);
 }
 
 double DCVoltage::voltage() const {
@@ -250,16 +278,6 @@ double DCVoltage::voltage() const {
 //TODO
 double DCVoltage::current() const {
 	return 0;
-}
-
-void DCVoltage::reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) {
-	for (unsigned i = 0; i < _nodes.size(); ++i) {
-		if (_nodes[i] == n1) {
-			_nodes[i] = n2;
-			n2->addComponent(std::make_shared<DCVoltage>(*this));
-			//TODO osloboditi cvor koji pokazuje na njega
-		}
-	}
 }
 
 

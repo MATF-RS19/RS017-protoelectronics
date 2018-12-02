@@ -14,10 +14,9 @@ int main() {
 	std::shared_ptr<Resistor> r1 = std::make_shared<Resistor>(1000, n1, n2);
 	std::shared_ptr<DCVoltage> u = std::make_shared<DCVoltage>(5, n2);
 	std::shared_ptr<Resistor> r2 = std::make_shared<Resistor>(2000, n2, n3);
-	std::shared_ptr<Wire> w = std::make_shared<Wire>(n3, n1);
+	//std::shared_ptr<Wire> w = std::make_shared<Wire>(n3, n1);
 	std::shared_ptr<Ground> gnd = std::make_shared<Ground>(n1);
 
-	//n1->connectTo(n3);
 	//n1->disconnectAll();
 	//n1 = nullptr;
 
@@ -26,18 +25,32 @@ int main() {
 	if (n2 != nullptr) nodes.push_back(n2);
 	if (n3 != nullptr) nodes.push_back(n3);
 
-	//Calculate some voltage, current...
-	std::cout << *r1 << std::endl;
-	std::cout << *r2 << std::endl;
-	std::cout << *u << std::endl;
 
 	//Simulation is vector of nodes
 	Circuit sim(nodes);
 
+	std::cout << "NODE0 components:" << std::endl;
+	for (auto c : sim.nodes()[0]->components()) {
+		std::cout << *c << std::endl;
+	}
+
+	std::cout << "Reconnect 1 - 3" << std::endl;
+	n1->connectTo(sim.nodes()[2]);
+	n1 = nullptr;
+
+
+	//Calculate some voltage, current...
+	for (auto n : sim.nodes()) {
+		std::cout << "\t*n" << n->id() << std::endl;
+		for (auto c : sim.components(n)) {
+			std::cout << *c << std::endl;
+		}
+	}
+/*
 	std::cout << "Reconnect R1:" << std::endl;
 	r1->reconnectTo(n1, n3);
 	std::cout << *r1 << std::endl;
-
+*/
 	std::cout << std::endl << "-----Resistors on node n2:-----" << std::endl;
 	auto resistorsN2 = sim.components(sim.nodes()[1], 'R');
 	for (auto component : resistorsN2) {

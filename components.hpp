@@ -13,6 +13,10 @@ protected:
 		_id = ++_counter;
 	}
 
+	~Counter() {
+		--_counter;
+	}
+
 	static int _counter;
 	int _id;
 
@@ -42,7 +46,11 @@ public:
 
 	std::vector<std::shared_ptr<Component>> components() const;
 
-	void connectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2);
+	bool operator==(const Node& n) const;
+
+	void connectTo(std::shared_ptr<Node> n2);
+
+	void disconnectComponent(const std::shared_ptr<Component>& e);
 
 	void disconnectAll();
 
@@ -54,9 +62,6 @@ private:
 
 class Component {
 public:
-	Component(const std::string &name,
-			std::vector<std::shared_ptr<Node>> nodes);
-
 	Component(const std::string &name,
 			std::shared_ptr<Node> node1);
 
@@ -73,11 +78,13 @@ public:
 
 	std::string name() const;
 
-	std::vector<std::shared_ptr<Node>> nodes() const;
+	std::vector<std::weak_ptr<Node>> nodes() const;
 
-	//reconnect component from node n1 to node n2
-	//for all leads connected to n1
-	virtual void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) = 0;
+	bool operator==(const Component& e);
+
+	void reconnectTo(const std::shared_ptr<Node>& from, const std::shared_ptr<Node>& to);
+
+	virtual std::shared_ptr<Component> make_shared_ptr() const = 0;
 
 	virtual double voltage() const = 0;
 	virtual double current() const = 0;
@@ -85,8 +92,11 @@ public:
 
 private:
 	std::string _name;
+
 protected:
-	std::vector<std::shared_ptr<Node>> _nodes;
+	std::vector<std::weak_ptr<Node>> _nodes;
+
+	void initNodeConnections(const std::shared_ptr<Component>& p);
 };
 
 
@@ -94,11 +104,11 @@ class Ground : public Component, public Counter<Ground> {
 public:
 	Ground(std::shared_ptr<Node> node);
 
+	std::shared_ptr<Component> make_shared_ptr() const override;
+
 	double voltage() const override;
 
 	double current() const override;
-
-	void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) override;
 };
 
 
@@ -107,11 +117,11 @@ public:
 	Wire(std::shared_ptr<Node> node1,
 		std::shared_ptr<Node> node2);
 
+	std::shared_ptr<Component> make_shared_ptr() const override;
+
 	double voltage() const override;
 
 	double current() const override;
-
-	void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) override;
 
 	std::shared_ptr<Node> otherNode(int id);
 };
@@ -123,13 +133,13 @@ public:
 			std::shared_ptr<Node> node1,
 			std::shared_ptr<Node> node2);
 
+	std::shared_ptr<Component> make_shared_ptr() const override;
+
 	double resistance() const;
 
 	double voltage() const override;
 
 	double current() const override;
-
-	void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) override;
 
 private:
 	double _resistance;
@@ -139,17 +149,13 @@ private:
 class DCVoltage : public Component, public Counter<DCVoltage> {
 public:
 	DCVoltage(double voltage,
-			std::shared_ptr<Node> node1,
-			std::shared_ptr<Node> node2);
-
-	DCVoltage(double voltage,
 			std::shared_ptr<Node> node);
+
+	std::shared_ptr<Component> make_shared_ptr() const override;
 
 	double voltage() const override;
 
 	double current() const override;
-
-	void reconnectTo(std::shared_ptr<Node> n1, std::shared_ptr<Node> n2) override;
 
 private:
 	double _voltage;
