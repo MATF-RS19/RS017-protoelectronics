@@ -1,7 +1,7 @@
 PROGRAM = protoElectronics
 LIB = components
 CC = g++
-CPPFLAGS = -Wall -Wextra -ggdb3 -std=c++17
+CPPFLAGS = -Wall -Wextra -ggdb3 -std=c++11
 
 $(PROGRAM): main.o components.o logical_components.o
 	$(CC) $(CPPFLAGS) -o $@ $^
@@ -20,5 +20,3 @@ main.o: main.cpp components.hpp
 
 clean:
 	rm *.o $(PROGRAM)
-
-
