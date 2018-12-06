@@ -1,15 +1,19 @@
 #include "components.hpp"
 #include <iostream>
 #include <algorithm>
+#include <cassert>
 
 template<typename T>
 int Counter<T>::_counter(0);
+
+std::set<std::shared_ptr<Node>, Node::node_cmp> Node::_allNodes;
+
 
 std::ostream& operator<<(std::ostream& out, const Component& c) {
 	out << c.name() << std::endl
 	<< "Nodes: [ ";
 	for (auto n : c.nodes()) {
-		out << n.lock()->id() << " ";
+		out << n->id() << " ";
 	}
 	out << "]" << std::endl;
 
@@ -27,7 +31,7 @@ std::ostream& operator<<(std::ostream& out, const Node& n) {
 		<< "Connected components: " << std::endl;
 
 	for (auto c : n.components()) {
-		out << c->name() << "\t";
+		out << c.lock()->name() << "\t";
 	}
 
 	return out;
@@ -35,138 +39,134 @@ std::ostream& operator<<(std::ostream& out, const Node& n) {
 
 
 //Node
-Node::Node(int x, int y)
+Node::Node(int x, int y, const std::shared_ptr<Component> &component = nullptr)
 :_x(x), _y(y)
 {
+    _components.clear();
+	if (component) _components.push_back(component);
 }
 
+//Node coordinates
 int Node::x() const { return _x; }
-
 int Node::y() const { return _y; }
 
-void Node::addComponent(std::shared_ptr<Component> e){
+void Node::addComponent(const std::shared_ptr<Component> &e){
 	_components.push_back(e);
 }
 
-std::vector<std::shared_ptr<Component>> Node::components() const{
+//All components connected to node
+std::vector<std::weak_ptr<Component>> Node::components() const{
 	return _components;
 }
 
-bool Node::operator==(const Node& n) const {
-	if (this->id() != n.id()) return false;
-	if (this->_x != n.x()) return false;
-	if (this->_y != n.y()) return false;
+//Only components of type 'componentType' connected to node
+std::vector<std::weak_ptr<Component>> Node::components(char componentType) const {
+	std::vector<std::weak_ptr<Component>> filterd;
 
-	return true;
-}
-
-void Node::disconnectAll() {
-	for (unsigned i = 0; i < _components.size(); ++i) {
-		_components[i] = nullptr;
-	}
-	_components.resize(0);
-}
-
-void Node::disconnectComponent(const std::shared_ptr<Component>& e) {
-	std::vector<std::vector<std::shared_ptr<Component>>::iterator> forDelete;
-
-	for (auto i = _components.begin(); i < _components.end(); ++i) {
-		if (**i == *e) {
-			forDelete.push_back(i);
-			*i = nullptr;
+	for (auto const& component : _components) {
+		if (component.lock()->name()[0] == componentType) {
+			filterd.push_back(component);
 		}
 	}
 
-	for (auto j : forDelete) {
-		_components.erase(j);
+	return filterd;
+}
+
+std::vector<std::weak_ptr<Component>> Node::components(char componentType, int x, int y) {
+	auto i = _allNodes.find(std::make_shared<Node>(x, y));
+	if (i != _allNodes.end()) {
+		return (*i)->components(componentType);
+	} else {
+		return std::vector<std::weak_ptr<Component>>();
 	}
 }
 
-//TODO
-void Node::connectTo(std::shared_ptr<Node> n2) {
-	auto n1 = std::make_shared<Node>(*this);
-	auto size = _components.size();
-	do {
-		auto i = _components.begin();
-		std::cout << "pocetak: " << **i << std::endl;
-		(*i)->reconnectTo(n1, n2);
-		size = _components.size();
-	} while (size != 0);
+//Disconnect component e from this node
+void Node::disconnectComponent(const std::shared_ptr<Component>& e) {
+	auto i = _components.begin();
+	for ( ; i < _components.end(); ++i) {
+		if ((*i).lock() == e) {
+			std::cout << "Evo ga!!!" << std::endl;
+			break;
+		}
+	}
+	_components.erase(i);
 }
 
 
 
 //Component
-Component::Component(const std::string &name,
-		std::shared_ptr<Node> node1)
+Component::Component(const std::string &name)
 	:_name(name)
 {
-	_nodes.resize(0);
-	_nodes.push_back(node1);
-}
-
-Component::Component(const std::string &name,
-		std::shared_ptr<Node> node1,
-		std::shared_ptr<Node> node2)
-	:_name(name)
-{
-	_nodes.resize(0);
-	_nodes.push_back(node1);
-	_nodes.push_back(node2);
-}
-
-Component::Component(const std::string &name,
-		std::shared_ptr<Node> node1,
-		std::shared_ptr<Node> node2,
-		std::shared_ptr<Node> node3)
-	:_name(name)
-{
-	_nodes.resize(0);
-	_nodes.push_back(node1);
-	_nodes.push_back(node2);
-	_nodes.push_back(node3);
+	_nodes.clear();
 }
 
 Component::~Component()
 {}
-void Component::initNodeConnections(const std::shared_ptr<Component>& p) {
-
-	for (auto n : _nodes) {
-		n.lock()->addComponent(p);
-	}
-}
 
 std::string Component::name() const {
 	return _name;
 }
 
-std::vector<std::weak_ptr<Node>> Component::nodes() const {
+std::vector<std::shared_ptr<Node>> Component::nodes() const {
 	return _nodes;
 }
 
-bool Component::operator==(const Component& e) {
-	if (this->_name != e.name()) return false;
-	if (this->_nodes.size() != e.nodes().size()) return false;
+/*
+Connect component to node if that node exist,
+if not, make new node and connect
+*/
+void Component::addNode(int x, int y) {
+    auto p = shared_from_this();
 
-	for (unsigned i = 0; i < _nodes.size(); ++i) {
-		if (this->_nodes[i].lock() != e.nodes()[i].lock())
-			return false;
+    auto new_node_ptr = std::make_shared<Node>(x, y, p);
+	_nodes.push_back(new_node_ptr);
+
+	auto res = Node::_allNodes.insert(_nodes.back());
+	if (!res.second) {
+		_nodes.back() = *res.first;
+		_nodes.back()->addComponent(p);
 	}
+}
 
-	return true;
+void Component::addNodes(int x1, int y1, int x2, int y2) {
+    addNode(x1, y1);
+    addNode(x2, y2);
+}
+
+void Component::addNodes(int x1, int y1, int x2, int y2, int x3, int y3) {
+    addNode(x1, y1);
+    addNode(x2, y2);
+    addNode(x3, y3);
+}
+
+void Component::addNodeAt(unsigned pos, int x, int y) {
+	assert(pos < _nodes.size());
+
+    auto p = shared_from_this();
+
+    auto new_node_ptr = std::make_shared<Node>(x, y, p);
+	_nodes[pos]->disconnectComponent(p);
+	_nodes[pos] = new_node_ptr;
+
+	auto res = Node::_allNodes.insert(_nodes[pos]);
+	if (!res.second) {
+		_nodes[pos] = *res.first;
+		_nodes[pos]->addComponent(p);
+	}
 }
 
 /*
-	reconnect component from nodeFrom to nodeTo
-	for all leads connected to nodeFrom
+Reconnect component from nodeFrom to nodeTo
+for all leads connected to nodeFrom
 */
-void Component::reconnectTo(const std::shared_ptr<Node>& from, const std::shared_ptr<Node>& to) {
-	auto p = make_shared_ptr();
+void Component::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
+	auto p = std::make_shared<Node>(xTo, yTo);
+
 	for (unsigned i = 0; i < _nodes.size(); ++i) {
-		if (*_nodes[i].lock() == *from) {
-			_nodes[i].lock()->disconnectComponent(p);
-			_nodes[i] = to;
-			to->addComponent(p);
+		if (_nodes[i]->x() == xFrom && _nodes[i]->y() == yFrom ) {
+			addNodeAt(i, xTo, yTo);
 		}
 	}
 }
@@ -176,20 +176,11 @@ double Component::power() const {
 }
 
 
+
 //Ground
-Ground::Ground(std::shared_ptr<Node> node)
-	:Component("GND" + std::to_string(_counter+1), node)
-{
-	auto p = make_shared_ptr();
-	initNodeConnections(p);
-
-	//set Voltage to 0
-	_nodes[0].lock()->_v = 0;
-}
-
-std::shared_ptr<Component> Ground::make_shared_ptr() const {
-	return std::make_shared<Ground>(*this);
-}
+Ground::Ground()
+	:Component("GND" + std::to_string(_counter+1))
+{}
 
 double Ground::voltage() const {
 	return 0;
@@ -200,19 +191,17 @@ double Ground::current() const {
 	return 0;
 }
 
+void Ground::addNode(int x, int y) {
+    Component::addNode(x, y);
+    _nodes.back()->_v = 0;
+}
+
 
 
 //Wire
-Wire::Wire(std::shared_ptr<Node> node1,
-		std::shared_ptr<Node> node2)
-	:Component("W" + std::to_string(_counter+1), node1, node2)
+Wire::Wire()
+	:Component("W" + std::to_string(_counter+1))
 {
-	auto p = make_shared_ptr();
-	initNodeConnections(p);
-}
-
-std::shared_ptr<Component> Wire::make_shared_ptr() const {
-	return std::make_shared<Wire>(*this);
 }
 
 double Wire::voltage() const {
@@ -225,22 +214,16 @@ double Wire::current() const {
 }
 
 std::shared_ptr<Node> Wire::otherNode(int id) {
-	return _nodes[0].lock()->id() == id ? _nodes[1].lock() : _nodes[0].lock();
+	return _nodes[0]->id() == id ? _nodes[1] : _nodes[0];
 }
+
 
 
 //Resistor
-Resistor::Resistor(double resistance,
-		std::shared_ptr<Node> node1,
-		std::shared_ptr<Node> node2)
-	:Component("R" + std::to_string(_counter+1), node1, node2), _resistance(resistance)
+Resistor::Resistor(double resistance)
+	:Component("R" + std::to_string(_counter+1)),
+	_resistance(resistance)
 {
-	auto p = make_shared_ptr();
-	initNodeConnections(p);
-}
-
-std::shared_ptr<Component> Resistor::make_shared_ptr() const {
-	return std::make_shared<Resistor>(*this);
 }
 
 double Resistor::resistance() const {
@@ -248,7 +231,8 @@ double Resistor::resistance() const {
 }
 
 double Resistor::voltage() const {
-	return _nodes[1].lock()->_v - _nodes[0].lock()->_v;
+    if (_nodes.size() != 2) return 0;
+	return _nodes[1]->_v - _nodes[0]->_v;
 }
 
 double Resistor::current() const {
@@ -256,19 +240,16 @@ double Resistor::current() const {
 }
 
 
+
 //DCVoltage
-DCVoltage::DCVoltage(double voltage,
-		std::shared_ptr<Node> node):
-	Component("U" + std::to_string(_counter+1), node), _voltage(voltage)
-{
-	auto p = make_shared_ptr();
-	initNodeConnections(p);
+DCVoltage::DCVoltage(double voltage)
+	:Component("U" + std::to_string(_counter+1)),
+	_voltage(voltage)
+{}
 
-	_nodes[0].lock()->_v = voltage;
-}
-
-std::shared_ptr<Component> DCVoltage::make_shared_ptr() const {
-	return std::make_shared<DCVoltage>(*this);
+void DCVoltage::addNode(int x, int y) {
+    Component::addNode(x, y);
+    _nodes.back()->_v = _voltage;
 }
 
 double DCVoltage::voltage() const {
@@ -280,38 +261,4 @@ double DCVoltage::current() const {
 	return 0;
 }
 
-
-//Circuit
-Circuit::Circuit(std::vector<std::shared_ptr<Node>> nodes)
-	:_nodes(nodes)
-{}
-
-void Circuit::addNode(std::shared_ptr<Node> node) {
-	_nodes.push_back(node);
-}
-
-void Circuit::addComponent(std::shared_ptr<Component> component) {
-	(void)component;
-	//TODO
-}
-
-std::vector<std::shared_ptr<Node>> Circuit::nodes() const {
-	return _nodes;
-}
-
-std::vector<std::shared_ptr<Component>> Circuit::components(std::shared_ptr<Node> node) const {
-	return node->components();
-}
-
-std::vector<std::shared_ptr<Component>> Circuit::components(std::shared_ptr<Node> node, char componentType) const {
-	std::vector<std::shared_ptr<Component>> filterd;
-
-	auto components = node->components();
-	for (auto component : components ) {
-		if (component->name()[0] == componentType) {
-			filterd.push_back(component);
-		}
-	}
-	return filterd;
-}
 
