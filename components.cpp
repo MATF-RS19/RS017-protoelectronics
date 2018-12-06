@@ -158,7 +158,7 @@ void Component::addNodeAt(unsigned pos, int x, int y) {
 }
 
 /*
-Reconnect component from nodeFrom to nodeTo
+Reconnect component from nodeFrom (x,y) to nodeTo (x,y)
 for all leads connected to nodeFrom
 */
 void Component::reconnect(int xFrom, int yFrom, int xTo, int yTo) {

@@ -7,6 +7,7 @@
 #include <set>
 
 
+//Interface for counting and naming components in the same class
 template <class T>
 class Counter {
 protected:
@@ -50,10 +51,9 @@ public:
 
 	std::vector<std::weak_ptr<Component>> components(char componentType) const;
 
-	void connectTo(std::shared_ptr<Node> n2);
-
 	void disconnectComponent(const std::shared_ptr<Component>& e);
 
+	//two nodes are same if they have the same coordinates
 	struct node_cmp {
 		bool operator() (const std::shared_ptr<Node>& n1,
 				const std::shared_ptr<Node>& n2) const {
@@ -61,13 +61,14 @@ public:
 		}
 	};
 
-    static std::set<std::shared_ptr<Node>, Node::node_cmp> _allNodes;
-	
+	static std::set<std::shared_ptr<Node>, Node::node_cmp> _allNodes;
+
 	static std::vector<std::weak_ptr<Component>> components(char componentType, int x, int y);
 
 private:
-    //node coordinates
+	//node coordinates
 	int _x, _y;
+	//connected components to node
 	std::vector<std::weak_ptr<Component>> _components;
 };
 
@@ -97,6 +98,7 @@ private:
 	std::string _name;
 
 protected:
+	//component is connected to nodes
 	std::vector<std::shared_ptr<Node>> _nodes;
 };
 
