@@ -5,64 +5,39 @@
 //#include "logical_components.hpp"
 
 int main() {
-    //add nodes
-	std::shared_ptr<Node> n1 = std::make_shared<Node>(2, 3);
-	std::shared_ptr<Node> n2 = std::make_shared<Node>(1, 4);
-	std::shared_ptr<Node> n3 = std::make_shared<Node>(2, 4);
-
 	//add components
-	std::shared_ptr<Resistor> r1 = std::make_shared<Resistor>(1000, n1, n2);
-	std::shared_ptr<DCVoltage> u = std::make_shared<DCVoltage>(5, n2);
-	std::shared_ptr<Resistor> r2 = std::make_shared<Resistor>(2000, n2, n3);
-	//std::shared_ptr<Wire> w = std::make_shared<Wire>(n3, n1);
-	std::shared_ptr<Ground> gnd = std::make_shared<Ground>(n1);
+	std::shared_ptr<Resistor> r1 = std::make_shared<Resistor>(1000);
+	std::shared_ptr<DCVoltage> u = std::make_shared<DCVoltage>(5);
+	std::shared_ptr<Resistor> r2 = std::make_shared<Resistor>(2000);
+	//std::shared_ptr<Wire> w = std::make_shared<Wire>(2, 4, 2, 3);
+	std::shared_ptr<Ground> gnd = std::make_shared<Ground>();
 
-	//n1->disconnectAll();
-	//n1 = nullptr;
+    //connect to nodes
+    r1->addNodes(2, 3, 1, 4);
+    u->addNode(1, 4);
+    r2->addNodes(1, 4, 2, 4);
+    gnd->addNode(2, 3);
 
-	std::vector<std::shared_ptr<Node>> nodes;
-	if (n1 != nullptr) nodes.push_back(n1);
-	if (n2 != nullptr) nodes.push_back(n2);
-	if (n3 != nullptr) nodes.push_back(n3);
+	//reconnect resistor 1 from (2,3) to (2,4)
+	r1->reconnect(2,3,2,4);
 
-
-	//Simulation is vector of nodes
-	Circuit sim(nodes);
-
-	std::cout << "NODE0 components:" << std::endl;
-	for (auto c : sim.nodes()[0]->components()) {
-		std::cout << *c << std::endl;
+	std::cout << "----------Nodes----------" << std::endl;
+	for (auto const& e : Node::_allNodes) {
+		std::cout << *e << std::endl;
 	}
 
-	std::cout << "Reconnect 1 - 3" << std::endl;
-	n1->connectTo(sim.nodes()[2]);
-	n1 = nullptr;
-
-
-	//Calculate some voltage, current...
-	for (auto n : sim.nodes()) {
-		std::cout << "\t*n" << n->id() << std::endl;
-		for (auto c : sim.components(n)) {
-			std::cout << *c << std::endl;
-		}
-	}
-/*
-	std::cout << "Reconnect R1:" << std::endl;
-	r1->reconnectTo(n1, n3);
+	std::cout << "--------Components--------" << std::endl;
 	std::cout << *r1 << std::endl;
-*/
-	std::cout << std::endl << "-----Resistors on node n2:-----" << std::endl;
-	auto resistorsN2 = sim.components(sim.nodes()[1], 'R');
-	for (auto component : resistorsN2) {
-		std::cout << component->name() << ": ";
-		std::cout << std::static_pointer_cast<Resistor>(component)->resistance() << std::endl;
-	}
+	std::cout << *r2 << std::endl;
+	std::cout << *u << std::endl;
+	std::cout << *gnd << std::endl;
 
-	std::cout << std::endl << "-----All components on nodes:-----" << std::endl;
-	for (auto n : sim.nodes()) {
-		std::cout << *n << std::endl;
+	std::cout << std::endl << "-----Resistors on node n2:-----" << std::endl;
+	auto resistorsN2 = Node::components('R', 1, 4);
+	for (auto const& component : resistorsN2) {
+		std::cout << component.lock()->name() << ": ";
+		std::cout << std::static_pointer_cast<Resistor>(component.lock())->resistance() << std::endl;
 	}
-	std::cout << std::endl;
 
 	std::cout << "Number of nodes: " << Node::counter() << std::endl;
 	std::cout << "Number of resistors: " << Resistor::counter() << std::endl;
