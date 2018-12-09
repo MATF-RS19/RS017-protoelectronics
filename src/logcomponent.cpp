@@ -39,8 +39,7 @@ QRectF LOGComponent::boundingRect() const {
 void LOGComponent::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
-    rec = boundingRect();
-    painter->drawRect(rec);
+    painter->drawRect(boundingRect());
 }
 
 ANDComponent::ANDComponent() {

@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "component.h"
+#include "components.hpp"
 #include "logcomponent.h"
 #include "scene.h"
 

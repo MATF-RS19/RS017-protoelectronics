@@ -31,25 +31,25 @@ void MainWindow::createSceneAndView() {
 }
 
 void MainWindow::createGraphicsItems(){
-    Ground *ground = new Ground;
+    Ground *ground = new Ground();
     scene->addItem(ground);
 
     Wire* wire = new Wire;
     wire->setPos(ground->pos()+QPointF(120,0));
     scene->addItem(wire);
 
-    Resistor* resistor = new Resistor;
+    Resistor* resistor = new Resistor(1000);
     resistor->setPos(wire->pos()+QPointF(120, 0));
     scene->addItem(resistor);
 
-    DCVoltage* dcVoltage = new DCVoltage;
+    DCVoltage* dcVoltage = new DCVoltage(10);
     dcVoltage->setPos(resistor->pos()+QPointF(120, 0));
     scene->addItem(dcVoltage);
-
+/*
     VoltageSource* voltageSource = new VoltageSource;
     voltageSource->setPos(dcVoltage->pos()+QPointF(120, 0));
     scene->addItem(voltageSource);
-
+*/
     ANDComponent* andComponent = new ANDComponent();
     andComponent->setPos(ground->pos()+QPointF(0, 140));
     scene->addItem(andComponent);

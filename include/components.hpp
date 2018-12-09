@@ -1,5 +1,16 @@
-#ifndef __COMPONENTS_H__
-#define __COMPONENTS_H__ 1
+#ifndef COMPONENTS_H
+#define COMPONENTS_H
+
+#include "scene.h"
+#include "math.h"
+
+#include <QPainter>
+#include <QGraphicsItem>
+#include <QGraphicsRectItem>
+#include <QApplication>
+#include <QPen>
+#include <QDebug>
+#include <QSize>
 
 #include <string>
 #include <vector>
@@ -73,11 +84,15 @@ private:
 };
 
 
-class Component : public std::enable_shared_from_this<Component> {
+class Component : public std::enable_shared_from_this<Component>, public QGraphicsItem {
 public:
 	Component(const std::string &name);
 
-	virtual ~Component();
+    QRectF boundingRect() const;
+
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    virtual ~Component();
 
 	std::string name() const;
 
@@ -99,7 +114,11 @@ private:
 
 protected:
 	//component is connected to nodes
-	std::vector<std::shared_ptr<Node>> _nodes;
+    std::vector<std::shared_ptr<Node>> _nodes;
+
+    QPen penForLines;
+    QPen penForDots;
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 };
 
 
@@ -111,7 +130,9 @@ public:
 
 	double current() const override;
 
-	void addNode(int x, int y) override;
+    void addNode(int x, int y) override;
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
 
@@ -123,7 +144,9 @@ public:
 
 	double current() const override;
 
-	std::shared_ptr<Node> otherNode(int id);
+    std::shared_ptr<Node> otherNode(int id);
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
 
@@ -136,6 +159,9 @@ public:
 	double voltage() const override;
 
 	double current() const override;
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
 
 private:
 	double _resistance;
@@ -152,6 +178,8 @@ public:
 
 	void addNode(int x, int y) override;
 
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
 private:
 	double _voltage;
 };
@@ -161,4 +189,4 @@ std::ostream& operator<<(std::ostream& out, const Component& r);
 
 std::ostream& operator<<(std::ostream& out, const Node& r);
 
-#endif /* __COMPONENTS_H__ */
+#endif /*COMPONENTS_H */

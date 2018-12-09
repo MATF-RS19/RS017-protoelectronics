@@ -29,15 +29,15 @@ INCLUDEPATH += include
 SOURCES += \
         src/main.cpp \
         src/mainwindow.cpp \
-        src/component.cpp \
         src/scene.cpp \
-        src/logcomponent.cpp
+        src/logcomponent.cpp \
+        src/components.cpp
 
 HEADERS += \
         include/mainwindow.h \
-        include/component.h \
         include/scene.h \
-        include/logcomponent.h
+        include/logcomponent.h \
+        include/components.hpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
