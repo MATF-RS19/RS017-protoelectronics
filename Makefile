@@ -1,22 +1,23 @@
 PROGRAM = protoElectronics
-LIB = components
 CC = g++
-CPPFLAGS = -Wall -Wextra -ggdb3 -std=c++11
+CPPFLAGS = -Wall -Wextra -ggdb3 -std=c++14 -I include
 
-$(PROGRAM): main.o components.o logical_components.o
+bin/$(PROGRAM): build/main.o build/components.o build/logical_components.o
+	@ mkdir -p bin
 	$(CC) $(CPPFLAGS) -o $@ $^
 
-components.o: components.cpp components.hpp
+build/components.o: src/components.cpp include/components.hpp
 	$(CC) $(CPPFLAGS) -c -o $@ $<
 
-logical_components.o: logical_components.cpp logical_components.hpp
+build/logical_components.o: src/logical_components.cpp include/logical_components.hpp
 	$(CC) $(CPPFLAGS) -c -o $@ $<
 
-main.o: main.cpp components.hpp
+build/main.o: src/main.cpp include/components.hpp
+	@ mkdir -p build
 	$(CC) $(CPPFLAGS) -c -o $@ $<
 
 
 .PHONY: clean
 
 clean:
-	rm *.o $(PROGRAM)
+	rm -rf build bin/$(PROGRAM) 

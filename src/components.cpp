@@ -86,7 +86,6 @@ void Node::disconnectComponent(const std::shared_ptr<Component>& e) {
 	auto i = _components.begin();
 	for ( ; i < _components.end(); ++i) {
 		if ((*i).lock() == e) {
-			std::cout << "Evo ga!!!" << std::endl;
 			break;
 		}
 	}

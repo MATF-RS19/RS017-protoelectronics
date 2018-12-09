@@ -31,3 +31,6 @@
 *.out
 *.app
 protoElectronics
+bin
+build
+.ycm*
