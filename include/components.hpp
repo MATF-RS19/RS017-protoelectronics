@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
-/*
+
+#ifdef QTPAINT
 #include "scene.h"
 #include "math.h"
 
@@ -11,7 +12,8 @@
 #include <QPen>
 #include <QDebug>
 #include <QSize>
-*/
+#endif
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -86,14 +88,20 @@ private:
 };
 
 
-class Component : public std::enable_shared_from_this<Component>/*, public QGraphicsItem */{
+class Component : public std::enable_shared_from_this<Component>
+				#ifdef QTPAINT
+				, public QGraphicsItem
+				#endif
+				{
 public:
 	Component(const std::string &name);
-/*
+
+#ifdef QTPAINT
     QRectF boundingRect() const;
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-*/
+#endif
+
     virtual ~Component();
 
 	std::string name() const;
@@ -117,11 +125,12 @@ private:
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
-/*
+
+#ifdef QTPAINT
     QPen penForLines;
     QPen penForDots;
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-*/
+#endif
 };
 
 
@@ -135,7 +144,9 @@ public:
 
     void addNode(int x, int y) override;
 
-    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#endif
 };
 
 
@@ -149,7 +160,9 @@ public:
 
     std::shared_ptr<Node> otherNode(int id);
 
-    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#endif
 };
 
 
@@ -163,8 +176,9 @@ public:
 
 	double current() const override;
 
-    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#endif
 
 private:
 	double _resistance;
@@ -181,7 +195,9 @@ public:
 
 	void addNode(int x, int y) override;
 
-    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#endif
 
 private:
 	double _voltage;

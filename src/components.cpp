@@ -107,16 +107,18 @@ Component::Component(const std::string &name)
 	:_name(name)
 {
     _nodes.clear();
-/*
+
+#ifdef QTPAINT
     setFlags(QGraphicsItem::ItemIsSelectable |
             QGraphicsItem::ItemIsMovable |
             QGraphicsItem::ItemSendsGeometryChanges);
 
     penForLines = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap);
     penForDots = QPen(Qt::white, 6, Qt::SolidLine, Qt::RoundCap);
-*/
+#endif
 }
-/*
+
+#ifdef QTPAINT
 QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value) {
     if (change == ItemPositionChange && scene()) {
         QPointF newPos = value.toPointF();
@@ -138,8 +140,7 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
         return QGraphicsItem::itemChange(change, value);
     }
 }
-*/
-/*
+
 QRectF Component::boundingRect() const {
     return QRectF(0,0,100,100);
 }
@@ -149,7 +150,8 @@ void Component::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     Q_UNUSED(widget);
     //painter->drawRect(boundingRect());
 }
-*/
+#endif
+
 Component::~Component() {
     for (auto const& node : _nodes) {
         node->pop_component();
@@ -230,7 +232,8 @@ double Component::power() const {
 Ground::Ground()
 	:Component("GND" + std::to_string(_counter+1))
 {}
-/*
+
+#ifdef QTPAINT
 void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::paint(painter, option, widget);
     painter->setPen(penForLines);
@@ -245,7 +248,8 @@ void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     painter->drawLine(lineH2);
     painter->drawLine(lineH3);
 }
-*/
+#endif
+
 double Ground::voltage() const {
 	return 0;
 }
@@ -267,7 +271,8 @@ Wire::Wire()
 	:Component("W" + std::to_string(_counter+1))
 {
 }
-/*
+
+#ifdef QTPAINT
 void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::paint(painter, option, widget);
     painter->setPen(penForLines);
@@ -280,7 +285,8 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
-*/
+#endif
+
 double Wire::voltage() const {
 	return 0;
 }
@@ -302,7 +308,8 @@ Resistor::Resistor(double resistance)
 	_resistance(resistance)
 {
 }
-/*
+
+#ifdef QTPAINT
 void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::paint(painter, option, widget);
 
@@ -338,7 +345,8 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
-*/
+#endif
+
 double Resistor::resistance() const {
 	return _resistance;
 }
@@ -359,7 +367,8 @@ DCVoltage::DCVoltage(double voltage)
 	:Component("U" + std::to_string(_counter+1)),
 	_voltage(voltage)
 {}
-/*
+
+#ifdef QTPAINT
 void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::paint(painter, option, widget);
 
@@ -377,7 +386,8 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignCenter, QString::number(_voltage) + " V");
 }
-*/
+#endif
+
 /* TODO 2 terminals
 void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::draw(painter, option, widget);
@@ -416,5 +426,3 @@ double DCVoltage::voltage() const {
 double DCVoltage::current() const {
 	return 0;
 }
-
-
