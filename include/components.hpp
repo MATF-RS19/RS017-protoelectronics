@@ -1,6 +1,6 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
-
+/*
 #include "scene.h"
 #include "math.h"
 
@@ -11,7 +11,7 @@
 #include <QPen>
 #include <QDebug>
 #include <QSize>
-
+*/
 #include <string>
 #include <vector>
 #include <memory>
@@ -51,18 +51,20 @@ public:
     //voltage in node
 	double _v;
 
-	Node(int x, int y, const std::shared_ptr<Component> &component);
+	Node(int x, int y, Component* const component);
 
 	int x() const;
 	int y() const;
 
-	void addComponent(const std::shared_ptr<Component> &e);
+	void addComponent(Component* const e);
 
-	std::vector<std::weak_ptr<Component>> components() const;
+    void pop_component();
 
-	std::vector<std::weak_ptr<Component>> components(char componentType) const;
+	std::vector<Component*> components() const;
 
-	void disconnectComponent(const std::shared_ptr<Component>& e);
+	std::vector<Component*> components(char componentType) const;
+
+	void disconnectComponent(Component* const e);
 
 	//two nodes are same if they have the same coordinates
 	struct node_cmp {
@@ -74,24 +76,24 @@ public:
 
 	static std::set<std::shared_ptr<Node>, Node::node_cmp> _allNodes;
 
-	static std::vector<std::weak_ptr<Component>> components(char componentType, int x, int y);
+	static std::vector<Component*> components(char componentType, int x, int y);
 
 private:
 	//node coordinates
 	int _x, _y;
 	//connected components to node
-	std::vector<std::weak_ptr<Component>> _components;
+	std::vector<Component*> _components;
 };
 
 
-class Component : public std::enable_shared_from_this<Component>, public QGraphicsItem {
+class Component : public std::enable_shared_from_this<Component>/*, public QGraphicsItem */{
 public:
 	Component(const std::string &name);
-
+/*
     QRectF boundingRect() const;
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
+*/
     virtual ~Component();
 
 	std::string name() const;
@@ -115,10 +117,11 @@ private:
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
-
+/*
     QPen penForLines;
     QPen penForDots;
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+*/
 };
 
 
@@ -132,7 +135,7 @@ public:
 
     void addNode(int x, int y) override;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
 
@@ -146,7 +149,7 @@ public:
 
     std::shared_ptr<Node> otherNode(int id);
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
 
@@ -160,7 +163,7 @@ public:
 
 	double current() const override;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 
 private:
@@ -178,7 +181,7 @@ public:
 
 	void addNode(int x, int y) override;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 private:
 	double _voltage;

@@ -31,7 +31,7 @@ std::ostream& operator<<(std::ostream& out, const Node& n) {
 		<< "Connected components: " << std::endl;
 
 	for (auto c : n.components()) {
-		out << c.lock()->name() << "\t";
+		out << c->name() << "\t";
 	}
 
 	return out;
@@ -39,7 +39,7 @@ std::ostream& operator<<(std::ostream& out, const Node& n) {
 
 
 //Node
-Node::Node(int x, int y, const std::shared_ptr<Component> &component = nullptr)
+Node::Node(int x, int y, Component* const component = nullptr)
 :_x(x), _y(y)
 {
     _components.clear();
@@ -50,21 +50,26 @@ Node::Node(int x, int y, const std::shared_ptr<Component> &component = nullptr)
 int Node::x() const { return _x; }
 int Node::y() const { return _y; }
 
-void Node::addComponent(const std::shared_ptr<Component> &e){
+void Node::addComponent(Component* const e){
 	_components.push_back(e);
 }
 
+void Node::pop_component() {
+    _components.pop_back();
+}
+
 //All components connected to node
-std::vector<std::weak_ptr<Component>> Node::components() const{
+std::vector<Component*> Node::components() const{
 	return _components;
 }
 
+
 //Only components of type 'componentType' connected to node
-std::vector<std::weak_ptr<Component>> Node::components(char componentType) const {
-	std::vector<std::weak_ptr<Component>> filterd;
+std::vector<Component*> Node::components(char componentType) const {
+	std::vector<Component*> filterd;
 
 	for (auto const& component : _components) {
-		if (component.lock()->name()[0] == componentType) {
+		if (component->name()[0] == componentType) {
 			filterd.push_back(component);
 		}
 	}
@@ -72,24 +77,27 @@ std::vector<std::weak_ptr<Component>> Node::components(char componentType) const
 	return filterd;
 }
 
-std::vector<std::weak_ptr<Component>> Node::components(char componentType, int x, int y) {
+
+std::vector<Component*> Node::components(char componentType, int x, int y) {
+    //BUG wont find (1,4)
 	auto i = _allNodes.find(std::make_shared<Node>(x, y));
 	if (i != _allNodes.end()) {
 		return (*i)->components(componentType);
 	} else {
-		return std::vector<std::weak_ptr<Component>>();
+		return std::vector<Component*>();
 	}
 }
 
+
 //Disconnect component e from this node
-void Node::disconnectComponent(const std::shared_ptr<Component>& e) {
-	auto i = _components.begin();
-	for ( ; i < _components.end(); ++i) {
-		if ((*i).lock() == e) {
-			break;
-		}
-	}
-	_components.erase(i);
+void Node::disconnectComponent(Component* const e) {
+    for (auto it = _components.begin(); it != _components.end(); ) {
+        if (*it == e) {
+            it = _components.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 
@@ -99,15 +107,16 @@ Component::Component(const std::string &name)
 	:_name(name)
 {
     _nodes.clear();
-
+/*
     setFlags(QGraphicsItem::ItemIsSelectable |
             QGraphicsItem::ItemIsMovable |
             QGraphicsItem::ItemSendsGeometryChanges);
 
     penForLines = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap);
     penForDots = QPen(Qt::white, 6, Qt::SolidLine, Qt::RoundCap);
+*/
 }
-
+/*
 QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value) {
     if (change == ItemPositionChange && scene()) {
         QPointF newPos = value.toPointF();
@@ -129,7 +138,8 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
         return QGraphicsItem::itemChange(change, value);
     }
 }
-
+*/
+/*
 QRectF Component::boundingRect() const {
     return QRectF(0,0,100,100);
 }
@@ -139,9 +149,14 @@ void Component::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     Q_UNUSED(widget);
     //painter->drawRect(boundingRect());
 }
-
-Component::~Component()
-{}
+*/
+Component::~Component() {
+    for (auto const& node : _nodes) {
+        node->pop_component();
+        if (node.use_count() == 2)
+            Node::_allNodes.erase(node);
+    }
+}
 
 std::string Component::name() const {
 	return _name;
@@ -156,15 +171,14 @@ Connect component to node if that node exist,
 if not, make new node and connect
 */
 void Component::addNode(int x, int y) {
-    auto p = shared_from_this();
 
-    auto new_node_ptr = std::make_shared<Node>(x, y, p);
+    auto new_node_ptr = std::make_shared<Node>(x, y, this);
 	_nodes.push_back(new_node_ptr);
 
 	auto res = Node::_allNodes.insert(_nodes.back());
 	if (!res.second) {
 		_nodes.back() = *res.first;
-		_nodes.back()->addComponent(p);
+		_nodes.back()->addComponent(this);
 	}
 }
 
@@ -182,16 +196,14 @@ void Component::addNodes(int x1, int y1, int x2, int y2, int x3, int y3) {
 void Component::addNodeAt(unsigned pos, int x, int y) {
 	assert(pos < _nodes.size());
 
-    auto p = shared_from_this();
-
-    auto new_node_ptr = std::make_shared<Node>(x, y, p);
-	_nodes[pos]->disconnectComponent(p);
+    auto new_node_ptr = std::make_shared<Node>(x, y, this);
+	_nodes[pos]->disconnectComponent(this);
 	_nodes[pos] = new_node_ptr;
 
 	auto res = Node::_allNodes.insert(_nodes[pos]);
 	if (!res.second) {
 		_nodes[pos] = *res.first;
-		_nodes[pos]->addComponent(p);
+		_nodes[pos]->addComponent(this);
 	}
 }
 
@@ -200,7 +212,6 @@ Reconnect component from nodeFrom (x,y) to nodeTo (x,y)
 for all leads connected to nodeFrom
 */
 void Component::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
-	auto p = std::make_shared<Node>(xTo, yTo);
 
 	for (unsigned i = 0; i < _nodes.size(); ++i) {
 		if (_nodes[i]->x() == xFrom && _nodes[i]->y() == yFrom ) {
@@ -219,7 +230,7 @@ double Component::power() const {
 Ground::Ground()
 	:Component("GND" + std::to_string(_counter+1))
 {}
-
+/*
 void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::paint(painter, option, widget);
     painter->setPen(penForLines);
@@ -234,7 +245,7 @@ void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     painter->drawLine(lineH2);
     painter->drawLine(lineH3);
 }
-
+*/
 double Ground::voltage() const {
 	return 0;
 }
@@ -256,7 +267,7 @@ Wire::Wire()
 	:Component("W" + std::to_string(_counter+1))
 {
 }
-
+/*
 void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::paint(painter, option, widget);
     painter->setPen(penForLines);
@@ -269,7 +280,7 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
-
+*/
 double Wire::voltage() const {
 	return 0;
 }
@@ -291,7 +302,7 @@ Resistor::Resistor(double resistance)
 	_resistance(resistance)
 {
 }
-
+/*
 void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::paint(painter, option, widget);
 
@@ -327,7 +338,7 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
-
+*/
 double Resistor::resistance() const {
 	return _resistance;
 }
@@ -348,7 +359,7 @@ DCVoltage::DCVoltage(double voltage)
 	:Component("U" + std::to_string(_counter+1)),
 	_voltage(voltage)
 {}
-
+/*
 void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::paint(painter, option, widget);
 
@@ -366,7 +377,7 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignCenter, QString::number(_voltage) + " V");
 }
-
+*/
 /* TODO 2 terminals
 void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Component::draw(painter, option, widget);
