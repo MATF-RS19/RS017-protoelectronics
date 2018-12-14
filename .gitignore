@@ -35,4 +35,4 @@ bin
 build
 .ycm*
 
-*.pro.user
+protoElectronics.pro.user
