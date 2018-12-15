@@ -284,8 +284,8 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->drawLine(line);
 
     painter->setPen(penForDots);
-    QPointF p1(0, 50);
-    QPointF p2(100, 50);
+    QPointF p1(0.5, 50);
+    QPointF p2(99.5, 50);
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
@@ -344,8 +344,8 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->drawText(boundingRect(), Qt::AlignHCenter, QString::number(_resistance) + " Ohm");
 
     painter->setPen(penForDots);
-    QPointF p1(0, 50);
-    QPointF p2(100, 50);
+    QPointF p1(0.5, 50);
+    QPointF p2(99.5, 50);
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
@@ -383,7 +383,7 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
     painter->setPen(penForDots);
 
-    QPointF p(50, 0);
+    QPointF p(50, 0.5);
     painter->drawPoint(p);
 
     painter->setPen(QPen(Qt::black));
@@ -402,7 +402,6 @@ void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *opti
     QLineF lineUpHorizontal(25, 45, 75, 45);
     QLineF lineDownHorizontal(35, 55, 65, 55);
     QLineF lineDownVertical(50, 55, 50, 100);
-
     painter->drawLine(lineUpVertical);
     painter->drawLine(lineUpHorizontal);
     painter->drawLine(lineDownHorizontal);
@@ -410,8 +409,8 @@ void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *opti
 
     painter->setPen(penForDots);
 
-    QPointF pUp(50,0);
-    QPointF pDown(50,100);
+    QPointF pUp(50,0.5);
+    QPointF pDown(50,99.5);
     painter->drawPoint(pUp);
     painter->drawPoint(pDown);
 }
