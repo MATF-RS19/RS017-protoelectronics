@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
+//#define QTPAINT
+
 #ifdef QTPAINT
 #include "scene.h"
 #include "math.h"
@@ -69,22 +71,34 @@ public:
 	void disconnectComponent(Component* const e);
 
 	//two nodes are same if they have the same coordinates
-	struct node_cmp {
+	struct lex_node_cmp {
 		bool operator() (const std::shared_ptr<Node>& n1,
 				const std::shared_ptr<Node>& n2) const {
-			return (n1->_x < n2->_x) || (n1->_y < n2->_y);
+			return n1->to_string() < n2->to_string();
 		}
 	};
 
-	static std::set<std::shared_ptr<Node>, Node::node_cmp> _allNodes;
+	static std::set<std::shared_ptr<Node>, lex_node_cmp> _allNodes;
 
-	static std::vector<Component*> components(char componentType, int x, int y);
+    //find all components with componentType connected to node (x, y)
+	static std::vector<Component*> find(char componentType, int x, int y);
+
+    //find node by coordinates
+    static std::set<std::shared_ptr<Node>, lex_node_cmp>::iterator find(int x, int y);
+
+    static size_t size() {
+        return _allNodes.size();
+    }
 
 private:
 	//node coordinates
 	int _x, _y;
 	//connected components to node
 	std::vector<Component*> _components;
+
+    std::string to_string() const {
+        return std::to_string(_x) + std::to_string(_y);
+    }
 };
 
 

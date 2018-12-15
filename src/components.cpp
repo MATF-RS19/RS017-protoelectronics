@@ -6,7 +6,7 @@
 template<typename T>
 int Counter<T>::_counter(0);
 
-std::set<std::shared_ptr<Node>, Node::node_cmp> Node::_allNodes;
+std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 
 
 std::ostream& operator<<(std::ostream& out, const Component& c) {
@@ -78,9 +78,9 @@ std::vector<Component*> Node::components(char componentType) const {
 }
 
 
-std::vector<Component*> Node::components(char componentType, int x, int y) {
-    //BUG wont find (1,4)
-	auto i = _allNodes.find(std::make_shared<Node>(x, y));
+//find all components with componentType connected to node (x, y)
+std::vector<Component*> Node::find(char componentType, int x, int y) {
+	auto i = Node::find(x, y);
 	if (i != _allNodes.end()) {
 		return (*i)->components(componentType);
 	} else {
@@ -88,6 +88,10 @@ std::vector<Component*> Node::components(char componentType, int x, int y) {
 	}
 }
 
+//find node by coordinates
+std::set<std::shared_ptr<Node>, Node::lex_node_cmp>::iterator Node::find(int x, int y) {
+    return _allNodes.find(std::make_shared<Node>(x, y));
+}
 
 //Disconnect component e from this node
 void Node::disconnectComponent(Component* const e) {
