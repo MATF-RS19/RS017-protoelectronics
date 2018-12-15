@@ -10,7 +10,7 @@ SCENARIO("add component", "[add]"){
 
             THEN("Resistor is unconnected"){
                 REQUIRE(r.nodes().size() == 0);
-                REQUIRE(Node::_allNodes.size() == 0);
+                REQUIRE(Node::size() == 0);
             }
         }
 
@@ -62,13 +62,13 @@ SCENARIO("add component", "[add]"){
 
             THEN("Ground is unconnected"){
                 REQUIRE(gnd.nodes().size() == 0);
-                REQUIRE(Node::_allNodes.size() == 0);
+                REQUIRE(Node::size() == 0);
             }
         }
     }
 }
 
-SCENARIO("connect component", "[connect]"){
+SCENARIO("connect one component", "[connect one]"){
    GIVEN("One resistor") {
         Resistor r(1000);
 
@@ -86,13 +86,12 @@ SCENARIO("connect component", "[connect]"){
             }
 
             THEN("Collection of all nodes have one node with (x,y)"){
-                REQUIRE(Node::_allNodes.size() == 1);
-                REQUIRE((*Node::_allNodes.begin())->x() == 1);
-                REQUIRE((*Node::_allNodes.begin())->y() == 5);
+                REQUIRE(Node::size() == 1);
+                REQUIRE(Node::find(1, 5) != Node::_allNodes.end());
             }
 
             THEN("Node point to that component"){
-                REQUIRE((*Node::_allNodes.begin())->components()[0] == &r);
+                REQUIRE((*Node::find(1, 5))->components()[0] == &r);
             }
 
             THEN("Node from all nodes is same as node in component"){
@@ -101,41 +100,43 @@ SCENARIO("connect component", "[connect]"){
         }
 
         WHEN("Connect two leads to nodes (x1,y1) and (x2,y2)"){
-            r.addNode(1, 5);
-            r.addNode(10, 8);
+            int x1 = 1, y1 = 5;
+            int x2 = 10, y2 = 8;
+            r.addNode(x1, y1);
+            r.addNode(x2, y2);
 
             THEN("Component have two nodes with (x1,y1) and (x2,y2)") {
                 REQUIRE(r.nodes().size() == 2);
-                REQUIRE(r.nodes()[0]->x() == 1);
-                REQUIRE(r.nodes()[0]->y() == 5);
-                REQUIRE(r.nodes()[1]->x() == 10);
-                REQUIRE(r.nodes()[1]->y() == 8);
+                REQUIRE(r.nodes()[0]->x() == x1);
+                REQUIRE(r.nodes()[0]->y() == y1);
+                REQUIRE(r.nodes()[1]->x() == x2);
+                REQUIRE(r.nodes()[1]->y() == y2);
             }
 
             THEN("Component nodes both have one component (self)"){
                 REQUIRE(r.nodes()[0]->components().size() == 1);
                 REQUIRE(r.nodes()[1]->components().size() == 1);
-				REQUIRE(r.nodes()[0]->components()[0] == &r);
-				REQUIRE(r.nodes()[1]->components()[0] == &r);
+                REQUIRE(r.nodes()[0]->components()[0] == &r);
+                REQUIRE(r.nodes()[1]->components()[0] == &r);
             }
 
             THEN("Collection of all nodes have two nodes"){
-                REQUIRE(Node::_allNodes.size() == 2);
+                REQUIRE(Node::size() == 2);
             }
 
             THEN("All nodes point only to that component"){
-                REQUIRE((*Node::_allNodes.begin())->components().size() == 1);
-                REQUIRE((*Node::_allNodes.begin())->components()[0] == &r);
+                REQUIRE((*Node::find(x1, y1))->components().size() == 1);
+                REQUIRE((*Node::find(x1, y1))->components()[0] == &r);
 
-                REQUIRE((*Node::_allNodes.rbegin())->components().size() == 1);
-                REQUIRE((*Node::_allNodes.rbegin())->components()[0] == &r);
+                REQUIRE((*Node::find(x2, y2))->components().size() == 1);
+                REQUIRE((*Node::find(x2, y2))->components()[0] == &r);
             }
 
             THEN("Nodes from all nodes is same as nodes in component"){
-                REQUIRE(*Node::_allNodes.begin() == r.nodes()[0]);
-				REQUIRE(*Node::_allNodes.rbegin() == r.nodes()[1]);
-            }
+                REQUIRE(*Node::find(x1, y1) == r.nodes()[0]);
+                REQUIRE(*Node::find(x2, y2) == r.nodes()[1]);
         }
+    }
 /*
         WHEN("Connect 3 leads to nodes"){
             r.addNode(1, 5);
@@ -148,7 +149,7 @@ SCENARIO("connect component", "[connect]"){
    }
 
 
-   GIVEN("One resistor connected to node1 and node2") {
+    GIVEN("One resistor connected to node1 and node2") {
         Resistor* r = new Resistor(1000);
         r->addNode(1, 2);
         r->addNode(3, 4);
@@ -157,25 +158,44 @@ SCENARIO("connect component", "[connect]"){
             delete r;
 
             THEN("Nodes are deleted"){
-                REQUIRE(Node::_allNodes.size() == 0);
-           }
-       }
+                REQUIRE(Node::size() == 0);
+            }
+        }
         if (!r) delete r;
-   }
+    }
 
+}
+
+SCENARIO("connect 2th component", "[connect 2th]"){
     GIVEN("One resistor connected to node1 and node2") {
         Resistor r1(1000);
-        r1.addNode(1, 2);
-        r1.addNode(3, 4);
+        int x1 = 5, y1 = 1;
+        int x2 = 4, y2 = 10;
+        r1.addNode(x1, y1);
+        r1.addNode(x2, y2);
 
         WHEN("Connect new resistor to node3 and node4") {
+            int x3 = 6, y3 = 1;
+            int x4 = 8, y4 = 10;
             Resistor r2(500);
-            r2.addNode(5, 6);
-            r2.addNode(7, 8);
+            r2.addNode(x3, y3);
+            r2.addNode(x4, y4);
 
             THEN("There are 4 nodes"){
-                REQUIRE(Node::_allNodes.size() == 4);
+                REQUIRE(Node::size() == 4);
             }
+        }
+        
+        WHEN("Connect new resistor to node2 and node3") {
+            int x3 = 6, y3 = 1;
+            Resistor r2(500);
+            r2.addNode(x2, y2);
+            r2.addNode(x3, y3);
+
+            THEN("There are 3 nodes"){
+                REQUIRE(Node::size() == 3);
+            }
+
         }
     }
 }
