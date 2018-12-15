@@ -318,16 +318,15 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Component::paint(painter, option, widget);
 
     painter->setPen(penForLines);
-    QLineF lineStart(0, 50, 6, 50);
-    QLineF lineZig1(6, 50, 17, 25);
-    QLineF lineZig2(17, 25, 28, 75);
-    QLineF lineZig3(28, 75, 39, 25);
-    QLineF lineZig4(39, 25, 50, 75);
-    QLineF lineZig5(50, 75, 61, 25);
-    QLineF lineZig6(61, 25, 72, 75);
-    QLineF lineZig7(72, 75, 83, 25);
-    QLineF lineZig8(83, 25, 94, 50);
-    QLineF lineEnd(94, 50, 100, 50);
+    QLineF lineStart(0, 50, 14, 50);
+    QLineF lineZig1(14, 50, 20, 30);
+    QLineF lineZig2(20, 30, 31, 65);
+    QLineF lineZig3(31, 65, 42, 30);
+    QLineF lineZig4(42, 30, 53, 65);
+    QLineF lineZig5(53, 65, 64, 30);
+    QLineF lineZig6(64, 30, 75, 65);
+    QLineF lineZig7(75, 65, 86, 50);
+    QLineF lineEnd(86, 50, 100, 50);
 
     painter->drawLine(lineStart);
     painter->drawLine(lineZig1);
@@ -337,7 +336,6 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->drawLine(lineZig5);
     painter->drawLine(lineZig6);
     painter->drawLine(lineZig7);
-    painter->drawLine(lineZig8);
     painter->drawLine(lineEnd);
 
     painter->setFont(QFont("Times", 12, QFont::Bold));
