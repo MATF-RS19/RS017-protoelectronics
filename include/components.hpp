@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-//#define QTPAINT
+#define QTPAINT
 
 #ifdef QTPAINT
 #include "scene.h"
