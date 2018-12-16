@@ -1,5 +1,7 @@
 #include "log_component.hpp"
 
+template <typename T>
+int Counter<T>::_counter(0);
 LogicGate::LogicGate(const std::string &name)
     :Component(name)
 {}
