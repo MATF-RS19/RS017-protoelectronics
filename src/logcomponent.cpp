@@ -63,7 +63,7 @@ void ANDComponent::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->drawLine(50,10,50,110);
     painter->drawLine(50,10,100,10);
     painter->drawLine(50,110,100,110);
-    painter->drawArc(QRect(62,10, 75,100), -90*16, 180*16);
+    painter->drawArc(QRect(62,10,75,100), -90*16, 180*16);
     //output lead
     painter->drawLine(137,60,180,60);
 
@@ -137,7 +137,6 @@ void ORComponent::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     painter->drawLine(50,10,50,110);
     painter->drawLine(50,10,100,10);
     painter->drawLine(50,110,100,110);
-
     //output lead
     painter->drawLine(137,60,180,60);
 
