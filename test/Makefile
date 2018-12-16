@@ -8,7 +8,8 @@ CPPFLAGS = -Wall -Wextra -std=c++11 -I ../include -I ../libs
 	@ mkdir -p ../bin
 	$(CC) $(CPPFLAGS) -o $@ $^
 
-../build/log_component.o: ../src/log_component.cpp ../include/log_component.hpp
+../build/log_component.o: ../src/log_component.cpp ../include/log_component.hpp 
+
 	$(CC) $(CPPFLAGS) -c -o $@ $<
 
 ../build/components.o: ../src/components.cpp ../include/components.hpp

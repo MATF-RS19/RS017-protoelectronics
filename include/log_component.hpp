@@ -1,30 +1,22 @@
 #ifndef LOG_COMPONENTS
 #define LOG_COMPONENTS 
 #include "components.hpp"
-#define QTPAINT
 
-#ifdef QTPAINT
-#include "scene.h"
-#include "math.h"
-
-#include <QPainter>
-#include <QGraphicsItem>
-#include <QGraphicsRectItem>
-#include <QApplication>
-#include <QPen>
-#include <QDebug>
-#include <QSize>
-#endif
 class LogicGate : public Component{
 public:
+    LogicGate(const std::string &name);
     ~LogicGate();
     // From given voltage returns their logical value
-    static bool getLogValue(double v) const;
+    static bool getBoolVoltage(double v);
 
     virtual void connect(int x1,int y1, int x2,int y2, int x3, int y3) = 0;
     double voltage() const override;
-    double power() const = delete;
-	virtual double current() const = delete;
+    double power() const override{
+        return 0;
+    };
+	double current() const override{
+        return 0;
+    };
 };
 class ANDGate : public LogicGate, public Counter<ANDGate>{
 public:
