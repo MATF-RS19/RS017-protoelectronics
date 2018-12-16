@@ -53,6 +53,14 @@ void MainWindow::createGraphicsItems(){
     ANDComponent* andComponent = new ANDComponent();
     andComponent->setPos(ground->pos()+QPointF(0, 140));
     scene->addItem(andComponent);
+
+    NANDComponent* nandComponent = new NANDComponent();
+    nandComponent->setPos(andComponent->pos()+QPointF(160, 0));
+    scene->addItem(nandComponent);
+
+    ORComponent* orComponent = new ORComponent();
+    orComponent->setPos(nandComponent->pos()+QPointF(160, 0));
+    scene->addItem(orComponent);
 }
 
 void MainWindow::createLayout(){
