@@ -172,6 +172,11 @@ std::vector<std::shared_ptr<Node>> Component::nodes() const {
 	return _nodes;
 }
 
+std::vector<std::shared_ptr<Node>>::iterator Component::find(int x, int y)  {
+    return std::find_if(_nodes.begin(), _nodes.end(), 
+            [x, y](const std::shared_ptr<Node>& node_ptr){return node_ptr->x() == x && node_ptr->y() == y; });
+}
+
 /*
 Connect component to node if that node exist,
 if not, make new node and connect

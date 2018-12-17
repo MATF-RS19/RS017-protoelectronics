@@ -70,19 +70,19 @@ SCENARIO("add component", "[add]"){
 
 SCENARIO("connect one component", "[connect one]"){
    GIVEN("One resistor") {
+        int x = 1, y = 5;
         Resistor r(1000);
 
         WHEN("Connect one lead to node (x,y)"){
-            r.addNode(1, 5);
+            r.addNode(x, y);
 
             THEN("Component have one node with (x,y)") {
                 REQUIRE(r.nodes().size() == 1);
-                REQUIRE(r.nodes()[0]->x() == 1);
-                REQUIRE(r.nodes()[0]->y() == 5);
+                REQUIRE(r.find(x, y) != r.nodes().end());
             }
 
             THEN("Component node have one component (self)"){
-                REQUIRE(r.nodes()[0]->components()[0] == &r);
+                REQUIRE((*r.find(x,y))->components()[0] == &r);
             }
 
             THEN("Collection of all nodes have one node with (x,y)"){
@@ -95,7 +95,7 @@ SCENARIO("connect one component", "[connect one]"){
             }
 
             THEN("Node from all nodes is same as node in component"){
-                REQUIRE((*Node::_allNodes.begin()) == r.nodes()[0]);
+                REQUIRE((*Node::find(x, y)) == *r.find(x, y));
             }
         }
 
@@ -107,10 +107,8 @@ SCENARIO("connect one component", "[connect one]"){
 
             THEN("Component have two nodes with (x1,y1) and (x2,y2)") {
                 REQUIRE(r.nodes().size() == 2);
-                REQUIRE(r.nodes()[0]->x() == x1);
-                REQUIRE(r.nodes()[0]->y() == y1);
-                REQUIRE(r.nodes()[1]->x() == x2);
-                REQUIRE(r.nodes()[1]->y() == y2);
+                REQUIRE(r.find(x1, y1) != r.nodes().end());
+                REQUIRE(r.find(x2, y2) != r.nodes().end());
             }
 
             THEN("Component nodes both have one component (self)"){

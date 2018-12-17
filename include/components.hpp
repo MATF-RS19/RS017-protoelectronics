@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-#define QTPAINT
+//#define QTPAINT
 
 #ifdef QTPAINT
 #include "scene.h"
@@ -20,7 +20,7 @@
 #include <vector>
 #include <memory>
 #include <set>
-
+#include <algorithm> //std::find_if
 
 //Interface for counting and naming components in the same class
 template <class T>
@@ -102,9 +102,9 @@ private:
 };
 
 
-class Component : public std::enable_shared_from_this<Component>
+class Component
 				#ifdef QTPAINT
-				, public QGraphicsItem
+				: public QGraphicsItem
 				#endif
 				{
 public:
@@ -122,7 +122,15 @@ public:
 
 	std::vector<std::shared_ptr<Node>> nodes() const;
 
+    //Find first node connected to component by coordinates
+    std::vector< std::shared_ptr<Node> >::iterator find(int x, int y);
+
+    /*
+    Connect component to node if that node exist,
+    if not, make new node and connect
+    */
     virtual void addNode(int x, int y);
+
     void addNodes(int x1, int y1, int x2, int y2);
     void addNodes(int x1, int y1, int x2, int y2, int x3, int y3);
 	void addNodeAt(unsigned pos, int x, int y);
