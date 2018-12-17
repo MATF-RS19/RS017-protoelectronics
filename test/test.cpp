@@ -1,6 +1,9 @@
 #include "catch2/catch.hpp"
 
 #include "components.hpp"
+#include "log_component.hpp"
+
+#define EPS 1e-5
 
 SCENARIO("add component", "[add]"){
     GIVEN("Empty circuit"){
@@ -15,10 +18,11 @@ SCENARIO("add component", "[add]"){
         }
 
         WHEN("Resistor added with 1000 Ohm") {
-            Resistor r(1000);
+            double resistance = 1000;
+            Resistor r(resistance);
 
             THEN("Resistance is 1000 Ohm"){
-                REQUIRE(r.resistance() == 1000);
+                REQUIRE(r.resistance() == Approx(resistance).epsilon(EPS));
             }
         }
 
@@ -50,10 +54,11 @@ SCENARIO("add component", "[add]"){
         */
 
         WHEN("DCVoltage added with 5 V") {
-            DCVoltage e(5);
+            double voltage = 5;
+            DCVoltage e(voltage);
 
             THEN("Voltage is 5"){
-                REQUIRE(e.voltage() == 5);
+                REQUIRE(e.voltage() == Approx(voltage).epsilon(EPS));
             }
         }
 
@@ -185,7 +190,7 @@ SCENARIO("connect 2th component", "[connect 2th]"){
                 REQUIRE(Node::size() == 4);
             }
         }
-        
+
         WHEN("Connect new resistor to node2 and node3") {
             int x3 = 6, y3 = 1;
             Resistor r2(500);
@@ -196,6 +201,91 @@ SCENARIO("connect 2th component", "[connect 2th]"){
                 REQUIRE(Node::size() == 3);
             }
 
+        }
+    }
+}
+
+
+
+SCENARIO("logic component connect", "[logic connect]"){
+    GIVEN("AND gate") {
+        ANDGate and1;
+
+        WHEN("Unconnected") {
+            THEN("All nodes is empty") {
+                REQUIRE(Node::size() == 0);
+            }
+        }
+
+        int x1 = 4, y1 = 4;
+        int x2 = 7, y2 = 5;
+        int x3 = 8, y3 = 6;
+        WHEN("Connect input to (x1, y1), (x2, y2) and output to (x3, y3)") {
+            THEN("There's 3 nodes") {
+                and1.connect(x1, y1, x2, y2, x3, y3);
+                REQUIRE(Node::size() == 3);
+            }
+        }
+    }
+
+}
+
+SCENARIO("logic components circuit", "[logic circuit]"){
+    GIVEN("Connected 2 AND, 1 OR gates") {
+        //Logic gates
+        ANDGate and1;
+        ANDGate and2;
+        ORGate or1;
+
+        //Input
+        DCVoltage v1(5);
+        DCVoltage v2(1);
+
+        //nodes coordinates
+        int x1 = 4, y1 = 4;
+        int x2 = 7, y2 = 5;
+        int x3 = 8, y3 = 6;
+        int x4 = 10, y4 = 8;
+        int x5 = 5, y5 = 11;
+
+        //Ovako radi, ali treba da radi i kada se povezu logicka kola
+        //pa tek onda doda napon na neke cvorove
+        //v1.addNode(x1, y1);
+        //v2.addNode(x2, y2);
+
+        //connections
+        and1.connect(x1, y1, x2, y2, x3, y3);
+        or1.connect(x1, y1, x2, y2, x4, y4);
+        and2.connect(x3, y3, x4, y4, x5, y5);
+
+        WHEN("Voltage connected on input") {
+            v1.addNode(x1, y1);
+            v2.addNode(x2, y2);
+
+            THEN("Output of AND1 is 0") {
+                REQUIRE(and1.voltage() == Approx(0).epsilon(EPS));
+            }
+
+            THEN("Output of OR1 is 5V") {
+                REQUIRE(or1.voltage() == Approx(5).epsilon(EPS));
+            }
+
+            THEN("Output of AND2 is 0") {
+                REQUIRE(and2.voltage() == Approx(0).epsilon(EPS));
+            }
+
+            //Now check nodes
+            THEN("Output node of AND1 is 0") {
+                REQUIRE((*Node::find(x3, y3))->_v == Approx(0).epsilon(EPS));
+            }
+
+            THEN("Output of OR is 5V") {
+                REQUIRE((*Node::find(x4, y4))->_v == Approx(5).epsilon(EPS));
+            }
+
+            THEN("Output of AND2 is 0") {
+                REQUIRE((*Node::find(x5, y5))->_v == Approx(0).epsilon(EPS));
+            }
         }
     }
 }
