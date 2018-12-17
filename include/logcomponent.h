@@ -30,4 +30,17 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 };
 
+class NANDComponent: public LOGComponent {
+public:
+    NANDComponent();
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+};
+
+class ORComponent: public LOGComponent {
+public:
+    ORComponent();
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+};
+
 #endif // LOGCOMPONENT_H
+

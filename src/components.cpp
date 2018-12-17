@@ -242,15 +242,16 @@ void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     Component::paint(painter, option, widget);
     painter->setPen(penForLines);
 
-    QLineF lineV(50, 60, 50, 0);
-    QLineF lineH1(20, 60, 80, 60);
-    QLineF lineH2(30, 70, 70, 70);
-    QLineF lineH3(40, 80, 60, 80);
+    // vertical line
+    painter->drawLine(50, 60, 50, 0);
+    // horizontal lines, one beneath other
+    painter->drawLine(20, 60, 80, 60);
+    painter->drawLine(30, 70, 70, 70);
+    painter->drawLine(40, 80, 60, 80);
 
-    painter->drawLine(lineV);
-    painter->drawLine(lineH1);
-    painter->drawLine(lineH2);
-    painter->drawLine(lineH3);
+    painter->setPen(penForDots);
+    QPointF up(50, 0.5);
+    painter->drawPoint(up);
 }
 #endif
 
@@ -318,25 +319,19 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Component::paint(painter, option, widget);
 
     painter->setPen(penForLines);
-    QLineF lineStart(0, 50, 14, 50);
-    QLineF lineZig1(14, 50, 20, 30);
-    QLineF lineZig2(20, 30, 31, 65);
-    QLineF lineZig3(31, 65, 42, 30);
-    QLineF lineZig4(42, 30, 53, 65);
-    QLineF lineZig5(53, 65, 64, 30);
-    QLineF lineZig6(64, 30, 75, 65);
-    QLineF lineZig7(75, 65, 86, 50);
-    QLineF lineEnd(86, 50, 100, 50);
 
-    painter->drawLine(lineStart);
-    painter->drawLine(lineZig1);
-    painter->drawLine(lineZig2);
-    painter->drawLine(lineZig3);
-    painter->drawLine(lineZig4);
-    painter->drawLine(lineZig5);
-    painter->drawLine(lineZig6);
-    painter->drawLine(lineZig7);
-    painter->drawLine(lineEnd);
+    // input line
+    painter->drawLine(0, 50, 14, 50);
+    // zigzag lines
+    painter->drawLine(14, 50, 20, 30);
+    painter->drawLine(20, 30, 31, 65);
+    painter->drawLine(31, 65, 42, 30);
+    painter->drawLine(42, 30, 53, 65);
+    painter->drawLine(53, 65, 64, 30);
+    painter->drawLine(64, 30, 75, 65);
+    painter->drawLine(75, 65, 86, 50);
+    // output line
+    painter->drawLine(86, 50, 100, 50);
 
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignHCenter, QString::number(_resistance) + " Ohm");
@@ -376,8 +371,8 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
     painter->setPen(penForLines);
 
-    QLineF line(50, 0, 50, 40);
-    painter->drawLine(line);
+    // vertical line
+    painter->drawLine(50, 0, 50, 40);
 
     painter->setPen(penForDots);
 
