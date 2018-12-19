@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-//#define QTPAINT
+#define QTPAINT
 
 #ifdef QTPAINT
 #include "scene.h"
@@ -172,7 +172,7 @@ private:
 	std::string _name;
 
     /*
-     * Removes both connection: component->node and node->component
+     * Removes both connections: component->node and node->component
      * and keeps nullptr at that place because another node will took his place
      * For use only in `addNodeAt` method
     */
