@@ -157,10 +157,17 @@ void Component::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 #endif
 
 Component::~Component() {
-    for (auto const& node : _nodes) {
-        node->components().pop_back();// pop_component();
-        if (node.use_count() == 2)
-            Node::_allNodes.erase(node);
+    for (auto it = _nodes.begin(); it != _nodes.end(); ++it) {
+        //disconnect node->component
+        (*it)->disconnectFromComponent(this);
+
+        //remove from all nodes
+        if ((*it).use_count() == 2) {
+            Node::_allNodes.erase(*it);
+        }
+
+        //"disconnect" component->node
+        *it = nullptr;
     }
 }
 

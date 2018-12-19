@@ -167,6 +167,20 @@ SCENARIO("connect one component", "[connect one]"){
         if (!r) delete r;
     }
 
+    GIVEN("One resistor connected twice to the same node") {
+        Resistor* r = new Resistor(1000);
+        r->addNode(1, 2);
+        r->addNode(1, 2);
+
+        WHEN("Delete resistor") {
+            delete r;
+
+            THEN("Nodes are deleted"){
+                REQUIRE(Node::size() == 0);
+            }
+        }
+        if (!r) delete r;
+    }
 }
 
 SCENARIO("connect 2th component", "[connect 2th]"){
