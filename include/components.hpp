@@ -20,7 +20,8 @@
 #include <vector>
 #include <memory>
 #include <set>
-
+#include <algorithm> //std::find_if
+#include <cassert>
 
 //Interface for counting and naming components in the same class
 template <class T>
@@ -55,22 +56,35 @@ public:
     //voltage in node
 	double _v;
 
+    //Creates node with given coordinates and optionally adds connection to component
 	Node(int x, int y, Component* const component);
 
+    //Returns node coordinates
 	int x() const;
 	int y() const;
 
+    //Adds component to node. Establishes connection from node to component
 	void addComponent(Component* const e);
 
-    void pop_component();
-
+    //Returns all components connected to node
 	std::vector<Component*> components() const;
 
+    //Returns only components of type 'componentType' connected to node
 	std::vector<Component*> components(char componentType) const;
 
-	void disconnectComponent(Component* const e);
+    //Returns iterator to component
+    std::vector<Component*>::iterator find(Component* const e);
 
-	//two nodes are same if they have the same coordinates
+    /*
+     * Checks if node have connection with component
+     * NOTE: only connections from node to component
+    */
+     bool isConnectedTo(Component* const e);
+
+    //Disconnects node from component (delete connection node->component)
+	void disconnectFromComponent(Component* const e);
+
+	//Two nodes are the same if they have the same coordinates
 	struct lex_node_cmp {
 		bool operator() (const std::shared_ptr<Node>& n1,
 				const std::shared_ptr<Node>& n2) const {
@@ -78,12 +92,13 @@ public:
 		}
 	};
 
+    //Set of all different nodes, compared by coordinates
 	static std::set<std::shared_ptr<Node>, lex_node_cmp> _allNodes;
 
-    //find all components with componentType connected to node (x, y)
+    //Finds all components with componentType connected to node (x, y)
 	static std::vector<Component*> find(char componentType, int x, int y);
 
-    //find node by coordinates
+    //Finds node by coordinates
     static std::set<std::shared_ptr<Node>, lex_node_cmp>::iterator find(int x, int y);
 
     static size_t size() {
@@ -96,15 +111,16 @@ private:
 	//connected components to node
 	std::vector<Component*> _components;
 
+    //string representation of coordinates: from (x, y) to "xy"
     std::string to_string() const {
         return std::to_string(_x) + std::to_string(_y);
     }
 };
 
 
-class Component : public std::enable_shared_from_this<Component>
+class Component
 				#ifdef QTPAINT
-				, public QGraphicsItem
+				: public QGraphicsItem
 				#endif
 				{
 public:
@@ -120,14 +136,33 @@ public:
 
 	std::string name() const;
 
+    //All nodes that component have
 	std::vector<std::shared_ptr<Node>> nodes() const;
 
-    virtual void addNode(int x, int y);
-    void addNodes(int x1, int y1, int x2, int y2);
-    void addNodes(int x1, int y1, int x2, int y2, int x3, int y3);
-	void addNodeAt(unsigned pos, int x, int y);
+    //Finds first node connected to component by coordinates
+    std::vector< std::shared_ptr<Node> >::iterator find(int x, int y);
 
-	void reconnect(int xFrom, int yFrom, int xTo, int yTo);
+    /*
+     * Checks if component have connection with node
+     * NOTE: only connections from component to node
+    */
+    bool isConnectedTo(int x, int y);
+
+    /*
+     * Connects component to node if that node exist,
+     * if not, makes new node and connects
+    */
+    virtual void addNode(int x, int y);
+
+    //Disconnects component from all nodes with given coordinates
+    void disconnect(int x, int y);
+
+    /*
+     * Disconnects component from all nodes with given coordinates
+     * (connection node->component will be removed also)
+     * and connects them to another node
+	*/
+    void reconnect(int xFrom, int yFrom, int xTo, int yTo);
 
 	virtual double voltage() const = 0;
 	virtual double current() const = 0;
@@ -135,6 +170,23 @@ public:
 
 private:
 	std::string _name;
+
+    /*
+     * Removes both connections: component->node and node->component
+     * and keeps nullptr at that place because another node will took his place
+     * For use only in `addNodeAt` method
+    */
+    template <typename Iter>
+    void disconnectAndPreserveEmptyPlace(Iter &it);
+
+    /*
+     * Same as function addNode, but adds node at given position
+     * overrides anything that was at that position
+     * For use only in `reconnect` method
+    */
+    template <typename Iter>
+	void addNodeAt(Iter &pos, int x, int y);
+
 
 protected:
 	//component is connected to nodes

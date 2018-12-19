@@ -1,7 +1,5 @@
 #include "components.hpp"
 #include <iostream>
-#include <algorithm>
-#include <cassert>
 
 template<typename T>
 int Counter<T>::_counter(0);
@@ -12,7 +10,7 @@ std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 std::ostream& operator<<(std::ostream& out, const Component& c) {
 	out << c.name() << std::endl
 	<< "Nodes: [ ";
-	for (auto n : c.nodes()) {
+	for (const auto& n : c.nodes()) {
 		out << n->id() << " ";
 	}
 	out << "]" << std::endl;
@@ -30,7 +28,7 @@ std::ostream& operator<<(std::ostream& out, const Node& n) {
 		<< "V = " << n._v << " V" << std::endl
 		<< "Connected components: " << std::endl;
 
-	for (auto c : n.components()) {
+	for (const auto& c : n.components()) {
 		out << c->name() << "\t";
 	}
 
@@ -43,28 +41,23 @@ Node::Node(int x, int y, Component* const component = nullptr)
 :_x(x), _y(y)
 {
     _components.clear();
-	if (component) _components.push_back(component);
+    _components.reserve(2);
+	if (component != nullptr) _components.push_back(component);
 }
 
-//Node coordinates
 int Node::x() const { return _x; }
 int Node::y() const { return _y; }
 
 void Node::addComponent(Component* const e){
-	_components.push_back(e);
+    //Node don't need multiple connection to the same component
+    if (e != nullptr && !isConnectedTo(e))
+        _components.push_back(e);
 }
 
-void Node::pop_component() {
-    _components.pop_back();
-}
-
-//All components connected to node
 std::vector<Component*> Node::components() const{
 	return _components;
 }
 
-
-//Only components of type 'componentType' connected to node
 std::vector<Component*> Node::components(char componentType) const {
 	std::vector<Component*> filterd;
 
@@ -77,8 +70,13 @@ std::vector<Component*> Node::components(char componentType) const {
 	return filterd;
 }
 
+std::vector<Component*>::iterator Node::find(Component* const e) {
+    if (e == nullptr) return _components.end();
 
-//find all components with componentType connected to node (x, y)
+    return find_if(_components.begin(), _components.end(),
+            [e](Component* const curr){return e == curr;});
+}
+
 std::vector<Component*> Node::find(char componentType, int x, int y) {
 	auto i = Node::find(x, y);
 	if (i != _allNodes.end()) {
@@ -88,19 +86,20 @@ std::vector<Component*> Node::find(char componentType, int x, int y) {
 	}
 }
 
-//find node by coordinates
+bool Node::isConnectedTo(Component* const e) {
+    return find(e) != _components.end() ? true : false;
+}
+
 std::set<std::shared_ptr<Node>, Node::lex_node_cmp>::iterator Node::find(int x, int y) {
     return _allNodes.find(std::make_shared<Node>(x, y));
 }
 
-//Disconnect component e from this node
-void Node::disconnectComponent(Component* const e) {
-    for (auto it = _components.begin(); it != _components.end(); ) {
-        if (*it == e) {
-            it = _components.erase(it);
-        } else {
-            ++it;
-        }
+void Node::disconnectFromComponent(Component* const e) {
+    if (e == nullptr) return;
+
+    auto it = find(e);
+    if (it != _components.end()){
+        _components.erase(it);
     }
 }
 
@@ -111,6 +110,7 @@ Component::Component(const std::string &name)
 	:_name(name)
 {
     _nodes.clear();
+    _nodes.reserve(3);
 
 #ifdef QTPAINT
     setFlags(QGraphicsItem::ItemIsSelectable |
@@ -158,7 +158,7 @@ void Component::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 Component::~Component() {
     for (auto const& node : _nodes) {
-        node->pop_component();
+        node->components().pop_back();// pop_component();
         if (node.use_count() == 2)
             Node::_allNodes.erase(node);
     }
@@ -172,57 +172,85 @@ std::vector<std::shared_ptr<Node>> Component::nodes() const {
 	return _nodes;
 }
 
-/*
-Connect component to node if that node exist,
-if not, make new node and connect
-*/
+std::vector<std::shared_ptr<Node>>::iterator Component::find(int x, int y)  {
+    return std::find_if(_nodes.begin(), _nodes.end(),
+            [x, y](const std::shared_ptr<Node>& node_ptr){
+                    return node_ptr->x() == x && node_ptr->y() == y; });
+}
+
+bool Component::isConnectedTo(int x, int y) {
+    auto const it = find(x, y);
+    if (it == _nodes.end()) return false;
+    return true;
+}
+
 void Component::addNode(int x, int y) {
 
-    auto new_node_ptr = std::make_shared<Node>(x, y, this);
-	_nodes.push_back(new_node_ptr);
+    auto new_node = std::make_shared<Node>(x, y, this);
+	_nodes.push_back(new_node);
 
-	auto res = Node::_allNodes.insert(_nodes.back());
-	if (!res.second) {
+	auto res = Node::_allNodes.insert(new_node);
+    //node already exists
+	if (res.second == false) {
 		_nodes.back() = *res.first;
 		_nodes.back()->addComponent(this);
 	}
 }
 
-void Component::addNodes(int x1, int y1, int x2, int y2) {
-    addNode(x1, y1);
-    addNode(x2, y2);
+void Component::disconnect(int x, int y) {
+    for (auto it = _nodes.begin(); it != _nodes.end(); ) {
+        if ((*it)->x() == x && (*it)->y() == y) {
+            //disconnect from _allNodes
+            if ((*it).use_count() == 2)
+                Node::_allNodes.erase(*it);
+
+            //node doesn't point to component anymore
+            (*it)->disconnectFromComponent(this);
+
+            //and component doesn't point to node
+            it = _nodes.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
-void Component::addNodes(int x1, int y1, int x2, int y2, int x3, int y3) {
-    addNode(x1, y1);
-    addNode(x2, y2);
-    addNode(x3, y3);
+template <typename Iter>
+void Component::disconnectAndPreserveEmptyPlace(Iter &it) {
+        assert(it != _nodes.end());
+
+        //disconnect from _allNodes
+        if ((*it).use_count() == 2)
+            Node::_allNodes.erase(*it);
+
+        //node doesn't point to component anymore
+        (*it)->disconnectFromComponent(this);
+
+        //and component doesn't point to node
+        *it = nullptr;
 }
 
-void Component::addNodeAt(unsigned pos, int x, int y) {
-	assert(pos < _nodes.size());
+template <typename Iter>
+void Component::addNodeAt(Iter &pos, int x, int y) {
+    assert(pos != _nodes.end());
+    assert(*pos == nullptr);
 
-    auto new_node_ptr = std::make_shared<Node>(x, y, this);
-	_nodes[pos]->disconnectComponent(this);
-	_nodes[pos] = new_node_ptr;
+    *pos = std::make_shared<Node>(x, y, this);
 
-	auto res = Node::_allNodes.insert(_nodes[pos]);
-	if (!res.second) {
-		_nodes[pos] = *res.first;
-		_nodes[pos]->addComponent(this);
+    auto res = Node::_allNodes.insert((*pos));
+    //Node already exists
+    if (res.second == false) {
+        (*pos) = *res.first;
+        (*pos)->addComponent(this);
 	}
 }
 
-/*
-Reconnect component from nodeFrom (x,y) to nodeTo (x,y)
-for all leads connected to nodeFrom
-*/
 void Component::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
-
-	for (unsigned i = 0; i < _nodes.size(); ++i) {
-		if (_nodes[i]->x() == xFrom && _nodes[i]->y() == yFrom ) {
-			addNodeAt(i, xTo, yTo);
-		}
+    for (auto it = _nodes.begin(); it != _nodes.end(); it++) {
+        if ((*it)->x() == xFrom && (*it)->y() == yFrom ) {
+            disconnectAndPreserveEmptyPlace(it);
+            addNodeAt(it, xTo, yTo);
+        }
 	}
 }
 
