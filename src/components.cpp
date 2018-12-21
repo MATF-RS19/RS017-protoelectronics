@@ -150,8 +150,6 @@ void Node::disconnectFromComponent(Component* const e) {
     }
 }
 
-
-
 //Component
 Component::Component(const std::string &name)
 	:_name(name)
@@ -160,6 +158,7 @@ Component::Component(const std::string &name)
     _nodes.reserve(3);
 
 #ifdef QTPAINT
+    setAcceptDrops(true);
     setFlags(QGraphicsItem::ItemIsSelectable |
             QGraphicsItem::ItemIsMovable |
             QGraphicsItem::ItemSendsGeometryChanges);

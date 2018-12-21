@@ -16,7 +16,7 @@ void MainWindow::createListWidget() {
     itemListWidget = new QListWidget;
 
     QStringList itemList;
-    itemList << "Wire" << "Resistor" << "Ground" << "DC Voltage" << "AND gate";
+    itemList << "Wire" << "Resistor" << "Ground" << "DC Voltage" << "AND" << "OR" << "XOR" << "NAND" << "NOR" << "NXOR" << "NOT";
     itemListWidget->addItems(itemList);
     itemListWidget->setFixedWidth(120);
 
@@ -85,4 +85,14 @@ void MainWindow::createLayout(){
     frameLayout->addWidget(itemListWidget);
     frameLayout->addWidget(view);
     setCentralWidget(frame);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event){
+    if(event->key() == Qt::Key_Delete){
+        foreach(QGraphicsItem *item, scene->selectedItems())
+            if(Component *rItem = qgraphicsitem_cast<Component*> (item))
+                delete item;
+        scene->clearSelection();
+    }
+    QMainWindow::keyPressEvent(event);
 }

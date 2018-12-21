@@ -17,7 +17,8 @@ class MainWindow : public QMainWindow
 {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-
+protected:
+    void keyPressEvent(QKeyEvent *);
 private:
     QGraphicsView* view;
     QGraphicsScene* scene;
