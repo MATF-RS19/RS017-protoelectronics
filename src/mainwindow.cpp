@@ -50,17 +50,33 @@ void MainWindow::createGraphicsItems(){
     voltageSource->setPos(dcVoltage->pos()+QPointF(120, 0));
     scene->addItem(voltageSource);
 */
-    ANDComponent* andComponent = new ANDComponent();
+    ANDGate* andComponent = new ANDGate();
     andComponent->setPos(ground->pos()+QPointF(0, 140));
     scene->addItem(andComponent);
 
-    NANDComponent* nandComponent = new NANDComponent();
+    NANDGate* nandComponent = new NANDGate();
     nandComponent->setPos(andComponent->pos()+QPointF(160, 0));
     scene->addItem(nandComponent);
 
-    ORComponent* orComponent = new ORComponent();
+    ORGate* orComponent = new ORGate();
     orComponent->setPos(nandComponent->pos()+QPointF(160, 0));
     scene->addItem(orComponent);
+
+    NORGate* norComponent = new NORGate();
+    norComponent->setPos(andComponent->pos()+QPointF(0, 150));
+    scene->addItem(norComponent);
+
+    XORGate* xorComponent = new XORGate();
+    xorComponent->setPos(norComponent->pos()+QPointF(160, 0));
+    scene->addItem(xorComponent);
+
+    NXORGate* nxorComponent = new NXORGate();
+    nxorComponent->setPos(xorComponent->pos()+QPointF(160, 0));
+    scene->addItem(nxorComponent);
+
+    NOTGate* notComponent = new NOTGate();
+    notComponent->setPos(norComponent->pos()+QPointF(0, 160));
+    scene->addItem(notComponent);
 }
 
 void MainWindow::createLayout(){

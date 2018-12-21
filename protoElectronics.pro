@@ -30,14 +30,14 @@ SOURCES += \
         src/main.cpp \
         src/mainwindow.cpp \
         src/scene.cpp \
-        src/logcomponent.cpp \
-        src/components.cpp
+        src/components.cpp \
+    src/log_component.cpp
 
 HEADERS += \
         include/mainwindow.h \
         include/scene.h \
-        include/logcomponent.h \
-        include/components.hpp
+        include/components.hpp \
+    include/log_component.hpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
