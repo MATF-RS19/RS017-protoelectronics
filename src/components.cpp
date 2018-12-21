@@ -70,10 +70,14 @@ std::vector<Component*> Node::components() const{
     allComponents.reserve(_components.size());
 
     for (const auto& c : _components) {
-        if ( c->name()[0] != 'W' ) {
+        if ( c->componentType() != "wire" ) {
             allComponents.push_back(c);
         } else {
+            //If it's wire, we need to recursively take components from another side of wire
             auto otherNode = ((Wire*)c)->otherNode(this->id());
+            //To prevent infinite recursion,
+            //disconnect node from component through which we came to that node
+            //but after recursion establish removed connection
             otherNode->disconnectFromComponent(c);
             auto otherComponnets = otherNode->components();
             append(allComponents, otherComponnets);
@@ -266,6 +270,20 @@ void Component::disconnect(int x, int y) {
         } else {
             ++it;
         }
+    }
+}
+
+void Component::disconnect() {
+    for (auto it = _nodes.begin(); it != _nodes.end(); ) {
+        //disconnect from _allNodes
+        if ((*it).use_count() == 2)
+            Node::_allNodes.erase(*it);
+
+        //node doesn't point to component anymore
+        (*it)->disconnectFromComponent(this);
+
+        //and component doesn't point to node
+        it = _nodes.erase(it);
     }
 }
 

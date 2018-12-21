@@ -72,7 +72,7 @@ public:
     //Returns only direct components of type 'componentType' connected to node
 	std::vector<Component*> directComponents(const std::string& componentType) const;
 
-    //Returns all components connected to node with those connected with wire
+    //Returns all components connected to node, including wire connections
 	std::vector<Component*> components() const;
 
     //Returns all components of type 'componentType' connected to node, including wire connections
@@ -103,7 +103,7 @@ public:
 
     //Finds all components with componentType directly connected to node (x, y)
 	static std::vector<Component*> findDirectlyConnected(const std::string& componentType, int x, int y);
-    
+
     //Finds all components with componentType directly or by wire connected to node (x, y)
 	static std::vector<Component*> find(const std::string& componentType, int x, int y);
 
@@ -171,6 +171,9 @@ public:
     //Disconnects component from all nodes with given coordinates
     void disconnect(int x, int y);
 
+    //Disconnects component completely
+    void disconnect();
+
     /*
      * Disconnects component from all nodes with given coordinates
      * (connection node->component will be removed also)
@@ -217,7 +220,7 @@ protected:
 class Ground : public Component, public Counter<Ground> {
 public:
 	Ground();
-    
+
     std::string componentType() const override { return "ground"; }
 
 	double voltage() const override;
@@ -235,7 +238,7 @@ public:
 class Wire : public Component, public Counter<Wire> {
 public:
 	Wire();
-    
+
     std::string componentType() const override { return "wire"; }
 
 	double voltage() const override;
@@ -253,7 +256,7 @@ public:
 class Resistor : public Component, public Counter<Resistor> {
 public:
 	Resistor(double resistance);
-    
+
     std::string componentType() const override {return "resistor";}
 
 	double resistance() const;

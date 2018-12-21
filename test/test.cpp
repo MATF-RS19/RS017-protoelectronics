@@ -386,6 +386,50 @@ SCENARIO("disconnect component from node", "[disconnect]"){
     }
 }
 
+SCENARIO("disconnect component completely", "[disconnectAll]"){
+    int x1 = 5, y1 = 1;
+    int x2 = 10, y2 = 10;
+    Resistor r1(1000);
+    Ground g;
+
+    GIVEN("resistor connect to 2 nodes"){
+        r1.addNode(x1, y1);
+        r1.addNode(x2, y2);
+
+        WHEN("disconnect from all nodes"){
+            r1.disconnect();
+
+            THEN("Resistor is unconnected") {
+                REQUIRE(r1.nodes().size() == 0);
+            }
+
+            THEN("_allNodes is empty") {
+                REQUIRE(Node::size() == 0);
+            }
+        }
+    }
+    
+    GIVEN("resistor connect to 2 nodes and ground connected to both"){
+        r1.addNode(x1, y1);
+        r1.addNode(x2, y2);
+        g.addNode(x1, y1);
+        g.addNode(x2, y2);
+
+        WHEN("disconnect Resistor from all nodes"){
+            r1.disconnect();
+
+            THEN("Resistor is unconnected") {
+                REQUIRE(r1.nodes().size() == 0);
+            }
+
+            THEN("There are two nodes connected to ground") {
+                REQUIRE(Node::size() == 2);
+                REQUIRE((*Node::find(x1, y1))->isConnectedTo(&g));
+                REQUIRE((*Node::find(x2, y2))->isConnectedTo(&g));
+            }
+        }
+    }
+}
 
 SCENARIO("connect two leads to same node and then reconnect to another", "[connect2one&reconnect]"){
     GIVEN("resistor connect to the same node twice"){

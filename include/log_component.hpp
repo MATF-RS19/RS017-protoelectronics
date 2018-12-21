@@ -16,7 +16,9 @@ public:
 	double current() const override{
         return 0;
     }
+#ifdef QTPAINT
     QRectF boundingRect() const override;
+#endif
 };
 
 class ANDGate : public LogicGate, public Counter<ANDGate>{
