@@ -5,7 +5,6 @@
 class LogicGate : public Component{
 public:
     LogicGate(const std::string &name);
-    ~LogicGate();
     // From given voltage returns their logical value
     static bool getBoolVoltage(double v);
 
@@ -22,8 +21,10 @@ class ANDGate : public LogicGate, public Counter<ANDGate>{
 public:
     ANDGate();
 
+    std::string componentType() const override { return "and"; }
+    
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3);
+    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -33,7 +34,9 @@ class ORGate : public LogicGate, public Counter<ORGate>{
 public:
     ORGate();
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3);
+    std::string componentType() const override { return "or"; }
+
+    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -44,8 +47,9 @@ class XORGate : public LogicGate, public Counter<XORGate>{
 public:
     XORGate();
 
+    std::string componentType() const override { return "xor"; }
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3);
+    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -55,7 +59,9 @@ class NANDGate : public LogicGate, public Counter<NANDGate>{
 public:
     NANDGate();
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3);
+    std::string componentType() const override { return "nand"; }
+    
+    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -65,8 +71,10 @@ public:
 class NORGate : public LogicGate, public Counter<NORGate>{
 public:
     NORGate();
+    
+    std::string componentType() const override { return "nor"; }
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3);
+    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -76,8 +84,10 @@ public:
 class NXORGate : public LogicGate, public Counter<NXORGate>{
 public:
     NXORGate();
+    
+    std::string componentType() const override { return "nxor"; }
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3);
+    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

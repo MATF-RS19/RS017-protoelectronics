@@ -66,11 +66,17 @@ public:
     //Adds component to node. Establishes connection from node to component
 	void addComponent(Component* const e);
 
-    //Returns all components connected to node
+    //Returns all direct components connected to node
+	std::vector<Component*> directComponents() const;
+
+    //Returns only direct components of type 'componentType' connected to node
+	std::vector<Component*> directComponents(const std::string& componentType) const;
+
+    //Returns all components connected to node with those connected with wire
 	std::vector<Component*> components() const;
 
-    //Returns only components of type 'componentType' connected to node
-	std::vector<Component*> components(char componentType) const;
+    //Returns all components of type 'componentType' connected to node, including wire connections
+	std::vector<Component*> components(const std::string& componentType) const;
 
     //Returns iterator to component
     std::vector<Component*>::iterator find(Component* const e);
@@ -95,8 +101,11 @@ public:
     //Set of all different nodes, compared by coordinates
 	static std::set<std::shared_ptr<Node>, lex_node_cmp> _allNodes;
 
-    //Finds all components with componentType connected to node (x, y)
-	static std::vector<Component*> find(char componentType, int x, int y);
+    //Finds all components with componentType directly connected to node (x, y)
+	static std::vector<Component*> findDirectlyConnected(const std::string& componentType, int x, int y);
+    
+    //Finds all components with componentType directly or by wire connected to node (x, y)
+	static std::vector<Component*> find(const std::string& componentType, int x, int y);
 
     //Finds node by coordinates
     static std::set<std::shared_ptr<Node>, lex_node_cmp>::iterator find(int x, int y);
@@ -133,6 +142,11 @@ public:
 #endif
 
     virtual ~Component();
+
+    virtual std::string componentType() const = 0;
+
+    Component(const Component&) = delete;
+    Component& operator=(const Component&) = delete;
 
 	std::string name() const;
 
@@ -203,6 +217,8 @@ protected:
 class Ground : public Component, public Counter<Ground> {
 public:
 	Ground();
+    
+    std::string componentType() const override { return "ground"; }
 
 	double voltage() const override;
 
@@ -219,6 +235,8 @@ public:
 class Wire : public Component, public Counter<Wire> {
 public:
 	Wire();
+    
+    std::string componentType() const override { return "wire"; }
 
 	double voltage() const override;
 
@@ -235,6 +253,8 @@ public:
 class Resistor : public Component, public Counter<Resistor> {
 public:
 	Resistor(double resistance);
+    
+    std::string componentType() const override {return "resistor";}
 
 	double resistance() const;
 
@@ -254,6 +274,8 @@ private:
 class DCVoltage : public Component, public Counter<DCVoltage> {
 public:
 	DCVoltage(double voltage);
+
+    std::string componentType() const override {return "voltage";}
 
 	double voltage() const override;
 

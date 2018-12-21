@@ -5,8 +5,7 @@ int Counter<T>::_counter(0);
 LogicGate::LogicGate(const std::string &name)
     :Component(name)
 {}
-LogicGate::~LogicGate()
-{}
+
 double LogicGate::voltage() const{
     return _nodes.back()->_v;
 }

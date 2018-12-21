@@ -451,7 +451,7 @@ SCENARIO("logic component connect", "[logic connect]"){
 
 }
 
-SCENARIO("logic components circuit", "[logic circuit]"){
+SCENARIO("logic components circuit", "[.circuit]"){
     GIVEN("Connected 2 AND, 1 OR gates") {
         //Logic gates
         ANDGate and1;
@@ -509,4 +509,157 @@ SCENARIO("logic components circuit", "[logic circuit]"){
             }
         }
     }
+}
+
+
+
+SCENARIO("get components when connected with wire", "[getComponentWire]") {
+    GIVEN("4 Resistor and 2 Wire connect") {
+        Resistor r1(100), r2(200), r3(300), r4(400), r5(500);
+        std::string allComponentsNames= r1.name() + " " + r2.name() + " " + r3.name() + " " + r4.name() + " " + r5.name() ;
+
+        Wire w1, w2, w3, w4;
+        int x1 = 1, y1 = 5;
+        int x2 = 2, y2 = 6;
+        int x3 = 3, y3 = 7;
+        int x4 = 4, y4 = 8;
+        int x5 = 5, y5 = 9;
+
+        //Node1
+        r1.addNode(x1, y1);
+        r2.addNode(x1, y1);
+        w1.addNode(x1, y1);
+        w2.addNode(x1, y1);
+
+        //Node2
+        w1.addNode(x2, y2);
+        r3.addNode(x2, y2);
+
+        //Node3
+        w2.addNode(x3, y3);
+        w3.addNode(x3, y3);
+        w4.addNode(x3, y3);
+
+        //Node4
+        r4.addNode(x4, y4);
+        w3.addNode(x4, y4);
+
+        //Node5
+        r5.addNode(x5, y5);
+        w4.addNode(x5, y5);
+
+        WHEN("get components from node1") {
+            auto allComponents = (*Node::find(x1, y1))->components();
+            THEN("all components is \"connect\" to node1") {
+                REQUIRE(allComponents.size() == 5);
+                for (const auto& c : allComponents) {
+                    REQUIRE(allComponentsNames.find(c->name()) != std::string::npos );
+                }
+            }
+        }
+
+        WHEN("get components from node2") {
+            auto allComponents = (*Node::find(x2, y2))->components();
+            THEN("all components is \"connect\" to node2") {
+                REQUIRE(allComponents.size() == 5);
+                for (const auto& c : allComponents) {
+                    REQUIRE(allComponentsNames.find(c->name()) != std::string::npos );
+                }
+            }
+        }
+
+        WHEN("get components from node3") {
+            auto allComponents = (*Node::find(x3, y3))->components();
+            THEN("all components is \"connect\" to node3") {
+                REQUIRE(allComponents.size() == 5);
+                for (const auto& c : allComponents) {
+                    REQUIRE(allComponentsNames.find(c->name()) != std::string::npos );
+                }
+            }
+        }
+
+        WHEN("get components from node4") {
+            auto allComponents = (*Node::find(x4, y4))->components();
+            THEN("all components is \"connect\" to node4") {
+                REQUIRE(allComponents.size() == 5);
+                for (const auto& c : allComponents) {
+                    REQUIRE(allComponentsNames.find(c->name()) != std::string::npos );
+                }
+            }
+        }
+
+        WHEN("get components from node5") {
+            auto allComponents = (*Node::find(x5, y5))->components();
+            THEN("all components is \"connect\" to node5") {
+                REQUIRE(allComponents.size() == 5);
+                for (const auto& c : allComponents) {
+                    REQUIRE(allComponentsNames.find(c->name()) != std::string::npos );
+                }
+            }
+        }
+    }
+}
+
+SCENARIO("Get components by type when connected with wire", "[getComponentTypeWire]") {
+    GIVEN("2 Resistor, 2 DCVoltage and 1 Wire connect") {
+        DCVoltage e1(5), e2(10);
+        std::string allDCVNames = e1.name() + " " + e2.name();
+        Resistor r1(100), r2(200);
+        std::string allResistorsNames = r1.name() + " " + r2.name();
+        Wire w1;
+
+        int x1 = 1, y1 = 5;
+        int x2 = 2, y2 = 6;
+
+        //Node1
+        r1.addNode(x1, y1);
+        e1.addNode(x1, y1);
+        w1.addNode(x1, y1);
+
+        //Node2
+        w1.addNode(x2, y2);
+        r2.addNode(x2, y2);
+        e2.addNode(x2, y2);
+
+        WHEN("get voltages from node1") {
+            auto allComponents = (*Node::find(x1, y1))->components("voltage");
+            THEN("all DCV is \"connect\" to node1") {
+                REQUIRE(allComponents.size() == 2);
+                for (const auto& c : allComponents) {
+                    REQUIRE(allDCVNames.find(c->name()) != std::string::npos );
+                }
+            }
+        }
+
+        WHEN("get resistors from node1") {
+            auto allComponents = (*Node::find(x1, y1))->components("resistor");
+            THEN("all resistors is \"connect\" to node1") {
+                REQUIRE(allComponents.size() == 2);
+                for (const auto& c : allComponents) {
+                    REQUIRE(allResistorsNames.find(c->name()) != std::string::npos );
+                }
+            }
+        }
+
+        WHEN("get voltages from node2") {
+            auto allComponents = (*Node::find(x2, y2))->components("voltage");
+            THEN("all DCV is \"connect\" to node2") {
+                REQUIRE(allComponents.size() == 2);
+                for (const auto& c : allComponents) {
+                    REQUIRE(allDCVNames.find(c->name()) != std::string::npos );
+                }
+            }
+        }
+
+        WHEN("get resistors from node2") {
+            auto allComponents = (*Node::find(x2, y2))->components("resistor");
+            THEN("all resistors is \"connect\" to node2") {
+                REQUIRE(allComponents.size() == 2);
+                for (const auto& c : allComponents) {
+                    REQUIRE(allResistorsNames.find(c->name()) != std::string::npos );
+                }
+            }
+        }
+    }
+
 }

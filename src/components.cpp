@@ -54,15 +54,53 @@ void Node::addComponent(Component* const e){
         _components.push_back(e);
 }
 
-std::vector<Component*> Node::components() const{
+std::vector<Component*> Node::directComponents() const{
 	return _components;
 }
 
-std::vector<Component*> Node::components(char componentType) const {
+template<typename T>
+void append(T& a, T& b) {
+    a.reserve(a.size() + b.size());
+    std::move(b.begin(), b.end(), std::inserter(a, a.end()));
+    b.clear();
+}
+
+std::vector<Component*> Node::components() const{
+	std::vector<Component*> allComponents;
+    allComponents.reserve(_components.size());
+
+    for (const auto& c : _components) {
+        if ( c->name()[0] != 'W' ) {
+            allComponents.push_back(c);
+        } else {
+            auto otherNode = ((Wire*)c)->otherNode(this->id());
+            otherNode->disconnectFromComponent(c);
+            auto otherComponnets = otherNode->components();
+            append(allComponents, otherComponnets);
+            otherNode->addComponent(c);
+        }
+    }
+
+    return allComponents;
+}
+
+std::vector<Component*> Node::directComponents(const std::string& componentType) const {
 	std::vector<Component*> filterd;
 
 	for (auto const& component : _components) {
-		if (component->name()[0] == componentType) {
+		if (component->componentType() == componentType) {
+			filterd.push_back(component);
+		}
+	}
+
+	return filterd;
+}
+
+std::vector<Component*> Node::components(const std::string& componentType) const {
+	std::vector<Component*> filterd;
+
+	for (auto const& component : components()) {
+		if (component->componentType() == componentType) {
 			filterd.push_back(component);
 		}
 	}
@@ -77,7 +115,16 @@ std::vector<Component*>::iterator Node::find(Component* const e) {
             [e](Component* const curr){return e == curr;});
 }
 
-std::vector<Component*> Node::find(char componentType, int x, int y) {
+std::vector<Component*> Node::findDirectlyConnected(const std::string& componentType, int x, int y) {
+	auto i = Node::find(x, y);
+	if (i != _allNodes.end()) {
+		return (*i)->directComponents(componentType);
+	} else {
+		return std::vector<Component*>();
+	}
+}
+
+std::vector<Component*> Node::find(const std::string& componentType, int x, int y) {
 	auto i = Node::find(x, y);
 	if (i != _allNodes.end()) {
 		return (*i)->components(componentType);
