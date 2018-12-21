@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include "components.hpp"
-#include "logcomponent.h"
+#include "log_component.hpp"
 #include "scene.h"
 
 #include <QMainWindow>

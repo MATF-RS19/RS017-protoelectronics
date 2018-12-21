@@ -136,7 +136,7 @@ public:
 	Component(const std::string &name);
 
 #ifdef QTPAINT
-    QRectF boundingRect() const;
+    virtual QRectF boundingRect() const;
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 #endif

@@ -12,11 +12,13 @@ public:
     double voltage() const override;
     double power() const override{
         return 0;
-    };
+    }
 	double current() const override{
         return 0;
-    };
+    }
+    QRectF boundingRect() const override;
 };
+
 class ANDGate : public LogicGate, public Counter<ANDGate>{
 public:
     ANDGate();
@@ -30,6 +32,7 @@ public:
 #endif
 
 };
+
 class ORGate : public LogicGate, public Counter<ORGate>{
 public:
     ORGate();
@@ -43,6 +46,7 @@ public:
 #endif
 
 };
+
 class XORGate : public LogicGate, public Counter<XORGate>{
 public:
     XORGate();
@@ -55,6 +59,7 @@ public:
 #endif
 
 };
+
 class NANDGate : public LogicGate, public Counter<NANDGate>{
 public:
     NANDGate();
@@ -68,6 +73,7 @@ public:
 #endif
 
 };
+
 class NORGate : public LogicGate, public Counter<NORGate>{
 public:
     NORGate();
@@ -81,6 +87,7 @@ public:
 #endif
 
 };
+
 class NXORGate : public LogicGate, public Counter<NXORGate>{
 public:
     NXORGate();
@@ -94,4 +101,18 @@ public:
 #endif
 
 };
+
+class NOTGate: public LogicGate, public Counter<NOTGate> {
+public:
+    NOTGate();
+
+    std::string componentType() const override { return "not"; }
+
+    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#endif
+};
+
 #endif /* ifndef LOG_COMPONENTS */

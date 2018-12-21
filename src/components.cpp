@@ -199,7 +199,7 @@ QRectF Component::boundingRect() const {
 void Component::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
-    //painter->drawRect(boundingRect());
+    painter->drawRect(boundingRect());
 }
 #endif
 
@@ -321,16 +321,22 @@ Ground::Ground()
 
 #ifdef QTPAINT
 void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    Component::paint(painter, option, widget);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    //Component::paint(painter, option, widget);
+
+    // Setting color for drawing lines
     painter->setPen(penForLines);
 
     // vertical line
     painter->drawLine(50, 60, 50, 0);
+
     // horizontal lines, one beneath other
     painter->drawLine(20, 60, 80, 60);
     painter->drawLine(30, 70, 70, 70);
     painter->drawLine(40, 80, 60, 80);
 
+    //connection points
     painter->setPen(penForDots);
     QPointF up(50, 0.5);
     painter->drawPoint(up);
@@ -361,11 +367,16 @@ Wire::Wire()
 
 #ifdef QTPAINT
 void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    Component::paint(painter, option, widget);
-    painter->setPen(penForLines);
-    QLineF line(0, 50, 100, 50);
-    painter->drawLine(line);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    // Component::paint(painter, option, widget);
 
+    // Setting color for drawing lines
+    painter->setPen(penForLines);
+
+    painter->drawLine(0, 50, 100, 50);
+
+    //connection points
     painter->setPen(penForDots);
     QPointF p1(0.5, 50);
     QPointF p2(99.5, 50);
@@ -398,12 +409,16 @@ Resistor::Resistor(double resistance)
 
 #ifdef QTPAINT
 void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    Component::paint(painter, option, widget);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    //Component::paint(painter, option, widget);
 
+    // Setting color for drawing lines
     painter->setPen(penForLines);
 
     // input line
     painter->drawLine(0, 50, 14, 50);
+
     // zigzag lines
     painter->drawLine(14, 50, 20, 30);
     painter->drawLine(20, 30, 31, 65);
@@ -412,12 +427,14 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->drawLine(53, 65, 64, 30);
     painter->drawLine(64, 30, 75, 65);
     painter->drawLine(75, 65, 86, 50);
+
     // output line
     painter->drawLine(86, 50, 100, 50);
 
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignHCenter, QString::number(_resistance) + " Ohm");
 
+    //connection points
     painter->setPen(penForDots);
     QPointF p1(0.5, 50);
     QPointF p2(99.5, 50);
@@ -449,15 +466,18 @@ DCVoltage::DCVoltage(double voltage)
 
 #ifdef QTPAINT
 void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    Component::paint(painter, option, widget);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    // Component::paint(painter, option, widget);
 
+    // Setting color for drawing lines
     painter->setPen(penForLines);
 
     // vertical line
     painter->drawLine(50, 0, 50, 40);
 
+    //connection points
     painter->setPen(penForDots);
-
     QPointF p(50, 0.5);
     painter->drawPoint(p);
 
@@ -469,8 +489,11 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 /* TODO 2 terminals
 void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    Component::draw(painter, option, widget);
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    // Component::draw(painter, option, widget);
 
+    // Setting color for drawing lines
     painter->setPen(penForLines);
 
     QLineF lineUpVertical(50,0, 50, 45);
@@ -482,8 +505,8 @@ void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->drawLine(lineDownHorizontal);
     painter->drawLine(lineDownVertical);
 
+    //connection points
     painter->setPen(penForDots);
-
     QPointF pUp(50,0.5);
     QPointF pDown(50,99.5);
     painter->drawPoint(pUp);
