@@ -510,9 +510,10 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 }
 
 std::vector<std::pair<int, int>> Resistor::connectionPoints(void) const {
-    std::vector<std::pair<int, int>> dots(2);
+    std::vector<std::pair<int, int>> dots;
+    dots.reserve(2);
     dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
+    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(),this->y()+boundingRect().height()/2));
     return dots;
 }
 #endif
@@ -546,6 +547,12 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     painter->setPen(penForLines);
 
     // Vertical line
+    if(voltage() > 0)
+        painter->setPen(penForLeadsGreen);
+    else if(voltage() < 0)
+        painter->setPen(penForLeadsRed);
+    else
+        painter->setPen(penForLines);
     painter->drawLine(50, 0, 50, 40);
 
     // Connection points
@@ -559,14 +566,28 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 }
 
 std::vector<std::pair<int, int>> DCVoltage::connectionPoints(void) const {
-    std::vector<std::pair<int, int>> dots(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
+    std::vector<std::pair<int, int>> dots;
+    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width()/2, this->y()));
     return dots;
 }
 #endif
 
+void DCVoltage::addNode(int x, int y) {
+    Component::addNode(x, y);
+    _nodes.back()->_v = _voltage;
+}
+
+double DCVoltage::voltage() const {
+	return _voltage;
+}
+
+//TODO
+double DCVoltage::current() const {
+	return 0;
+}
+
 /* TODO 2 terminals
+#ifdef QTPAINT
 void VoltageSource::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
@@ -593,23 +614,11 @@ void VoltageSource::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 }
 
 std::vector<std::pair<int, int>> VoltageSource::connectionPoints(void) const {
+    // TODO AKO DODAMO
     std::vector<std::pair<int, int>> dots(2);
     dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
     dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
     return dots;
 }
+#endif
 */
-
-void DCVoltage::addNode(int x, int y) {
-    Component::addNode(x, y);
-    _nodes.back()->_v = _voltage;
-}
-
-double DCVoltage::voltage() const {
-	return _voltage;
-}
-
-//TODO
-double DCVoltage::current() const {
-	return 0;
-}

@@ -5,7 +5,6 @@ int Counter<T>::_counter(0);
 LogicGate::LogicGate(const std::string &name)
     :Component(name)
 {}
-
 double LogicGate::voltage() const{
     return _nodes.back()->_v;
 }
@@ -127,6 +126,15 @@ void LogicGate::voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned
     painter->setPen(penForLines);
 }
 
+std::vector<std::pair<int, int>> LogicGate::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots;
+    dots.reserve(3);
+    dots.push_back(std::pair<int, int>(this->x(), this->y()+30));
+    dots.push_back(std::pair<int, int>(this->x(), this->y()+90));
+    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
+    return dots;
+}
+
 void ANDGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
@@ -155,13 +163,6 @@ void ANDGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
-}
-
-std::vector<std::pair<int, int>> ANDGate::connectionPoints(void) const {
-    std::vector<std::pair<int, int>> dots(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
-    return dots;
 }
 
 void ORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -195,12 +196,6 @@ void ORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QW
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
-}
-std::vector<std::pair<int, int>> ORGate::connectionPoints(void) const {
-    std::vector<std::pair<int, int>> dots(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
-    return dots;
 }
 
 void XORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -237,13 +232,6 @@ void XORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
-}
-
-std::vector<std::pair<int, int>> XORGate::connectionPoints(void) const {
-    std::vector<std::pair<int, int>> dots(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
-    return dots;
 }
 
 void NORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -284,14 +272,6 @@ void NORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
     painter->drawPath(path);
 }
 
-std::vector<std::pair<int, int>> NORGate::connectionPoints(void) const {
-    std::vector<std::pair<int, int>> dots(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
-    return dots;
-}
-
-
 void NANDGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
@@ -325,13 +305,6 @@ void NANDGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, 
     QPainterPath path;
     path.addEllipse(QPointF(139, 60), 1, 1);
     painter->drawPath(path);
-}
-
-std::vector<std::pair<int, int>> NANDGate::connectionPoints(void) const {
-    std::vector<std::pair<int, int>> dots(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
-    return dots;
 }
 
 void NXORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -375,13 +348,6 @@ void NXORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, 
     painter->drawPath(path);
 }
 
-std::vector<std::pair<int, int>> NXORGate::connectionPoints(void) const {
-    std::vector<std::pair<int, int>> dots(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
-    return dots;
-}
-
 void NOTGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
@@ -415,9 +381,10 @@ void NOTGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
 }
 
 std::vector<std::pair<int, int>> NOTGate::connectionPoints(void) const {
-    std::vector<std::pair<int, int>> dots(2);
+    std::vector<std::pair<int, int>> dots;
+    dots.reserve(2);
     dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
+    dots.push_back(std::pair<int, int>(this->x()+this->y()+boundingRect().width(), this->y()+boundingRect().height()/2));
     return dots;
 }
 
