@@ -204,14 +204,18 @@ private:
     template <typename Iter>
 	void addNodeAt(Iter &pos, int x, int y);
 
+    //friend std::ostream& operator<<(std::ostream& out, const Component& c);
 
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
+    //std::string toString() const;
 
 #ifdef QTPAINT
     QPen penForLines;
     QPen penForDots;
+    QPen penForLeadsGreen;
+    QPen penForLeadsRed;
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
     void mousePressEvent(QGraphicsSceneMouseEvent* event);

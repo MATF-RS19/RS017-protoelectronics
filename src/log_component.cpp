@@ -107,32 +107,47 @@ QRectF LogicGate::boundingRect() const {
     return QRectF(0, 0, 180, 120);
 }
 
+void LogicGate::voltageDependedSetPen(QPainter* painter, unsigned id) {
+    if(nodes().size() < id+1) {
+        painter->setPen(penForLines);
+        return;
+    }
+
+    if(nodes()[id]->_v > 0)
+        painter->setPen(penForLeadsGreen);
+    else if(nodes()[id]->_v < 0)
+        painter->setPen(penForLeadsRed);
+    else
+        painter->setPen(penForLines);
+}
+
+void LogicGate::voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned id) {
+    voltageDependedSetPen(painter, id);
+    painter->drawLine(line);
+    painter->setPen(penForLines);
+}
+
 void ANDGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
     //painter->drawRect(boundingRect());
 
-    // Setting color for drawing lines
-    painter->setPen(penForLines);
+    // First input lead
+    voltageDependedDrawLine(QLineF(0,30,50,30), painter, 0);
 
-    //first input lead
-    //TODO if input voltage > 0 - color lead in green
-    //if voltage < 0 - color in dark red
-    painter->drawLine(0,30,50,30);
+    // Second input
+    voltageDependedDrawLine(QLineF(0,90,50,90), painter, 1);
 
-    //second input
-    painter->drawLine(0,90,50,90);
-
-    //component body
+    // Component body
     painter->drawLine(50,10,50,110);
     painter->drawLine(50,10,100,10);
     painter->drawLine(50,110,100,110);
     painter->drawArc(QRect(62,10,75,100), -90*16, 180*16);
 
-    //output lead
-    painter->drawLine(137,60,180,60);
+    // Output lead
+    voltageDependedDrawLine(QLineF(137,60,180,60), painter, 2);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF in1(0.5, 30);
     QPointF in2(0.5, 90);
@@ -154,29 +169,25 @@ void ORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QW
     Q_UNUSED(widget);
     //LOGComponent::paint(painter, option, widget);
 
-    // Setting color for drawing lines
-    painter->setPen(penForLines);
+    // First input lead
+    voltageDependedDrawLine(QLineF(0,30,58,30), painter, 0);
 
-    //first input lead
-    //TODO if input voltage > 0 - color lead in green
-    //if voltage < 0 - color in dark red
-    painter->drawLine(0,30,58,30);
-    //second input
-    painter->drawLine(0,90,58,90);
+    // Second input
+    voltageDependedDrawLine(QLineF(0,90,58,90), painter, 1);
 
-    //component body
+    // Component body
     painter->drawArc(QRect(15,10,50,100), -90*16, 180*16);
     painter->drawLine(45,10,80,10);
     painter->drawLine(45,110,80,110);
 
-    // up and bottom arc
+    // Up and bottom arc
     painter->drawArc(QRect(10,10,140,110), 0, 90*16);
     painter->drawArc(QRect(10,10,140,100), -90*16, 90*16);
 
-    //output lead
-    painter->drawLine(150,60,180,60);
+    // Output lead
+    voltageDependedDrawLine(QLineF(150,60,180,60), painter, 2);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF in1(0.5, 30);
     QPointF in2(0.5, 90);
@@ -197,33 +208,28 @@ void XORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
     Q_UNUSED(widget);
     //LOGComponent::paint(painter, option, widget);
 
-    // Setting color for drawing lines
-    painter->setPen(penForLines);
+    // First input lead
+    voltageDependedDrawLine(QLineF(0,30,58,30), painter, 0);
 
-    //first input lead
-    //TODO if input voltage > 0 - color lead in green
-    //if voltage < 0 - color in dark red
-    painter->drawLine(0,30,58,30);
+    // Second input
+    voltageDependedDrawLine(QLineF(0,90,58,90), painter, 1);
 
-    //second input
-    painter->drawLine(0,90,58,90);
-
-    //component body
+    // Component body
     painter->drawArc(QRect(15,10,50,100), -90*16, 180*16);
     painter->drawLine(45,10,80,10);
     painter->drawLine(45,110,80,110);
 
-    // up and bottom arc
+    // Up and bottom arc
     painter->drawArc(QRect(10,10,140,110), 0, 90*16);
     painter->drawArc(QRect(10,10,140,100), -90*16, 90*16);
 
-    // xor input arc
+    // Xor input arc
     painter->drawArc(QRect(8,10,50,100), -90*16, 180*16);
 
-    //output lead
-    painter->drawLine(150,60,180,60);
+    // Output lead
+    voltageDependedDrawLine(QLineF(150,60,180,60), painter, 2);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF in1(0.5, 30);
     QPointF in2(0.5, 90);
@@ -231,7 +237,6 @@ void XORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
-
 }
 
 std::vector<std::pair<int, int>> XORGate::connectionPoints(void) const {
@@ -246,30 +251,25 @@ void NORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
     Q_UNUSED(widget);
     //LOGComponent::paint(painter, option, widget);
 
-    // Setting color for drawing lines
-    painter->setPen(penForLines);
+    // First input lead
+    voltageDependedDrawLine(QLineF(0,30,58,30), painter, 0);
 
-    //first input lead
-    //TODO if input voltage > 0 - color lead in green
-    //if voltage < 0 - color in dark red
-    painter->drawLine(0,30,58,30);
+    // Second input
+    voltageDependedDrawLine(QLineF(0,90,58,90), painter, 1);
 
-    //second input
-    painter->drawLine(0,90,58,90);
-
-    //component body
+    // Component body
     painter->drawArc(QRect(15,10,50,100), -90*16, 180*16);
     painter->drawLine(45,10,80,10);
     painter->drawLine(45,110,80,110);
 
-    // up and bottom arc
+    // Up and bottom arc
     painter->drawArc(QRect(10,10,140,110), 0, 90*16);
     painter->drawArc(QRect(10,10,140,100), -90*16, 90*16);
 
-    //output lead
-    painter->drawLine(150,60,180,60);
+    // Output lead
+    voltageDependedDrawLine(QLineF(150,60,180,60), painter, 2);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF in1(0.5, 30);
     QPointF in2(0.5, 90);
@@ -278,7 +278,7 @@ void NORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
     painter->drawPoint(in2);
     painter->drawPoint(out);
 
-    // negation at the end
+    // Negation at the end
     QPainterPath path;
     path.addEllipse(QPointF(150, 60), 1, 1);
     painter->drawPath(path);
@@ -297,27 +297,22 @@ void NANDGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(widget);
     //LOGComponent::paint(painter, option, widget);
 
-    // Setting color for drawing lines
-    painter->setPen(penForLines);
+    // First input lead
+    voltageDependedDrawLine(QLineF(0,30,50,30), painter, 0);
 
-    //first input lead
-    //TODO if input voltage > 0 - color lead in green
-    //if voltage < 0 - color in dark red
-    painter->drawLine(0,30,50,30);
+    // Second input
+    voltageDependedDrawLine(QLineF(0,90,50,90), painter, 1);
 
-    //second input
-    painter->drawLine(0,90,50,90);
-
-    //component body
+    // Component body
     painter->drawLine(50,10,50,110);
     painter->drawLine(50,10,100,10);
     painter->drawLine(50,110,100,110);
     painter->drawArc(QRect(62,10, 75,100), -90*16, 180*16);
 
-    //output lead
-    painter->drawLine(140,60,180,60);
+    // Output lead
+    voltageDependedDrawLine(QLineF(140,60,180,60), painter, 2);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF in1(0.5, 30);
     QPointF in2(0.5, 90);
@@ -326,7 +321,7 @@ void NANDGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, 
     painter->drawPoint(in2);
     painter->drawPoint(out);
 
-    // negation at the end
+    // Negation at the end
     QPainterPath path;
     path.addEllipse(QPointF(139, 60), 1, 1);
     painter->drawPath(path);
@@ -344,33 +339,28 @@ void NXORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(widget);
     //LOGComponent::paint(painter, option, widget);
 
-    // Setting color for drawing lines
-    painter->setPen(penForLines);
+    // First input lead
+    voltageDependedDrawLine(QLineF(0,30,58,30), painter, 0);
 
-    //first input lead
-    //TODO if input voltage > 0 - color lead in green
-    //if voltage < 0 - color in dark red
-    painter->drawLine(0,30,58,30);
+    // Second input
+    voltageDependedDrawLine(QLineF(0,90,58,90), painter, 1);
 
-    //second input
-    painter->drawLine(0,90,58,90);
-
-    //component body
+    // Component body
     painter->drawArc(QRect(15,10,50,100), -90*16, 180*16);
     painter->drawLine(45,10,80,10);
     painter->drawLine(45,110,80,110);
 
-    // up and bottom arc
+    // Up and bottom arc
     painter->drawArc(QRect(10,10,140,110), 0, 90*16);
     painter->drawArc(QRect(10,10,140,100), -90*16, 90*16);
 
-    // xor input arc
+    // Xor input arc
     painter->drawArc(QRect(8,10,50,100), -90*16, 180*16);
 
-    //output lead
-    painter->drawLine(150,60,180,60);
+    // Output lead
+    voltageDependedDrawLine(QLineF(150,60,180,60), painter, 2);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF in1(0.5, 30);
     QPointF in2(0.5, 90);
@@ -379,7 +369,7 @@ void NXORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, 
     painter->drawPoint(in2);
     painter->drawPoint(out);
 
-    // negation at the end
+    // Negation at the end
     QPainterPath path;
     path.addEllipse(QPointF(150, 60), 1, 1);
     painter->drawPath(path);
@@ -397,13 +387,10 @@ void NOTGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
     Q_UNUSED(widget);
     //LogicGate::paint(painter, option, widget);
 
-    // Setting color for drawing lines
-    painter->setPen(penForLines);
+    // Input lead
+    voltageDependedDrawLine(QLineF(0,60,60,60), painter, 0);
 
-    // input lead
-    painter->drawLine(0,60,60,60);
-
-    // body
+    // Component body
     static const QPointF points[3] = {
         QPointF(60, 30),
         QPointF(120, 60),
@@ -411,17 +398,17 @@ void NOTGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
     };
     painter->drawPolygon(points, 3);
 
-    // output lead
-    painter->drawLine(120,60,180,60);
+    // Output lead
+    voltageDependedDrawLine(QLineF(120,60,180,60), painter, 1);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF in(0.5, 60);
     QPointF out(179.5, 60);
     painter->drawPoint(in);
     painter->drawPoint(out);
 
-    // negation at the end
+    // Negation at the end
     QPainterPath path;
     path.addEllipse(QPointF(120, 60), 1, 1);
     painter->drawPath(path);

@@ -6,21 +6,26 @@ int Counter<T>::_counter(0);
 
 std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 
+//std::string Component::toString() const {
+//    std::string str;
+//    str = name() + "\n";
 
-std::ostream& operator<<(std::ostream& out, const Component& c) {
-	out << c.name() << std::endl
-	<< "Nodes: [ ";
-	for (const auto& n : c.nodes()) {
-		out << n->id() << " ";
-	}
-	out << "]" << std::endl;
+//    str += "U = " + std::to_string(voltage()) + " V\n";
+//    str += "I = " + std::to_string(current()) + " A\n";
+//    str += "P = " + std::to_string(power()) + " W\n";
+//    return str;
+//}
 
-	out << "U = " << c.voltage() << " V" << std::endl
-		<< "I = " << c.current() << " A" << std::endl
-		<< "P = " << c.power() << " W";
+//std::ostream& operator<<(std::ostream& out, const Component& c) {
+//    out << "Nodes: [ ";
+//    for (const auto& n : c.nodes()) {
+//        out << n->id() << " ";
+//    }
 
-	return out;
-}
+//    out << "]\n";
+//    out << c.toString();
+//	return out;
+//}
 
 std::ostream& operator<<(std::ostream& out, const Node& n) {
 	out << "*  Node " << n.id() << ":" << std::endl
@@ -166,6 +171,8 @@ Component::Component(const std::string &name)
 
     penForLines = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap);
     penForDots = QPen(Qt::white, 6, Qt::SolidLine, Qt::RoundCap);
+    penForLeadsGreen = QPen(Qt::green, 3, Qt::SolidLine, Qt::RoundCap);
+    penForLeadsRed = QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap);
 #endif
 }
 
@@ -195,17 +202,13 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
 }
 
 void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    static int angleRotation = 0;
-
     if(event->button() == Qt::LeftButton) {
         qDebug() << "Mis je pressed";
        // setSelected(true);
         penForLines.setColor(QColor(8, 246, 242));
     }
     else if(event->button() == Qt::RightButton) {
-        angleRotation = (angleRotation == -360) ? 0: angleRotation-90;
-        this->setRotation(angleRotation);
-        qDebug() << angleRotation;
+        setTransform(QTransform().rotate(-90), true);
     }
 
     QGraphicsItem::mousePressEvent(event);
@@ -221,6 +224,12 @@ void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 }
 
 void Component::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    auto dots = this->connectionPoints();
+    qDebug() << QString::fromStdString(this->componentType());
+    for(auto e: dots) {
+        qDebug() << e.first << " " << e.second;
+    }
+    //qDebug() << QString::fromStdString(this->toString());
     QGraphicsItem::mouseMoveEvent(event);
 }
 
@@ -372,15 +381,15 @@ void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     // Setting color for drawing lines
     painter->setPen(penForLines);
 
-    // vertical line
+    // Vertical line
     painter->drawLine(50, 60, 50, 0);
 
-    // horizontal lines, one beneath other
+    // Horizontal lines, one beneath other
     painter->drawLine(20, 60, 80, 60);
     painter->drawLine(30, 70, 70, 70);
     painter->drawLine(40, 80, 60, 80);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF up(50, 0.5);
     painter->drawPoint(up);
@@ -427,7 +436,7 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 
     painter->drawLine(0, 50, 100, 50);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF p1(0.5, 50);
     QPointF p2(99.5, 50);
@@ -458,8 +467,6 @@ std::shared_ptr<Node> Wire::otherNode(int id) {
 	return _nodes[0]->id() == id ? _nodes[1] : _nodes[0];
 }
 
-
-
 //Resistor
 Resistor::Resistor(double resistance)
 	:Component("R" + std::to_string(_counter+1)),
@@ -476,10 +483,10 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     // Setting color for drawing lines
     painter->setPen(penForLines);
 
-    // input line
+    // Input line
     painter->drawLine(0, 50, 14, 50);
 
-    // zigzag lines
+    // Zigzag lines
     painter->drawLine(14, 50, 20, 30);
     painter->drawLine(20, 30, 31, 65);
     painter->drawLine(31, 65, 42, 30);
@@ -488,13 +495,13 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->drawLine(64, 30, 75, 65);
     painter->drawLine(75, 65, 86, 50);
 
-    // output line
+    // Output line
     painter->drawLine(86, 50, 100, 50);
 
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignHCenter, QString::number(_resistance) + " Ohm");
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF p1(0.5, 50);
     QPointF p2(99.5, 50);
@@ -523,8 +530,6 @@ double Resistor::current() const {
 	return voltage() / _resistance;
 }
 
-
-
 //DCVoltage
 DCVoltage::DCVoltage(double voltage)
 	:Component("U" + std::to_string(_counter+1)),
@@ -540,10 +545,10 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     // Setting color for drawing lines
     painter->setPen(penForLines);
 
-    // vertical line
+    // Vertical line
     painter->drawLine(50, 0, 50, 40);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF p(50, 0.5);
     painter->drawPoint(p);
@@ -579,7 +584,7 @@ void VoltageSource::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     painter->drawLine(lineDownHorizontal);
     painter->drawLine(lineDownVertical);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF pUp(50,0.5);
     QPointF pDown(50,99.5);
