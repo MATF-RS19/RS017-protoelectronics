@@ -159,6 +159,7 @@ Component::Component(const std::string &name)
 
 #ifdef QTPAINT
     setAcceptDrops(true);
+    setAcceptHoverEvents(true);
     setFlags(QGraphicsItem::ItemIsSelectable |
             QGraphicsItem::ItemIsMovable |
             QGraphicsItem::ItemSendsGeometryChanges);
@@ -172,23 +173,67 @@ Component::Component(const std::string &name)
 QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value) {
     if (change == ItemPositionChange && scene()) {
         QPointF newPos = value.toPointF();
+
         if(QApplication::mouseButtons() == Qt::LeftButton &&
                 qobject_cast<GridZone*> (scene())){
 
-            //penForLines.setColor(QColor(8, 246, 242));
             GridZone* customScene = qobject_cast<GridZone*> (scene());
             int gridSize = customScene->getGridSize();
             qreal xV = round(newPos.x()/gridSize)*gridSize;
             qreal yV = round(newPos.y()/gridSize)*gridSize;
             return QPointF(xV, yV);
         }
+
         else {
             return newPos;
         }
     }
+
     else {
         return QGraphicsItem::itemChange(change, value);
     }
+}
+
+void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    static int angleRotation = 0;
+
+    if(event->button() == Qt::LeftButton) {
+        qDebug() << "Mis je pressed";
+       // setSelected(true);
+        penForLines.setColor(QColor(8, 246, 242));
+    }
+    else if(event->button() == Qt::RightButton) {
+        angleRotation = (angleRotation == -360) ? 0: angleRotation-90;
+        this->setRotation(angleRotation);
+        qDebug() << angleRotation;
+    }
+
+    QGraphicsItem::mousePressEvent(event);
+}
+
+void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    if(event->button() == Qt::LeftButton) {
+        qDebug() << "Mis je released";
+       // setSelected(true);
+        penForLines.setColor(QColor(Qt::black));
+        QGraphicsItem::mouseReleaseEvent(event);
+    }
+}
+
+void Component::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseMoveEvent(event);
+}
+
+void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
+    qDebug() << "hovering";
+    penForLines.setColor(QColor(8, 246, 242));
+    update();
+}
+
+void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
+    qDebug() << "hoveringg offf";
+    penForLines.setColor(QColor(Qt::black));
+    update();
 }
 
 QRectF Component::boundingRect() const {
@@ -340,6 +385,13 @@ void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     QPointF up(50, 0.5);
     painter->drawPoint(up);
 }
+
+std::vector<std::pair<int, int>> Ground::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots;
+    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width()/2, this->y()));
+    return dots;
+}
+
 #endif
 
 double Ground::voltage() const {
@@ -382,6 +434,15 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
+
+std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots;
+    dots.reserve(2);
+    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
+    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(),this->y()+boundingRect().height()/2));
+    return dots;
+}
+
 #endif
 
 double Wire::voltage() const {
@@ -440,6 +501,13 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
+
+std::vector<std::pair<int, int>> Resistor::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots(2);
+    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
+    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
+    return dots;
+}
 #endif
 
 double Resistor::resistance() const {
@@ -484,10 +552,17 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignCenter, QString::number(_voltage) + " V");
 }
+
+std::vector<std::pair<int, int>> DCVoltage::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots(2);
+    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
+    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
+    return dots;
+}
 #endif
 
 /* TODO 2 terminals
-void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+void VoltageSource::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
     // Component::draw(painter, option, widget);
@@ -510,6 +585,13 @@ void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *opti
     QPointF pDown(50,99.5);
     painter->drawPoint(pUp);
     painter->drawPoint(pDown);
+}
+
+std::vector<std::pair<int, int>> VoltageSource::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots(2);
+    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
+    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
+    return dots;
 }
 */
 

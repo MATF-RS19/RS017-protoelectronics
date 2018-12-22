@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -88,11 +89,19 @@ void MainWindow::createLayout(){
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event){
+
+    // On pressed delete key removing item from scene
     if(event->key() == Qt::Key_Delete){
         foreach(QGraphicsItem *item, scene->selectedItems())
             if(Component *rItem = qgraphicsitem_cast<Component*> (item))
                 delete item;
         scene->clearSelection();
     }
+
+    // On pressed escape key window is closed
+    else if(event->key() == Qt::Key_Escape){
+        this->close();
+    }
+
     QMainWindow::keyPressEvent(event);
 }

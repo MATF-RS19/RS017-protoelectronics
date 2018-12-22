@@ -12,13 +12,12 @@
 #include <QHBoxLayout>
 #include <QKeyEvent>
 
-
 class MainWindow : public QMainWindow
 {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 protected:
-    void keyPressEvent(QKeyEvent *);
+    void keyPressEvent(QKeyEvent *) override;
 private:
     QGraphicsView* view;
     QGraphicsScene* scene;

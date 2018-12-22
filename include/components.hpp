@@ -10,6 +10,8 @@
 #include <QPainter>
 #include <QGraphicsItem>
 #include <QGraphicsRectItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneHoverEvent>
 #include <QApplication>
 #include <QPen>
 #include <QDebug>
@@ -129,7 +131,7 @@ private:
 
 class Component
 				#ifdef QTPAINT
-				: public QGraphicsItem
+                : public QGraphicsItem
 				#endif
 				{
 public:
@@ -139,6 +141,7 @@ public:
     virtual QRectF boundingRect() const;
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual std::vector<std::pair<int, int>> connectionPoints(void) const = 0;
 #endif
 
     virtual ~Component();
@@ -210,6 +213,13 @@ protected:
     QPen penForLines;
     QPen penForDots;
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
+    void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
+
 #endif
 };
 
@@ -228,6 +238,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 };
 
@@ -246,6 +257,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 };
 
@@ -264,6 +276,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 private:
@@ -285,6 +298,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 private:
