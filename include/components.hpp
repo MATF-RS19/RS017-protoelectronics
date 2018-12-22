@@ -274,6 +274,39 @@ private:
 };
 
 
+class Switch : public Component, public Counter<Switch> {
+public:
+
+    enum state {
+        OPEN,
+        CLOSE
+    };
+
+    Switch(state s = OPEN);
+
+    std::string componentType() const override {return "switch";}
+
+    void open();
+
+    bool isOpend() const;
+
+    void close();
+
+    bool isClosed() const;
+
+    double voltage() const override;
+
+    double current() const override;
+
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#endif
+
+private:
+    state _state;
+};
+
+
 class DCVoltage : public Component, public Counter<DCVoltage> {
 public:
 	DCVoltage(double voltage);

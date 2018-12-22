@@ -545,3 +545,38 @@ double DCVoltage::voltage() const {
 double DCVoltage::current() const {
 	return 0;
 }
+
+//Switch
+Switch::Switch(state s)
+:Component("S" + std::to_string(_counter+1)),
+_state(s)
+{
+
+}
+
+void Switch::open() {
+    _state = OPEN;
+}
+
+bool Switch::isOpend() const {
+    return _state == OPEN;
+}
+
+void Switch::close() {
+    _state = CLOSE;
+}
+
+bool Switch::isClosed() const {
+    return _state == CLOSE;
+}
+
+//TODO
+double Switch::voltage() const {
+    return 0;
+}
+
+//TODO
+double Switch::current() const {
+    return 0;
+}
+
