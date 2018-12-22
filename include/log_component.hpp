@@ -31,6 +31,7 @@ public:
     void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 };
@@ -45,6 +46,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 };
@@ -58,6 +60,7 @@ public:
     void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 };
@@ -72,6 +75,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 };
@@ -86,6 +90,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 };
@@ -100,6 +105,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 };
@@ -114,6 +120,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 };
 
