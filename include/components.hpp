@@ -247,6 +247,8 @@ public:
 
     std::shared_ptr<Node> otherNode(int id);
 
+    void addNode(int x, int y) override;
+
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -255,7 +257,7 @@ public:
 
 class Resistor : public Component, public Counter<Resistor> {
 public:
-	Resistor(double resistance);
+	Resistor(double resistance = 1000);
 
     std::string componentType() const override {return "resistor";}
 
@@ -264,6 +266,8 @@ public:
 	double voltage() const override;
 
 	double current() const override;
+
+    void addNode(int x, int y) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -284,7 +288,9 @@ public:
 
     Switch(state s = OPEN);
 
-    std::string componentType() const override {return "switch";}
+    std::string componentType() const override {return ( _state == CLOSE )? "wire" : "switch";}
+
+    void addNode(int x, int y) override;
 
     void open();
 
@@ -311,7 +317,7 @@ private:
 
 class DCVoltage : public Component, public Counter<DCVoltage> {
 public:
-	DCVoltage(double voltage);
+	DCVoltage(double voltage = 5);
 
     std::string componentType() const override {return "voltage";}
 

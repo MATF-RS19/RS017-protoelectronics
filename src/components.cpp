@@ -1,5 +1,6 @@
 #include "components.hpp"
 #include <iostream>
+#include <stdexcept>
 
 template<typename T>
 int Counter<T>::_counter(0);
@@ -385,6 +386,10 @@ double Ground::current() const {
 }
 
 void Ground::addNode(int x, int y) {
+    if (_nodes.size() >= 1) {
+        throw std::runtime_error("Ground already connected!");
+    }
+
     Component::addNode(x, y);
     _nodes.back()->_v = 0;
 }
@@ -431,6 +436,13 @@ std::shared_ptr<Node> Wire::otherNode(int id) {
 	return _nodes[0]->id() == id ? _nodes[1] : _nodes[0];
 }
 
+void Wire::addNode(int x, int y) {
+    if (_nodes.size() >= 2) {
+        throw std::runtime_error("Wire already connected!");
+    }
+    Component::addNode(x, y);
+}
+
 
 
 //Resistor
@@ -438,6 +450,9 @@ Resistor::Resistor(double resistance)
 	:Component("R" + std::to_string(_counter+1)),
 	_resistance(resistance)
 {
+    if (_resistance <= 0) {
+        throw std::invalid_argument("Resistance must be positive");
+    }
 }
 
 #ifdef QTPAINT
@@ -487,6 +502,13 @@ double Resistor::voltage() const {
 
 double Resistor::current() const {
 	return voltage() / _resistance;
+}
+
+void Resistor::addNode(int x, int y) {
+    if (_nodes.size() >= 2) {
+        throw std::runtime_error("Resistor already connected!");
+    }
+    Component::addNode(x, y);
 }
 
 
@@ -548,6 +570,10 @@ void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *opti
 */
 
 void DCVoltage::addNode(int x, int y) {
+    if (_nodes.size() >= 1) {
+        throw std::runtime_error("DCVoltage already connected!");
+    }
+
     Component::addNode(x, y);
     _nodes.back()->_v = _voltage;
 }
@@ -588,6 +614,13 @@ Switch::Switch(state s)
 _state(s)
 {
 
+}
+
+void Switch::addNode(int x, int y) {
+    if (_nodes.size() >= 2) {
+        throw std::runtime_error("Switch already connected!");
+    }
+    Component::addNode(x, y);
 }
 
 void Switch::open() {
@@ -644,9 +677,9 @@ void Switch::changeState() {
     else open();
 }
 
-//TODO
 double Switch::voltage() const {
-    return 0;
+    if (_nodes.size() != 2) return 0;
+    return _nodes[0]->_v;
 }
 
 //TODO
