@@ -208,7 +208,9 @@ void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
         penForLines.setColor(QColor(8, 246, 242));
     }
     else if(event->button() == Qt::RightButton) {
-        setTransform(QTransform().rotate(-90), true);
+        QPointF center = boundingRect().center();
+        QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(-90).translate(-center.x(), -center.y());
+        setTransform(rotation, true);
     }
 
     QGraphicsItem::mousePressEvent(event);
@@ -217,7 +219,6 @@ void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if(event->button() == Qt::LeftButton) {
         qDebug() << "Mis je released";
-       // setSelected(true);
         penForLines.setColor(QColor(Qt::black));
         QGraphicsItem::mouseReleaseEvent(event);
     }
@@ -235,12 +236,14 @@ void Component::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 
 void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     qDebug() << "hovering";
+    setSelected(true);
     penForLines.setColor(QColor(8, 246, 242));
     update();
 }
 
 void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     qDebug() << "hoveringg offf";
+    setSelected(false);
     penForLines.setColor(QColor(Qt::black));
     update();
 }
@@ -397,7 +400,14 @@ void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 
 std::vector<std::pair<int, int>> Ground::connectionPoints(void) const {
     std::vector<std::pair<int, int>> dots;
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width()/2, this->y()));
+
+    // Find local coordinates of connection point
+    QPointF localPoint(boundingRect().x()+boundingRect().width()/2,
+                       boundingRect().y());
+
+    // And then map to scene coordinates
+    auto scenePoint = mapToScene(localPoint);
+    dots.push_back(std::pair<int, int>(scenePoint.x(), scenePoint.y()));
     return dots;
 }
 
@@ -447,8 +457,20 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
     std::vector<std::pair<int, int>> dots;
     dots.reserve(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(),this->y()+boundingRect().height()/2));
+
+    // Find local coordinates of connection point
+    QPointF localPoint1(boundingRect().x(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    QPointF localPoint2(boundingRect().x()+boundingRect().width(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    // And then map to scene coordinates
+    auto scenePoint1 = mapToScene(localPoint1);
+    auto scenePoint2 = mapToScene(localPoint2);
+    dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+    dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+
     return dots;
 }
 
@@ -512,8 +534,19 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 std::vector<std::pair<int, int>> Resistor::connectionPoints(void) const {
     std::vector<std::pair<int, int>> dots;
     dots.reserve(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(),this->y()+boundingRect().height()/2));
+
+    // Find local coordinates of connection point
+    QPointF localPoint1(boundingRect().x(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    QPointF localPoint2(boundingRect().x()+boundingRect().width(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    // And then map to scene coordinates
+    auto scenePoint1 = mapToScene(localPoint1);
+    auto scenePoint2 = mapToScene(localPoint2);
+    dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+    dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
     return dots;
 }
 #endif
@@ -567,7 +600,14 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 std::vector<std::pair<int, int>> DCVoltage::connectionPoints(void) const {
     std::vector<std::pair<int, int>> dots;
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width()/2, this->y()));
+
+    // Find local coordinates of connection point
+    QPointF localPoint(boundingRect().x()+boundingRect().width()/2,
+                       boundingRect().y());
+
+    // And then map to scene coordinates
+    auto scenePoint = mapToScene(localPoint);
+    dots.push_back(std::pair<int, int>(scenePoint.x(), scenePoint.y()));
     return dots;
 }
 #endif

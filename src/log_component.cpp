@@ -129,9 +129,25 @@ void LogicGate::voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned
 std::vector<std::pair<int, int>> LogicGate::connectionPoints(void) const {
     std::vector<std::pair<int, int>> dots;
     dots.reserve(3);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+30));
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+90));
-    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
+
+    // Find local coordinates of connection point
+    QPointF localPoint1(boundingRect().x(),
+                       boundingRect().y()+30);
+
+    QPointF localPoint2(boundingRect().x(),
+                       boundingRect().y()+90);
+
+    QPointF localPoint3(boundingRect().x()+boundingRect().width(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    // And then map to scene coordinates
+    auto scenePoint1 = mapToScene(localPoint1);
+    auto scenePoint2 = mapToScene(localPoint2);
+    auto scenePoint3 = mapToScene(localPoint3);
+    dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+    dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+    dots.push_back(std::pair<int, int>(scenePoint3.x(), scenePoint3.y()));
+
     return dots;
 }
 
