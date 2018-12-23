@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "log_component.hpp"
+#include "circuit.hpp"
 
 #define EPS 1e-5
 
@@ -408,7 +409,7 @@ SCENARIO("disconnect component completely", "[disconnectAll]"){
             }
         }
     }
-    
+
     GIVEN("resistor connect to 2 nodes and ground connected to both"){
         r1.addNode(x1, y1);
         r1.addNode(x2, y2);
@@ -706,4 +707,48 @@ SCENARIO("Get components by type when connected with wire", "[getComponentTypeWi
         }
     }
 
+}
+
+SCENARIO("Circuit", "[circuit]"){
+    GIVEN("Empty circuit") {
+        Circuit c;
+
+        WHEN("Add component") {
+            c.addComponent(new Resistor(10));
+
+            THEN("Component is in circuit") {
+                REQUIRE(c[0]->name() == "R1" );
+            }
+        }
+
+        WHEN("Add 2 components") {
+            c.addComponent(new Resistor(10));
+            c.addComponent(new DCVoltage(10));
+
+            THEN("Component 1 is in circuit") {
+                REQUIRE(c[0]->name() == "R1" );
+            }
+
+            THEN("Component 2 is in circuit") {
+                REQUIRE(c[1]->name() == "U1" );
+            }
+        }
+
+        WHEN("Add component then remove") {
+            c.addComponent(new Resistor(10));
+            c.removeComponent(0);
+
+            THEN("Circuit is empty") {
+                REQUIRE(c.size() == 0 );
+            }
+        }
+
+        WHEN("get component") {
+            THEN("Exception is thrown") {
+                REQUIRE_THROWS(c[0]);
+                REQUIRE_THROWS(c[-5]);
+                REQUIRE_THROWS(c[5]);
+            }
+        }
+    }
 }

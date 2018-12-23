@@ -33,6 +33,10 @@ std::vector<Component*> Circuit::components() const {
     return _components;
 }
 
+size_t Circuit::size() const {
+    return _components.size();
+}
+
 std::vector<Component*> Circuit::componentsBetween() const {
     //TODO
     return {};

@@ -8,7 +8,11 @@ public:
     Circuit();
     ~Circuit();
 
+    //Returns all components in circuit
     std::vector<Component*> components() const;
+
+    //Returns number of components in circuit
+    size_t size() const;
 
     //Adds component to circuit
     void addComponent(Component* c);
