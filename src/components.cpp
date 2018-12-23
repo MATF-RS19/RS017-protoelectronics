@@ -654,3 +654,8 @@ double Switch::current() const {
     return 0;
 }
 
+#ifdef QTPAINT
+void Switch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    //TODO
+}
+#endif
