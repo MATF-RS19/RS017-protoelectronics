@@ -256,6 +256,8 @@ void Component::addNode(int x, int y) {
 }
 
 void Component::disconnect(int x, int y) {
+    if (Node::find(x, y) == Node::_allNodes.end()) return;
+
     for (auto it = _nodes.begin(); it != _nodes.end(); ) {
         if ((*it)->x() == x && (*it)->y() == y) {
             //disconnect from _allNodes
@@ -318,6 +320,18 @@ void Component::addNodeAt(Iter &pos, int x, int y) {
 }
 
 void Component::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
+    //If start and end node is the same node we don't need to reconnect
+    if(xFrom == xTo && yFrom == yTo) return;
+
+    //If node from doesn't exist, just connect to destination node
+    auto nodeFrom = Node::find(xFrom, yFrom);
+    if (nodeFrom == Node::_allNodes.end()) {
+        addNode(xTo, yTo);
+        return;
+    }
+
+    //If exists, disconnect component from that node
+    //and connect to destination node, but on the same position as original
     for (auto it = _nodes.begin(); it != _nodes.end(); it++) {
         if ((*it)->x() == xFrom && (*it)->y() == yFrom ) {
             disconnectAndPreserveEmptyPlace(it);
@@ -403,6 +417,7 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 }
 #endif
 
+//TODO
 double Wire::voltage() const {
 	return 0;
 }
@@ -546,6 +561,27 @@ double DCVoltage::current() const {
 	return 0;
 }
 
+void DCVoltage::disconnect(int x, int y) {
+    auto it = Node::find(x, y);
+    if (it == Node::_allNodes.end()) return;
+
+    (*it)->_v = 0;
+    Component::disconnect(x, y);
+}
+
+void DCVoltage::disconnect() {
+    for (const auto& node : _nodes) {
+        node->_v = 0;
+    }
+    Component::disconnect();
+}
+
+void DCVoltage::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
+    auto start = Node::find(xFrom, yFrom);
+    if (start != Node::_allNodes.end()) (*start)->_v = 0;
+    Component::reconnect(xFrom, yFrom, xTo, yTo);
+}
+
 //Switch
 Switch::Switch(state s)
 :Component("S" + std::to_string(_counter+1)),
@@ -556,6 +592,19 @@ _state(s)
 
 void Switch::open() {
     _state = OPEN;
+
+    //Switch should be connected
+    if (_nodes.size() != 2) return;
+
+    if (_nodes[0]->components("voltage").size() != 0) {
+        _nodes[1]->_v = 0;
+    }
+    else if (_nodes[1]->components("voltage").size() != 0) {
+        _nodes[0]->_v = 0;
+    } else {
+        _nodes[0]->_v = 0;
+        _nodes[1]->_v = 0;
+    }
 }
 
 bool Switch::isOpend() const {
@@ -564,10 +613,35 @@ bool Switch::isOpend() const {
 
 void Switch::close() {
     _state = CLOSE;
+
+    //Switch should be connected
+    if (_nodes.size() != 2) return;
+
+    //There is voltage source (exactly one) on one side
+    auto voltageComponent = _nodes[0]->components("voltage");
+    if (voltageComponent.size() == 1) {
+        assert(_nodes[1]->_v == 0);
+        //Delegate that voltage to another side
+        _nodes[1]->_v = voltageComponent[0]->voltage();
+    }
+    //There is voltage source (exactly one) on another side
+    else {
+        voltageComponent = _nodes[1]->components("voltage");
+        if (voltageComponent.size() == 1) {
+            assert(_nodes[0]->_v == 0);
+            //Delegate that voltage to another side
+            _nodes[0]->_v = voltageComponent[0]->voltage();
+        }
+    }
 }
 
 bool Switch::isClosed() const {
     return _state == CLOSE;
+}
+
+void Switch::changeState() {
+    if (_state == OPEN) close();
+    else open();
 }
 
 //TODO

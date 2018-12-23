@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-#define QTPAINT
+//#define QTPAINT
 
 #ifdef QTPAINT
 #include "scene.h"
@@ -169,17 +169,17 @@ public:
     virtual void addNode(int x, int y);
 
     //Disconnects component from all nodes with given coordinates
-    void disconnect(int x, int y);
+    virtual void disconnect(int x, int y);
 
     //Disconnects component completely
-    void disconnect();
+    virtual void disconnect();
 
     /*
      * Disconnects component from all nodes with given coordinates
      * (connection node->component will be removed also)
      * and connects them to another node
 	*/
-    void reconnect(int xFrom, int yFrom, int xTo, int yTo);
+    virtual void reconnect(int xFrom, int yFrom, int xTo, int yTo);
 
 	virtual double voltage() const = 0;
 	virtual double current() const = 0;
@@ -294,6 +294,8 @@ public:
 
     bool isClosed() const;
 
+    void changeState();
+
     double voltage() const override;
 
     double current() const override;
@@ -318,6 +320,12 @@ public:
 	double current() const override;
 
 	void addNode(int x, int y) override;
+
+    void disconnect(int x, int y) override;
+
+    void disconnect() override;
+
+    void reconnect(int xFrom, int yFrom, int xTo, int yTo) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
