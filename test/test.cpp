@@ -493,7 +493,10 @@ SCENARIO("logic component connect", "[logic connect]"){
         int x3 = 8, y3 = 6;
         WHEN("Connect input to (x1, y1), (x2, y2) and output to (x3, y3)") {
             THEN("There's 3 nodes") {
-                and1.connect(x1, y1, x2, y2, x3, y3);
+                and1.connect(std::vector<std::pair<int, int>>{
+                        std::pair<int, int>(x1, y1),
+                        std::pair<int, int>(x2, y2),
+                        std::pair<int, int>(x3, y3)});
                 REQUIRE(Node::size() == 3);
             }
         }
@@ -525,9 +528,21 @@ SCENARIO("logic components circuit", "[.circuit]"){
         //v2.addNode(x2, y2);
 
         //connections
-        and1.connect(x1, y1, x2, y2, x3, y3);
-        or1.connect(x1, y1, x2, y2, x4, y4);
-        and2.connect(x3, y3, x4, y4, x5, y5);
+        and1.connect(std::vector<std::pair<int, int>>{
+                    std::pair<int, int>(x1,y1),
+                    std::pair<int, int>(x2,y2),
+                    std::pair<int, int>(x3,y3)
+                    });
+        or1.connect(std::vector<std::pair<int, int>>{
+                    std::pair<int, int>(x1,y1),
+                    std::pair<int, int>(x2,y2),
+                    std::pair<int, int>(x4,y4)
+                    });
+        and2.connect(std::vector<std::pair<int, int>>{
+                    std::pair<int, int>(x3,y3),
+                    std::pair<int, int>(x4,y4),
+                    std::pair<int, int>(x5,y5)
+                    });
 
         WHEN("Voltage connected on input") {
             v1.addNode(x1, y1);

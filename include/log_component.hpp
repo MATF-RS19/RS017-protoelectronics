@@ -8,7 +8,6 @@ public:
     // From given voltage returns their logical value
     static bool getBoolVoltage(double v);
 
-    virtual void connect(int x1,int y1, int x2,int y2, int x3, int y3) = 0;
     double voltage() const override;
     double power() const override{
         return 0;
@@ -34,7 +33,7 @@ public:
 
     std::string componentType() const override { return "and"; }
     
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -48,7 +47,7 @@ public:
 
     std::string componentType() const override { return "or"; }
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -62,7 +61,7 @@ public:
 
     std::string componentType() const override { return "xor"; }
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -76,7 +75,7 @@ public:
 
     std::string componentType() const override { return "nand"; }
     
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -90,7 +89,7 @@ public:
     
     std::string componentType() const override { return "nor"; }
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -104,7 +103,7 @@ public:
     
     std::string componentType() const override { return "nxor"; }
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -118,7 +117,7 @@ public:
 
     std::string componentType() const override { return "not"; }
 
-    void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

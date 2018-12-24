@@ -55,7 +55,7 @@ class Component;
 class Node : public Counter<Node> {
 public:
     //voltage in node
-	double _v;
+    double _v = 0;
 
     //Creates node with given coordinates and optionally adds connection to component
 	Node(int x, int y, Component* const component);
@@ -169,6 +169,12 @@ public:
      * if not, makes new node and connects
     */
     virtual void addNode(int x, int y);
+
+    /*
+     * Connects component to all nodes given by coordinates of connection points
+     * Calls addNode for every pair of coordinates
+    */
+    virtual void connect(const std::vector<std::pair<int, int>> &connPts);
 
     //Disconnects component from all nodes with given coordinates
     virtual void disconnect(int x, int y);

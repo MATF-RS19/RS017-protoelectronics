@@ -1,7 +1,10 @@
 #include "components.hpp"
 #include <iostream>
 #include <stdexcept>
+
+#ifdef QTPAINT
 #include "scene.h" // for itemChange
+#endif
 
 template<typename T>
 int Counter<T>::_counter(0);
@@ -209,7 +212,7 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
 void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     if(event->button() == Qt::RightButton) {
         QPointF center = boundingRect().center();
-        QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(-90).translate(-center.x(), -center.y());
+        QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(90).translate(-center.x(), -center.y());
         setTransform(rotation, true);
     }
 
@@ -219,8 +222,11 @@ void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if(event->button() == Qt::LeftButton) {
         qDebug() << "Mis je released";
-        QGraphicsItem::mouseReleaseEvent(event);
+
+        disconnect();
+        connect(connectionPoints());
     }
+    QGraphicsItem::mouseReleaseEvent(event);
 }
 
 void Component::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
@@ -302,6 +308,12 @@ void Component::addNode(int x, int y) {
 		_nodes.back() = *res.first;
 		_nodes.back()->addComponent(this);
 	}
+}
+
+void Component::connect(const std::vector<std::pair<int, int>> &connPts) {
+    for(auto const& connPoint : connPts) {
+        this->addNode(connPoint.first, connPoint.second);
+    }
 }
 
 void Component::disconnect(int x, int y) {
