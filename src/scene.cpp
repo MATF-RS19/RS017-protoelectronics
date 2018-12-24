@@ -30,15 +30,15 @@ void GridZone::drawBackground(QPainter *painter, const QRectF &rect)
 }
 
 void GridZone::dragEnterEvent(QGraphicsSceneDragDropEvent *event) {
-
+    Q_UNUSED(event);
 }
 
 void GridZone::dragMoveEvent(QGraphicsSceneDragDropEvent *event) {
-
+    Q_UNUSED(event);
 }
 
 void GridZone::dragLeaveEvent(QGraphicsSceneDragDropEvent *event) {
-
+    Q_UNUSED(event);
 }
 
 void GridZone::dropEvent(QGraphicsSceneDragDropEvent *event) {

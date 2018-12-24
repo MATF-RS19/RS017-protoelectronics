@@ -15,7 +15,7 @@ public:
     int getGridSize() const {return this->gridSize;}
 
 protected:
-    void drawBackground(QPainter* painter, const QRectF &rect);
+    void drawBackground(QPainter* painter, const QRectF &rect) override;
 
     void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
     void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;

@@ -17,7 +17,10 @@ void MainWindow::createListWidget() {
     itemListWidget = new QListWidget;
 
     QStringList itemList;
-    itemList << "Wire" << "Resistor" << "Ground" << "DC Voltage" << "AND" << "OR" << "XOR" << "NAND" << "NOR" << "NXOR" << "NOT";
+    itemList << "Wire" << "Resistor" << "Ground" <<
+                "DC Voltage" << "AND" << "OR" <<
+                "XOR" << "NAND" << "NOR" <<
+                "NXOR" << "NOT";
     itemListWidget->addItems(itemList);
     itemListWidget->setFixedWidth(120);
 

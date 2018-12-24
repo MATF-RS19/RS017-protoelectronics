@@ -1,6 +1,7 @@
 #include "components.hpp"
 #include <iostream>
 #include <stdexcept>
+#include "scene.h" // for itemChange
 
 template<typename T>
 int Counter<T>::_counter(0);
@@ -664,6 +665,9 @@ std::vector<std::pair<int, int>> DCVoltage::connectionPoints(void) const {
 #endif
 
 void DCVoltage::addNode(int x, int y) {
+    if (_nodes.size() >= 1) {
+        throw std::runtime_error("DCVoltage already connected!");
+    }
     Component::addNode(x, y);
     _nodes.back()->_v = _voltage;
 }
@@ -715,24 +719,6 @@ std::vector<std::pair<int, int>> VoltageSource::connectionPoints(void) const {
 #endif
 */
 
-
-void DCVoltage::addNode(int x, int y) {
-    if (_nodes.size() >= 1) {
-        throw std::runtime_error("DCVoltage already connected!");
-    }
-
-    Component::addNode(x, y);
-    _nodes.back()->_v = _voltage;
-}
-
-double DCVoltage::voltage() const {
-	return _voltage;
-}
-
-//TODO
-double DCVoltage::current() const {
-	return 0;
-}
 
 void DCVoltage::disconnect(int x, int y) {
     auto it = Node::find(x, y);

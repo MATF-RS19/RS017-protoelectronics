@@ -4,7 +4,6 @@
 #define QTPAINT
 
 #ifdef QTPAINT
-#include "scene.h"
 #include "math.h"
 
 #include <QPainter>
