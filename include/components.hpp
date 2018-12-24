@@ -10,6 +10,8 @@
 #include <QPainter>
 #include <QGraphicsItem>
 #include <QGraphicsRectItem>
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsSceneHoverEvent>
 #include <QApplication>
 #include <QPen>
 #include <QDebug>
@@ -129,7 +131,7 @@ private:
 
 class Component
 				#ifdef QTPAINT
-				: public QGraphicsItem
+                : public QGraphicsItem
 				#endif
 				{
 public:
@@ -139,6 +141,7 @@ public:
     virtual QRectF boundingRect() const;
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual std::vector<std::pair<int, int>> connectionPoints(void) const = 0;
 #endif
 
     virtual ~Component();
@@ -204,15 +207,26 @@ private:
     template <typename Iter>
 	void addNodeAt(Iter &pos, int x, int y);
 
+    //friend std::ostream& operator<<(std::ostream& out, const Component& c);
 
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
+    //std::string toString() const;
 
 #ifdef QTPAINT
     QPen penForLines;
     QPen penForDots;
+    QPen penForLeadsGreen;
+    QPen penForLeadsRed;
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
+    void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
+
 #endif
 };
 
@@ -231,6 +245,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 };
 
@@ -251,6 +266,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 };
 
@@ -271,6 +287,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 private:
@@ -335,6 +352,7 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
 private:

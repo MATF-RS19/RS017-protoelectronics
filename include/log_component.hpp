@@ -16,8 +16,15 @@ public:
 	double current() const override{
         return 0;
     }
+
 #ifdef QTPAINT
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
+protected:
     QRectF boundingRect() const override;
+
+    void voltageDependedSetPen(QPainter* painter, unsigned id);
+    void voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned id);
+
 #endif
 };
 
@@ -27,8 +34,8 @@ public:
 
     std::string componentType() const override { return "and"; }
     
-
     void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -56,6 +63,7 @@ public:
     std::string componentType() const override { return "xor"; }
 
     void connect(int x1,int y1, int x2,int y2, int x3, int y3) override;
+
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -114,7 +122,9 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
+
 };
 
 #endif /* ifndef LOG_COMPONENTS */

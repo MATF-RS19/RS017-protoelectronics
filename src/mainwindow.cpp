@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -16,7 +17,7 @@ void MainWindow::createListWidget() {
     itemListWidget = new QListWidget;
 
     QStringList itemList;
-    itemList << "Wire" << "Resistor" << "Ground" << "DC Voltage" << "AND gate";
+    itemList << "Wire" << "Resistor" << "Ground" << "DC Voltage" << "AND" << "OR" << "XOR" << "NAND" << "NOR" << "NXOR" << "NOT";
     itemListWidget->addItems(itemList);
     itemListWidget->setFixedWidth(120);
 
@@ -31,6 +32,7 @@ void MainWindow::createSceneAndView() {
 }
 
 void MainWindow::createGraphicsItems(){
+    /*
     Ground *ground = new Ground();
     scene->addItem(ground);
 
@@ -45,11 +47,11 @@ void MainWindow::createGraphicsItems(){
     DCVoltage* dcVoltage = new DCVoltage(10);
     dcVoltage->setPos(resistor->pos()+QPointF(120, 0));
     scene->addItem(dcVoltage);
-/*
-    VoltageSource* voltageSource = new VoltageSource;
-    voltageSource->setPos(dcVoltage->pos()+QPointF(120, 0));
-    scene->addItem(voltageSource);
-*/
+
+   // VoltageSource* voltageSource = new VoltageSource;
+   // voltageSource->setPos(dcVoltage->pos()+QPointF(120, 0));
+   // scene->addItem(voltageSource);
+
     ANDGate* andComponent = new ANDGate();
     andComponent->setPos(ground->pos()+QPointF(0, 140));
     scene->addItem(andComponent);
@@ -77,6 +79,7 @@ void MainWindow::createGraphicsItems(){
     NOTGate* notComponent = new NOTGate();
     notComponent->setPos(norComponent->pos()+QPointF(0, 160));
     scene->addItem(notComponent);
+*/
 }
 
 void MainWindow::createLayout(){
@@ -85,4 +88,13 @@ void MainWindow::createLayout(){
     frameLayout->addWidget(itemListWidget);
     frameLayout->addWidget(view);
     setCentralWidget(frame);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event){
+    // On pressed escape key window is closed
+    if(event->key() == Qt::Key_Escape){
+        this->close();
+    }
+
+    QMainWindow::keyPressEvent(event);
 }

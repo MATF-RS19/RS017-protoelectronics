@@ -7,20 +7,25 @@ int Counter<T>::_counter(0);
 
 std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 
+//std::string Component::toString() const {
+//    std::string str;
+//    str = name() + "\n";
+
+//    str += "U = " + std::to_string(voltage()) + " V\n";
+//    str += "I = " + std::to_string(current()) + " A\n";
+//    str += "P = " + std::to_string(power()) + " W\n";
+//    return str;
+//}
 
 std::ostream& operator<<(std::ostream& out, const Component& c) {
-	out << c.name() << std::endl
-	<< "Nodes: [ ";
-	for (const auto& n : c.nodes()) {
-		out << n->id() << " ";
-	}
-	out << "]" << std::endl;
+    out << "Nodes: [ ";
+    for (const auto& n : c.nodes()) {
+        out << n->id() << " ";
+    }
 
-	out << "U = " << c.voltage() << " V" << std::endl
-		<< "I = " << c.current() << " A" << std::endl
-		<< "P = " << c.power() << " W";
-
-	return out;
+    out << "]\n";
+    //out << c.toString();
+    return out;
 }
 
 std::ostream& operator<<(std::ostream& out, const Node& n) {
@@ -155,8 +160,6 @@ void Node::disconnectFromComponent(Component* const e) {
     }
 }
 
-
-
 //Component
 Component::Component(const std::string &name)
 	:_name(name)
@@ -165,12 +168,15 @@ Component::Component(const std::string &name)
     _nodes.reserve(3);
 
 #ifdef QTPAINT
+    setAcceptHoverEvents(true);
     setFlags(QGraphicsItem::ItemIsSelectable |
             QGraphicsItem::ItemIsMovable |
             QGraphicsItem::ItemSendsGeometryChanges);
 
     penForLines = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap);
     penForDots = QPen(Qt::white, 6, Qt::SolidLine, Qt::RoundCap);
+    penForLeadsGreen = QPen(Qt::green, 3, Qt::SolidLine, Qt::RoundCap);
+    penForLeadsRed = QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap);
 #endif
 }
 
@@ -178,23 +184,64 @@ Component::Component(const std::string &name)
 QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value) {
     if (change == ItemPositionChange && scene()) {
         QPointF newPos = value.toPointF();
+
         if(QApplication::mouseButtons() == Qt::LeftButton &&
                 qobject_cast<GridZone*> (scene())){
 
-            //penForLines.setColor(QColor(8, 246, 242));
             GridZone* customScene = qobject_cast<GridZone*> (scene());
             int gridSize = customScene->getGridSize();
             qreal xV = round(newPos.x()/gridSize)*gridSize;
             qreal yV = round(newPos.y()/gridSize)*gridSize;
             return QPointF(xV, yV);
         }
+
         else {
             return newPos;
         }
     }
+
     else {
         return QGraphicsItem::itemChange(change, value);
     }
+}
+
+void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    if(event->button() == Qt::RightButton) {
+        QPointF center = boundingRect().center();
+        QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(-90).translate(-center.x(), -center.y());
+        setTransform(rotation, true);
+    }
+
+    QGraphicsItem::mousePressEvent(event);
+}
+
+void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    if(event->button() == Qt::LeftButton) {
+        qDebug() << "Mis je released";
+        QGraphicsItem::mouseReleaseEvent(event);
+    }
+}
+
+void Component::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+    auto dots = this->connectionPoints();
+    qDebug() << QString::fromStdString(this->componentType());
+    for(auto e: dots) {
+        qDebug() << e.first << " " << e.second;
+    }
+    //qDebug() << QString::fromStdString(this->toString());
+    QGraphicsItem::mouseMoveEvent(event);
+}
+
+void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
+    qDebug() << "hovering";
+    setSelected(true);
+    penForLines.setColor(QColor(8, 246, 242));
+}
+
+void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
+    qDebug() << "hoveringg offf";
+    setSelected(false);
+    penForLines.setColor(QColor(Qt::black));
 }
 
 QRectF Component::boundingRect() const {
@@ -361,19 +408,33 @@ void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     // Setting color for drawing lines
     painter->setPen(penForLines);
 
-    // vertical line
+    // Vertical line
     painter->drawLine(50, 60, 50, 0);
 
-    // horizontal lines, one beneath other
+    // Horizontal lines, one beneath other
     painter->drawLine(20, 60, 80, 60);
     painter->drawLine(30, 70, 70, 70);
     painter->drawLine(40, 80, 60, 80);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF up(50, 0.5);
     painter->drawPoint(up);
 }
+
+std::vector<std::pair<int, int>> Ground::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots;
+
+    // Find local coordinates of connection point
+    QPointF localPoint(boundingRect().x()+boundingRect().width()/2,
+                       boundingRect().y());
+
+    // And then map to scene coordinates
+    auto scenePoint = mapToScene(localPoint);
+    dots.push_back(std::pair<int, int>(scenePoint.x(), scenePoint.y()));
+    return dots;
+}
+
 #endif
 
 double Ground::voltage() const {
@@ -413,13 +474,34 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 
     painter->drawLine(0, 50, 100, 50);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF p1(0.5, 50);
     QPointF p2(99.5, 50);
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
+
+std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots;
+    dots.reserve(2);
+
+    // Find local coordinates of connection point
+    QPointF localPoint1(boundingRect().x(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    QPointF localPoint2(boundingRect().x()+boundingRect().width(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    // And then map to scene coordinates
+    auto scenePoint1 = mapToScene(localPoint1);
+    auto scenePoint2 = mapToScene(localPoint2);
+    dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+    dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+
+    return dots;
+}
+
 #endif
 
 //TODO
@@ -464,10 +546,10 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     // Setting color for drawing lines
     painter->setPen(penForLines);
 
-    // input line
+    // Input line
     painter->drawLine(0, 50, 14, 50);
 
-    // zigzag lines
+    // Zigzag lines
     painter->drawLine(14, 50, 20, 30);
     painter->drawLine(20, 30, 31, 65);
     painter->drawLine(31, 65, 42, 30);
@@ -476,18 +558,37 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->drawLine(64, 30, 75, 65);
     painter->drawLine(75, 65, 86, 50);
 
-    // output line
+    // Output line
     painter->drawLine(86, 50, 100, 50);
 
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignHCenter, QString::number(_resistance) + " Ohm");
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF p1(0.5, 50);
     QPointF p2(99.5, 50);
     painter->drawPoint(p1);
     painter->drawPoint(p2);
+}
+
+std::vector<std::pair<int, int>> Resistor::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots;
+    dots.reserve(2);
+
+    // Find local coordinates of connection point
+    QPointF localPoint1(boundingRect().x(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    QPointF localPoint2(boundingRect().x()+boundingRect().width(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    // And then map to scene coordinates
+    auto scenePoint1 = mapToScene(localPoint1);
+    auto scenePoint2 = mapToScene(localPoint2);
+    dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+    dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+    return dots;
 }
 #endif
 
@@ -513,6 +614,7 @@ void Resistor::addNode(int x, int y) {
 
 
 
+
 //DCVoltage
 DCVoltage::DCVoltage(double voltage)
 	:Component("U" + std::to_string(_counter+1)),
@@ -528,10 +630,16 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     // Setting color for drawing lines
     painter->setPen(penForLines);
 
-    // vertical line
+    // Vertical line
+    if(voltage() > 0)
+        painter->setPen(penForLeadsGreen);
+    else if(voltage() < 0)
+        painter->setPen(penForLeadsRed);
+    else
+        painter->setPen(penForLines);
     painter->drawLine(50, 0, 50, 40);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF p(50, 0.5);
     painter->drawPoint(p);
@@ -540,10 +648,38 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignCenter, QString::number(_voltage) + " V");
 }
+
+std::vector<std::pair<int, int>> DCVoltage::connectionPoints(void) const {
+    std::vector<std::pair<int, int>> dots;
+
+    // Find local coordinates of connection point
+    QPointF localPoint(boundingRect().x()+boundingRect().width()/2,
+                       boundingRect().y());
+
+    // And then map to scene coordinates
+    auto scenePoint = mapToScene(localPoint);
+    dots.push_back(std::pair<int, int>(scenePoint.x(), scenePoint.y()));
+    return dots;
+}
 #endif
 
+void DCVoltage::addNode(int x, int y) {
+    Component::addNode(x, y);
+    _nodes.back()->_v = _voltage;
+}
+
+double DCVoltage::voltage() const {
+	return _voltage;
+}
+
+//TODO
+double DCVoltage::current() const {
+	return 0;
+}
+
 /* TODO 2 terminals
-void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+#ifdef QTPAINT
+void VoltageSource::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
     Q_UNUSED(widget);
     // Component::draw(painter, option, widget);
@@ -560,14 +696,25 @@ void VoltageSource::draw(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->drawLine(lineDownHorizontal);
     painter->drawLine(lineDownVertical);
 
-    //connection points
+    // Connection points
     painter->setPen(penForDots);
     QPointF pUp(50,0.5);
     QPointF pDown(50,99.5);
     painter->drawPoint(pUp);
     painter->drawPoint(pDown);
 }
+
+
+std::vector<std::pair<int, int>> VoltageSource::connectionPoints(void) const {
+    // TODO AKO DODAMO
+    std::vector<std::pair<int, int>> dots(2);
+    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
+    dots.push_back(std::pair<int, int>(this->x()+boundingRect().width(), this->y()+boundingRect().height()/2));
+    return dots;
+}
+#endif
 */
+
 
 void DCVoltage::addNode(int x, int y) {
     if (_nodes.size() >= 1) {
@@ -692,3 +839,4 @@ void Switch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     //TODO
 }
 #endif
+

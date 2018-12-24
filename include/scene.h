@@ -4,6 +4,8 @@
 #include <QGraphicsScene>
 #include <QPainter>
 #include <QApplication>
+#include <QKeyEvent>
+#include <QMimeData>
 
 class GridZone : public QGraphicsScene
 {
@@ -14,6 +16,13 @@ public:
 
 protected:
     void drawBackground(QPainter* painter, const QRectF &rect);
+
+    void dragEnterEvent(QGraphicsSceneDragDropEvent *event) override;
+    void dragMoveEvent(QGraphicsSceneDragDropEvent *event) override;
+    void dragLeaveEvent(QGraphicsSceneDragDropEvent *event) override;
+    void dropEvent(QGraphicsSceneDragDropEvent *event) override;
+
+    void keyPressEvent(QKeyEvent *event) override;
 private:
     int gridSize;
 };
