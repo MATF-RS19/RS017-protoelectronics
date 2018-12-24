@@ -2,6 +2,7 @@
 
 #include "components.hpp"
 #include "log_component.hpp"
+#include "circuit.hpp"
 
 #define EPS 1e-5
 
@@ -26,6 +27,14 @@ SCENARIO("add component", "[add]"){
             }
         }
 
+        WHEN("Resistor added with no resistance") {
+            Resistor r;
+
+            THEN("Resistance is 1000 Ohm"){
+                REQUIRE(r.resistance() == Approx(1000).epsilon(EPS));
+            }
+        }
+
         WHEN("Two resistors and ground added") {
             Resistor r1(1000);
             Resistor r2(500);
@@ -37,21 +46,19 @@ SCENARIO("add component", "[add]"){
             }
         }
 
-        /*
         WHEN("resistor added with negative resistance") {
 
             THEN("Throws Exception"){
-                REQUIRE_THROWS(Resistor* r = new Resistor(-5));
+                REQUIRE_THROWS(new Resistor(-5));
             }
         }
 
         WHEN("resistor added with 0 resistance") {
 
             THEN("Throws Exception"){
-                REQUIRE_THROWS(Resistor* r = new Resistor(-5));
+                REQUIRE_THROWS(new Resistor(0));
             }
         }
-        */
 
         WHEN("DCVoltage added with 5 V") {
             double voltage = 5;
@@ -138,17 +145,16 @@ SCENARIO("connect one component", "[connect one]"){
             THEN("Nodes from all nodes is same as nodes in component"){
                 REQUIRE(*Node::find(x1, y1) == *r.find(x1, y1));
                 REQUIRE(*Node::find(x2, y2) == *r.find(x2, y2));
-        }
+            }
     }
-/*
-        WHEN("Connect 3 leads to nodes"){
-            r.addNode(1, 5);
-            r.addNode(10, 8);
-            THEN("Throw exeption"){
-                REQUIRE_THROWS(r.addNode(5,3));
+
+        WHEN("Connect three leads"){
+            r.addNode(1, 3);
+            r.addNode(2, 2);
+            THEN("Throws exception") {
+                REQUIRE_THROWS(r.addNode(3, 4));
             }
         }
-*/
    }
 
 
@@ -390,7 +396,7 @@ SCENARIO("disconnect component completely", "[disconnectAll]"){
     int x1 = 5, y1 = 1;
     int x2 = 10, y2 = 10;
     Resistor r1(1000);
-    Ground g;
+    Resistor g(500);
 
     GIVEN("resistor connect to 2 nodes"){
         r1.addNode(x1, y1);
@@ -408,7 +414,7 @@ SCENARIO("disconnect component completely", "[disconnectAll]"){
             }
         }
     }
-    
+
     GIVEN("resistor connect to 2 nodes and ground connected to both"){
         r1.addNode(x1, y1);
         r1.addNode(x2, y2);
@@ -706,4 +712,48 @@ SCENARIO("Get components by type when connected with wire", "[getComponentTypeWi
         }
     }
 
+}
+
+SCENARIO("Circuit", "[circuit]"){
+    GIVEN("Empty circuit") {
+        Circuit c;
+
+        WHEN("Add component") {
+            c.addComponent(new Resistor(10));
+
+            THEN("Component is in circuit") {
+                REQUIRE(c[0]->name() == "R1" );
+            }
+        }
+
+        WHEN("Add 2 components") {
+            c.addComponent(new Resistor(10));
+            c.addComponent(new DCVoltage(10));
+
+            THEN("Component 1 is in circuit") {
+                REQUIRE(c[0]->name() == "R1" );
+            }
+
+            THEN("Component 2 is in circuit") {
+                REQUIRE(c[1]->name() == "U1" );
+            }
+        }
+
+        WHEN("Add component then remove") {
+            c.addComponent(new Resistor(10));
+            c.removeComponent(0);
+
+            THEN("Circuit is empty") {
+                REQUIRE(c.size() == 0 );
+            }
+        }
+
+        WHEN("get component") {
+            THEN("Exception is thrown") {
+                REQUIRE_THROWS(c[0]);
+                REQUIRE_THROWS(c[-5]);
+                REQUIRE_THROWS(c[5]);
+            }
+        }
+    }
 }
