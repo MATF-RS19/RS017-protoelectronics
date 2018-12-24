@@ -74,7 +74,7 @@ public:
     //Returns only direct components of type 'componentType' connected to node
 	std::vector<Component*> directComponents(const std::string& componentType) const;
 
-    //Returns all components connected to node with those connected with wire
+    //Returns all components connected to node, including wire connections
 	std::vector<Component*> components() const;
 
     //Returns all components of type 'componentType' connected to node, including wire connections
@@ -105,7 +105,7 @@ public:
 
     //Finds all components with componentType directly connected to node (x, y)
 	static std::vector<Component*> findDirectlyConnected(const std::string& componentType, int x, int y);
-    
+
     //Finds all components with componentType directly or by wire connected to node (x, y)
 	static std::vector<Component*> find(const std::string& componentType, int x, int y);
 
@@ -172,14 +172,17 @@ public:
     virtual void addNode(int x, int y);
 
     //Disconnects component from all nodes with given coordinates
-    void disconnect(int x, int y);
+    virtual void disconnect(int x, int y);
+
+    //Disconnects component completely
+    virtual void disconnect();
 
     /*
      * Disconnects component from all nodes with given coordinates
      * (connection node->component will be removed also)
      * and connects them to another node
 	*/
-    void reconnect(int xFrom, int yFrom, int xTo, int yTo);
+    virtual void reconnect(int xFrom, int yFrom, int xTo, int yTo);
 
 	virtual double voltage() const = 0;
 	virtual double current() const = 0;
@@ -231,7 +234,7 @@ protected:
 class Ground : public Component, public Counter<Ground> {
 public:
 	Ground();
-    
+
     std::string componentType() const override { return "ground"; }
 
 	double voltage() const override;
@@ -250,7 +253,7 @@ public:
 class Wire : public Component, public Counter<Wire> {
 public:
 	Wire();
-    
+
     std::string componentType() const override { return "wire"; }
 
 	double voltage() const override;
@@ -258,6 +261,8 @@ public:
 	double current() const override;
 
     std::shared_ptr<Node> otherNode(int id);
+
+    void addNode(int x, int y) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -268,8 +273,8 @@ public:
 
 class Resistor : public Component, public Counter<Resistor> {
 public:
-	Resistor(double resistance);
-    
+	Resistor(double resistance = 1000);
+
     std::string componentType() const override {return "resistor";}
 
 	double resistance() const;
@@ -277,6 +282,8 @@ public:
 	double voltage() const override;
 
 	double current() const override;
+
+    void addNode(int x, int y) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -288,9 +295,46 @@ private:
 };
 
 
+class Switch : public Component, public Counter<Switch> {
+public:
+
+    enum state {
+        OPEN,
+        CLOSE
+    };
+
+    Switch(state s = OPEN);
+
+    std::string componentType() const override {return ( _state == CLOSE )? "wire" : "switch";}
+
+    void addNode(int x, int y) override;
+
+    void open();
+
+    bool isOpend() const;
+
+    void close();
+
+    bool isClosed() const;
+
+    void changeState();
+
+    double voltage() const override;
+
+    double current() const override;
+
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#endif
+
+private:
+    state _state;
+};
+
+
 class DCVoltage : public Component, public Counter<DCVoltage> {
 public:
-	DCVoltage(double voltage);
+	DCVoltage(double voltage = 5);
 
     std::string componentType() const override {return "voltage";}
 
@@ -299,6 +343,12 @@ public:
 	double current() const override;
 
 	void addNode(int x, int y) override;
+
+    void disconnect(int x, int y) override;
+
+    void disconnect() override;
+
+    void reconnect(int xFrom, int yFrom, int xTo, int yTo) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

@@ -24,6 +24,7 @@ protected:
 
     void voltageDependedSetPen(QPainter* painter, unsigned id);
     void voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned id);
+
 #endif
 };
 
