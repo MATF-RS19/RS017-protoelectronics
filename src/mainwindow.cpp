@@ -18,7 +18,7 @@ void MainWindow::createListWidget() {
 
     QStringList itemList;
     itemList << "Wire" << "Resistor" << "Ground" <<
-                "DC Voltage" << "AND" << "OR" <<
+                "DC Voltage" << "Switch" << "AND" << "OR" <<
                 "XOR" << "NAND" << "NOR" <<
                 "NXOR" << "NOT";
     itemListWidget->addItems(itemList);
@@ -83,6 +83,7 @@ void MainWindow::createGraphicsItems(){
     notComponent->setPos(norComponent->pos()+QPointF(0, 160));
     scene->addItem(notComponent);
 */
+
 }
 
 void MainWindow::createLayout(){
@@ -97,7 +98,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event){
     // On pressed escape key window is closed
     if(event->key() == Qt::Key_Escape){
         this->close();
+        QMainWindow::keyPressEvent(event);
     }
-
-    QMainWindow::keyPressEvent(event);
 }
