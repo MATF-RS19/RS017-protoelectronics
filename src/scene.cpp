@@ -69,7 +69,7 @@ void GridZone::dropEvent(QGraphicsSceneDragDropEvent *event) {
                     this->addItem(wire);
                 }
                 else if(componentType == "Resistor") {
-                        Resistor* resistor = new Resistor(1000);
+                        Resistor* resistor = new Resistor();
                         resistor->setPos(newPos);
 
                         resistor->connect(resistor->connectionPoints());
@@ -85,10 +85,16 @@ void GridZone::dropEvent(QGraphicsSceneDragDropEvent *event) {
                         this->addItem(gnd);
                 }
                 else if (componentType == "DC Voltage") {
-                    DCVoltage* dcv = new DCVoltage(5);
+                    DCVoltage* dcv = new DCVoltage();
                     dcv->setPos(newPos);
                     dcv->connect(dcv->connectionPoints());
                     this->addItem(dcv);
+                }
+                else if(componentType == "Switch") {
+                    Switch* sw = new Switch();
+                    sw->setPos(newPos);
+                    sw->connect(sw->connectionPoints());
+                    this->addItem(sw);
                 }
                 else if (componentType == "AND") {
                     ANDGate* andGate = new ANDGate();

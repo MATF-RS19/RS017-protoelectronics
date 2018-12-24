@@ -178,6 +178,7 @@ Component::Component(const std::string &name)
             QGraphicsItem::ItemSendsGeometryChanges);
 
     penForLines = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap);
+    penForLinesWhite = QPen(Qt::white, 3, Qt::SolidLine, Qt::RoundCap);
     penForDots = QPen(Qt::white, 6, Qt::SolidLine, Qt::RoundCap);
     penForLeadsGreen = QPen(Qt::green, 3, Qt::SolidLine, Qt::RoundCap);
     penForLeadsRed = QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap);
@@ -243,12 +244,14 @@ void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     qDebug() << "hovering";
     setSelected(true);
     penForLines.setColor(QColor(8, 246, 242));
+    penForLinesWhite.setColor(QColor(8, 246, 242));
 }
 
 void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     qDebug() << "hoveringg offf";
     setSelected(false);
     penForLines.setColor(QColor(Qt::black));
+    penForLinesWhite.setColor(Qt::white);
 }
 
 QRectF Component::boundingRect() const {
@@ -560,19 +563,19 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->setPen(penForLines);
 
     // Input line
-    painter->drawLine(0, 50, 14, 50);
+    painter->drawLine(0, 50, 18, 50);
 
     // Zigzag lines
-    painter->drawLine(14, 50, 20, 30);
-    painter->drawLine(20, 30, 31, 65);
-    painter->drawLine(31, 65, 42, 30);
-    painter->drawLine(42, 30, 53, 65);
-    painter->drawLine(53, 65, 64, 30);
-    painter->drawLine(64, 30, 75, 65);
-    painter->drawLine(75, 65, 86, 50);
+    painter->drawLine(18, 50, 25, 30);
+    painter->drawLine(25, 30, 35, 65);
+    painter->drawLine(35, 65, 45, 30);
+    painter->drawLine(45, 30, 55, 65);
+    painter->drawLine(55, 65, 65, 30);
+    painter->drawLine(65, 30, 75, 65);
+    painter->drawLine(75, 65, 82, 50);
 
     // Output line
-    painter->drawLine(86, 50, 100, 50);
+    painter->drawLine(82, 50, 100, 50);
 
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignHCenter, QString::number(_resistance) + " Ohm");
@@ -785,7 +788,7 @@ void Switch::open() {
     }
 }
 
-bool Switch::isOpend() const {
+bool Switch::isOpened() const {
     return _state == OPEN;
 }
 
@@ -834,7 +837,59 @@ double Switch::current() const {
 
 #ifdef QTPAINT
 void Switch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    //TODO
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    // Component::paint(painter, option, widget);
+
+    // Setting color for drawing lines
+    painter->setPen(penForLines);
+
+    // 2 small lines
+    painter->drawLine(0, 50, 35, 50);
+    painter->drawLine(65, 50, 100, 50);
+
+    // Open/Closed line
+    painter->setPen(penForLinesWhite);
+    if(this->_state == OPEN)
+        painter->drawLine(35, 50, 65, 30);
+    else
+        painter->drawLine(35, 47, 65, 47);
+
+    // Connection points
+    painter->setPen(penForDots);
+    QPointF p1(0.5, 50);
+    QPointF p2(99.5, 50);
+    painter->drawPoint(p1);
+    painter->drawPoint(p2);
+}
+
+std::vector<std::pair<int, int>> Switch::connectionPoints(void) const{
+    std::vector<std::pair<int, int>> dots;
+    dots.reserve(2);
+
+    // Find local coordinates of connection point
+    QPointF localPoint1(boundingRect().x(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    QPointF localPoint2(boundingRect().x()+boundingRect().width(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    // And then map to scene coordinates
+    auto scenePoint1 = mapToScene(localPoint1);
+    auto scenePoint2 = mapToScene(localPoint2);
+    dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+    dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+    return dots;
+}
+
+void Switch::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    Component::mousePressEvent(event);
+    if(event->button() == Qt::LeftButton) {
+        this->changeState();
+        update();
+    }
+
+    QGraphicsItem::mousePressEvent(event);
 }
 #endif
 

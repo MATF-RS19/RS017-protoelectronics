@@ -221,6 +221,7 @@ protected:
 
 #ifdef QTPAINT
     QPen penForLines;
+    QPen penForLinesWhite;
     QPen penForDots;
     QPen penForLeadsGreen;
     QPen penForLeadsRed;
@@ -316,7 +317,7 @@ public:
 
     void open();
 
-    bool isOpend() const;
+    bool isOpened() const;
 
     void close();
 
@@ -330,6 +331,10 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
 
 private:
@@ -359,7 +364,6 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
-
 private:
 	double _voltage;
 };
