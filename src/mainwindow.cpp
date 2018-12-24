@@ -32,6 +32,7 @@ void MainWindow::createSceneAndView() {
 }
 
 void MainWindow::createGraphicsItems(){
+    /*
     Ground *ground = new Ground();
     scene->addItem(ground);
 
@@ -46,11 +47,11 @@ void MainWindow::createGraphicsItems(){
     DCVoltage* dcVoltage = new DCVoltage(10);
     dcVoltage->setPos(resistor->pos()+QPointF(120, 0));
     scene->addItem(dcVoltage);
-/*
-    VoltageSource* voltageSource = new VoltageSource;
-    voltageSource->setPos(dcVoltage->pos()+QPointF(120, 0));
-    scene->addItem(voltageSource);
-*/
+
+   // VoltageSource* voltageSource = new VoltageSource;
+   // voltageSource->setPos(dcVoltage->pos()+QPointF(120, 0));
+   // scene->addItem(voltageSource);
+
     ANDGate* andComponent = new ANDGate();
     andComponent->setPos(ground->pos()+QPointF(0, 140));
     scene->addItem(andComponent);
@@ -78,6 +79,7 @@ void MainWindow::createGraphicsItems(){
     NOTGate* notComponent = new NOTGate();
     notComponent->setPos(norComponent->pos()+QPointF(0, 160));
     scene->addItem(notComponent);
+*/
 }
 
 void MainWindow::createLayout(){
@@ -89,17 +91,8 @@ void MainWindow::createLayout(){
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event){
-
-    // On pressed delete key removing item from scene
-    if(event->key() == Qt::Key_Delete){
-        foreach(QGraphicsItem *item, scene->selectedItems())
-            if(Component *rItem = qgraphicsitem_cast<Component*> (item))
-                delete item;
-        scene->clearSelection();
-    }
-
     // On pressed escape key window is closed
-    else if(event->key() == Qt::Key_Escape){
+    if(event->key() == Qt::Key_Escape){
         this->close();
     }
 

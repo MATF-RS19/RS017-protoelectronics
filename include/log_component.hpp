@@ -18,12 +18,13 @@ public:
     }
 
 #ifdef QTPAINT
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
+protected:
     QRectF boundingRect() const override;
+
     void voltageDependedSetPen(QPainter* painter, unsigned id);
     void voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned id);
-    std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
-
 };
 
 class ANDGate : public LogicGate, public Counter<ANDGate>{

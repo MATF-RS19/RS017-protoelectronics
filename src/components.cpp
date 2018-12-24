@@ -16,16 +16,16 @@ std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 //    return str;
 //}
 
-//std::ostream& operator<<(std::ostream& out, const Component& c) {
-//    out << "Nodes: [ ";
-//    for (const auto& n : c.nodes()) {
-//        out << n->id() << " ";
-//    }
+std::ostream& operator<<(std::ostream& out, const Component& c) {
+    out << "Nodes: [ ";
+    for (const auto& n : c.nodes()) {
+        out << n->id() << " ";
+    }
 
-//    out << "]\n";
-//    out << c.toString();
-//	return out;
-//}
+    out << "]\n";
+    //out << c.toString();
+    return out;
+}
 
 std::ostream& operator<<(std::ostream& out, const Node& n) {
 	out << "*  Node " << n.id() << ":" << std::endl
@@ -163,7 +163,6 @@ Component::Component(const std::string &name)
     _nodes.reserve(3);
 
 #ifdef QTPAINT
-    setAcceptDrops(true);
     setAcceptHoverEvents(true);
     setFlags(QGraphicsItem::ItemIsSelectable |
             QGraphicsItem::ItemIsMovable |
@@ -202,12 +201,7 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
 }
 
 void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    if(event->button() == Qt::LeftButton) {
-        qDebug() << "Mis je pressed";
-       // setSelected(true);
-        penForLines.setColor(QColor(8, 246, 242));
-    }
-    else if(event->button() == Qt::RightButton) {
+    if(event->button() == Qt::RightButton) {
         QPointF center = boundingRect().center();
         QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(-90).translate(-center.x(), -center.y());
         setTransform(rotation, true);
@@ -219,7 +213,6 @@ void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if(event->button() == Qt::LeftButton) {
         qDebug() << "Mis je released";
-        penForLines.setColor(QColor(Qt::black));
         QGraphicsItem::mouseReleaseEvent(event);
     }
 }
@@ -238,14 +231,12 @@ void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     qDebug() << "hovering";
     setSelected(true);
     penForLines.setColor(QColor(8, 246, 242));
-    update();
 }
 
 void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     qDebug() << "hoveringg offf";
     setSelected(false);
     penForLines.setColor(QColor(Qt::black));
-    update();
 }
 
 QRectF Component::boundingRect() const {
