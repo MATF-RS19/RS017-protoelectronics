@@ -294,6 +294,9 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
 
 private:

@@ -4,6 +4,7 @@
 
 #ifdef QTPAINT
 #include "scene.h" // for itemChange
+#include "dialog.h"
 #endif
 
 template<typename T>
@@ -605,6 +606,13 @@ std::vector<std::pair<int, int>> Resistor::connectionPoints(void) const {
     dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
     dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
     return dots;
+}
+
+void Resistor::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    if(event->button() == Qt::RightButton) {
+        Dialog* dialog = new Dialog();
+        dialog->show();
+    }
 }
 #endif
 
