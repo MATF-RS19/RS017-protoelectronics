@@ -1,7 +1,7 @@
 #ifndef COMPONENTS_H
 #define COMPONENTS_H
 
-#define QTPAINT
+//#define QTPAINT
 
 #ifdef QTPAINT
 #include "math.h"
@@ -78,6 +78,9 @@ public:
 
     //Returns all components of type 'componentType' connected to node, including wire connections
 	std::vector<Component*> components(const std::string& componentType) const;
+
+    //Returns all nodes connected by wire to that node - they are all the same node
+    std::vector<std::shared_ptr<Node>> connectedNodes() const;
 
     //Returns iterator to component
     std::vector<Component*>::iterator find(Component* const e);
@@ -212,12 +215,13 @@ private:
     template <typename Iter>
 	void addNodeAt(Iter &pos, int x, int y);
 
-    //friend std::ostream& operator<<(std::ostream& out, const Component& c);
+    friend std::ostream& operator<<(std::ostream& out, const Component& c);
 
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
-    //std::string toString() const;
+
+    std::string toString() const;
 
 #ifdef QTPAINT
     QPen penForLines;

@@ -11,15 +11,15 @@ int Counter<T>::_counter(0);
 
 std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 
-//std::string Component::toString() const {
-//    std::string str;
-//    str = name() + "\n";
+std::string Component::toString() const {
+    std::string str;
+    str = name() + "\n";
 
-//    str += "U = " + std::to_string(voltage()) + " V\n";
-//    str += "I = " + std::to_string(current()) + " A\n";
-//    str += "P = " + std::to_string(power()) + " W\n";
-//    return str;
-//}
+    str += "U = " + std::to_string(voltage()) + " V\n";
+    str += "I = " + std::to_string(current()) + " A\n";
+    str += "P = " + std::to_string(power()) + " W\n";
+    return str;
+}
 
 std::ostream& operator<<(std::ostream& out, const Component& c) {
     out << "Nodes: [ ";
@@ -28,7 +28,7 @@ std::ostream& operator<<(std::ostream& out, const Component& c) {
     }
 
     out << "]\n";
-    //out << c.toString();
+    out << c.toString();
     return out;
 }
 
@@ -120,6 +120,27 @@ std::vector<Component*> Node::components(const std::string& componentType) const
 	}
 
 	return filterd;
+}
+
+std::vector<std::shared_ptr<Node>> Node::connectedNodes() const {
+	std::vector<std::shared_ptr<Node>> allNodes;
+
+    for (const auto& c : _components) {
+        if ( c->componentType() == "wire" ) {
+            //If it's wire, we need to recursively take Node from another side of wire
+            auto otherNode = ((Wire*)c)->otherNode(this->id());
+            allNodes.push_back(otherNode);
+            //To prevent infinite recursion,
+            //disconnect node from component through which we came to that node
+            //but after recursion establish removed connection
+            otherNode->disconnectFromComponent(c);
+            auto otherNodes = otherNode->connectedNodes();
+            append(allNodes, otherNodes);
+            otherNode->addComponent(c);
+        }
+    }
+
+    return allNodes;
 }
 
 std::vector<Component*>::iterator Node::find(Component* const e) {
