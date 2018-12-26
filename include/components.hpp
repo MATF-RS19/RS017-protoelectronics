@@ -232,7 +232,6 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
-
 #endif
 };
 
@@ -298,7 +297,7 @@ public:
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 
 protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
 
 private:
@@ -372,7 +371,7 @@ public:
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 
 protected:
-	void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
 private:
 	double _voltage;

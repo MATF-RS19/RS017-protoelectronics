@@ -75,16 +75,18 @@ void Dialog::onOkButtonInDialog() {
 			update();
 		}
 		else {
+			applyHappened = true;
 			oldResistanceValue = r->resistance();
 			r->setResistance(newResistanceValue);
+			this->close();
 		}
 
 	} else if(isDCVoltage) {
+		applyHappened = true;
 		oldVoltageValue = v->voltage();
 		v->setVoltage(this->lineEdit->text().toDouble());
+		this->close();
 	}
-
-	applyHappened = true;
 }
 
 void Dialog::onCancelButtonInDialog() {

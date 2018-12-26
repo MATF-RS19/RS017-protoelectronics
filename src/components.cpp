@@ -211,13 +211,12 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
     }
 }
 
-void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    if(event->button() == Qt::RightButton) {
+void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {	
+	if(event->button() == Qt::RightButton) {
         QPointF center = boundingRect().center();
         QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(90).translate(-center.x(), -center.y());
         setTransform(rotation, true);
     }
-
     QGraphicsItem::mousePressEvent(event);
 }
 
@@ -604,8 +603,8 @@ std::vector<std::pair<int, int>> Resistor::connectionPoints(void) const {
     return dots;
 }
 
-void Resistor::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    if(event->button() == Qt::RightButton) {
+void Resistor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
 		dialog->setModal(false);
         dialog->show();
@@ -689,8 +688,8 @@ std::vector<std::pair<int, int>> DCVoltage::connectionPoints(void) const {
     return dots;
 }
 
-void DCVoltage::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-	if(event->button() == Qt::RightButton) {
+void DCVoltage::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
 		dialog->setModal(false);
 		dialog->show();
