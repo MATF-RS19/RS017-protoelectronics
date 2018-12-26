@@ -2,7 +2,7 @@
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
+	QMainWindow(parent)
 {
     setWindowTitle("ProtoElectronics");
     resize(1000, 800);
@@ -96,8 +96,8 @@ void MainWindow::createLayout(){
 
 void MainWindow::keyPressEvent(QKeyEvent *event){
     // On pressed escape key window is closed
-    if(event->key() == Qt::Key_Escape){
-        this->close();
-        QMainWindow::keyPressEvent(event);
-    }
+	if(event->key() == Qt::Key_Escape)
+		this->close();
+
+	QMainWindow::keyPressEvent(event);
 }

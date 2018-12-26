@@ -285,6 +285,8 @@ public:
 
 	double resistance() const;
 
+	void setResistance(double resistance);
+
 	double voltage() const override;
 
 	double current() const override;
@@ -353,6 +355,8 @@ public:
 
 	double voltage() const override;
 
+	void setVoltage(double voltage);
+
 	double current() const override;
 
 	void addNode(int x, int y) override;
@@ -366,6 +370,9 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
+
+protected:
+	void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
 private:
 	double _voltage;
