@@ -2,6 +2,7 @@
 #define CIRCUIT_HPP
 
 #include "components.hpp"
+#include <Eigen/Dense>
 
 class Circuit {
 public:
@@ -25,6 +26,11 @@ public:
 
     //TODO
     std::vector<Component*> componentsBetween() const;
+
+    //Returns all different nodes in circuit
+    std::vector<std::shared_ptr<Node>> differentNodes();
+
+    Eigen::MatrixXd makeGMatrix(const std::vector<std::shared_ptr<Node>> &diffNodes);
 
     //Access components by index. Throws exception if index is out of range.
     Component* operator[](unsigned i);

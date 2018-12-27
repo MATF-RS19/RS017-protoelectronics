@@ -293,6 +293,8 @@ public:
 	double current() const override;
 
     void addNode(int x, int y) override;
+    
+    std::shared_ptr<Node> otherNode(int id);
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

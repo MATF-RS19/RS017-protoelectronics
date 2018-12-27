@@ -646,6 +646,9 @@ void Resistor::addNode(int x, int y) {
     Component::addNode(x, y);
 }
 
+std::shared_ptr<Node> Resistor::otherNode(int id) {
+	return _nodes[0]->id() == id ? _nodes[1] : _nodes[0];
+}
 
 
 

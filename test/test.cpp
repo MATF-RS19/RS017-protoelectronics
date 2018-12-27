@@ -776,7 +776,6 @@ SCENARIO("Circuit", "[circuit]"){
 
 
 #include <iostream>
-#include <Eigen/Dense>
 
 SCENARIO("main", "[main]"){
     Circuit c;
@@ -785,7 +784,7 @@ SCENARIO("main", "[main]"){
     c.addComponent(new Wire());
     c[1]->addNode(-1, -1);
     c[1]->addNode(1, 1);
-    c.addComponent(new Resistor());
+    c.addComponent(new Resistor(5));
     c[2]->addNode(1, 1);
     c[2]->addNode(2, 2);
     c.addComponent(new Wire());
@@ -799,7 +798,7 @@ SCENARIO("main", "[main]"){
     c.addComponent(new Wire());
     c[6]->addNode(3, 3);
     c[6]->addNode(5, 5);
-    c.addComponent(new Resistor());
+    c.addComponent(new Resistor(10));
     c[7]->addNode(5, 5);
     c[7]->addNode(6, 6);
     c.addComponent(new Ground());
@@ -811,54 +810,14 @@ SCENARIO("main", "[main]"){
     for (const auto& n : Node::_allNodes) {
         std::cout << *n << std::endl;
     }
-    std::cout << "-------connectedNodes---------" << std::endl;
     
-    {
-        std::vector<std::shared_ptr<Node>> razliciti;
-        std::vector<std::shared_ptr<Node>> ponovljeni;
-
-        for (const auto& n : Node::_allNodes) {
-            //ako se nije pojavio
-            if (ponovljeni.size() == 0 || std::find(ponovljeni.begin(), ponovljeni.end(), n) == ponovljeni.end()) {
-                //ako sadrzi ground
-                if (n->components("ground").size() != 0) {
-                    continue;
-                }
-                //stavi medj razlicite
-                razliciti.push_back(n);
-                //obidji njegove susede
-                for(const auto& istiSused : n->connectedNodes()) {
-                    ponovljeni.push_back(istiSused);
-                }
-            } 
-        }
-
-        /*
-        std::cout << "\nrazliciti:" << std::endl;
-        for (auto i : razliciti) {
-            std::cout << *i << std::endl;
-        }
-        std::cout << "\nponovljeni:" << std::endl;
-        for (auto i : ponovljeni) {
-            std::cout << *i << std::endl;
-        }
-        */
-
-        int numOfNodes = razliciti.size();
-        Eigen::MatrixXd Gmatrix(numOfNodes, numOfNodes);
-
-        std::cout << "==================Analiza=======================" << std::endl;
-        for (const auto &i : razliciti) {
-            std::cout << *i << std::endl;
-        }
-
-        for (int i = 0; i < numOfNodes; ++i) {
-            for (int j = 0; j < numOfNodes; ++j) {
-                //TODO implementirati ovo
-                Gmatrix(i, j) = c.componentsBetween(i, j) ;
-            }   
-        }
-
-        std::cout << Gmatrix << std::endl;
+    auto diffNodes = c.differentNodes();
+    
+    for (const auto &i : diffNodes) {
+        std::cout << *i << std::endl;
     }
+
+    auto Gmatrix = c.makeGMatrix(diffNodes);
+
+    std::cout << Gmatrix << std::endl;
 }

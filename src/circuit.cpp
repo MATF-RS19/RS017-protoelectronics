@@ -42,6 +42,54 @@ std::vector<Component*> Circuit::componentsBetween() const {
     return {};
 }
 
+std::vector<std::shared_ptr<Node>> Circuit::differentNodes() {
+    std::vector<std::shared_ptr<Node>> diff;
+    std::vector<std::shared_ptr<Node>> same;
+
+    for (const auto& n : Node::_allNodes) {
+        //if not in same nodes
+        if (same.size() == 0 || std::find(same.cbegin(), same.cend(), n) == same.cend()) {
+            //and if it isn't ground
+            if (n->components("ground").size() != 0) {
+                continue;
+            }
+            //push node in different nodes
+            diff.push_back(n);
+            //recursively add his neighbors
+            for(const auto& adjNode : n->connectedNodes()) {
+                same.push_back(adjNode);
+            }
+        }
+    }
+
+    return diff;
+}
+
+Eigen::MatrixXd Circuit::makeGMatrix(const std::vector<std::shared_ptr<Node>> &diffNodes) {
+    int numOfNodes = diffNodes.size();
+    Eigen::MatrixXd Gmatrix(numOfNodes, numOfNodes);
+
+    for (int i = 0; i < numOfNodes; ++i) {
+        auto resistorsOnNodeI = diffNodes[i]->components("resistor");
+        for (int j = 0; j < numOfNodes; ++j) {
+            if (i == j) {
+                for(const auto& r : resistorsOnNodeI) {
+                    Gmatrix(i, j) += 1/((Resistor*)r)->resistance();
+                }
+            } else {
+                for(const auto& r : resistorsOnNodeI) {
+                    //TODO
+                    if (r->isConnectedTo( diffNodes[j]->x(), diffNodes[j]->y() )) {
+                        Gmatrix(i, j) -= 1/((Resistor*)r)->resistance();
+                    }
+                }
+            }
+        }
+    }
+
+    return Gmatrix;
+}
+
 Component* Circuit::operator[](unsigned i) {
     if (i >= _components.size()) {
         throw std::runtime_error("Error: Index " + std::to_string(i) + " out of range " );
