@@ -244,8 +244,9 @@ void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     penForLines.setColor(QColor(8, 246, 242));
     penForLinesWhite.setColor(QColor(8, 246, 242));
 
-	MainWindow* win = (MainWindow*) QApplication::activeWindow();
-	win->propertiesMessage->setText(QString::fromStdString(this->toString()));
+	// DONT MAKE GLOBAL, it will crash!
+	MainWindow * mw = MainWindow::getMainWindow();
+	mw->propertiesMessage->setText(QString::fromStdString(this->toString()));
 	update();
 }
 
@@ -253,6 +254,12 @@ void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     setSelected(false);
     penForLines.setColor(QColor(Qt::black));
     penForLinesWhite.setColor(Qt::white);
+
+	// DONT MAKE GLOBAL, it will crash!
+	MainWindow * mw = MainWindow::getMainWindow();
+	mw->propertiesMessage->setText("");
+	update();
+
 }
 
 QRectF Component::boundingRect() const {

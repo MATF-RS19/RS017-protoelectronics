@@ -11,7 +11,14 @@ MainWindow::MainWindow(QWidget *parent) :
     createSceneAndView();
     createGraphicsItems();
     createLayout();
+
+//	pMainWindow = this;
 }
+
+//MainWindow *MainWindow::getMainWinPtr()
+//{
+//	return pMainWindow;
+//}
 
 void MainWindow::createListWidget() {
     itemListWidget = new QListWidget;
