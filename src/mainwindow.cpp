@@ -91,6 +91,12 @@ void MainWindow::createLayout(){
     QHBoxLayout *frameLayout = new QHBoxLayout(frame);
     frameLayout->addWidget(itemListWidget);
     frameLayout->addWidget(view);
+
+	propertiesMessage = new QLabel("Properties goo here");
+	propertiesMessage->setAlignment(Qt::AlignBottom);
+	propertiesMessage->setFixedWidth(130);
+	frameLayout->addWidget(propertiesMessage);
+
     setCentralWidget(frame);
 }
 

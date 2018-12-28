@@ -4,6 +4,7 @@
 
 #ifdef QTPAINT
 #include "scene.h" // for itemChange
+#include "mainwindow.h" // for propertiesMessage
 #include "dialog.h"
 #endif
 
@@ -12,15 +13,15 @@ int Counter<T>::_counter(0);
 
 std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 
-//std::string Component::toString() const {
-//    std::string str;
-//    str = name() + "\n";
+std::string Component::toString() const {
+	std::string str;
+	str = name() + "\n";
 
-//    str += "U = " + std::to_string(voltage()) + " V\n";
-//    str += "I = " + std::to_string(current()) + " A\n";
-//    str += "P = " + std::to_string(power()) + " W\n";
-//    return str;
-//}
+	str += "U = " + std::to_string(voltage()) + " V\n";
+	str += "I = " + std::to_string(current()) + " A\n";
+	str += "P = " + std::to_string(power()) + " W\n";
+	return str;
+}
 
 std::ostream& operator<<(std::ostream& out, const Component& c) {
     out << "Nodes: [ ";
@@ -242,6 +243,10 @@ void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     setSelected(true);
     penForLines.setColor(QColor(8, 246, 242));
     penForLinesWhite.setColor(QColor(8, 246, 242));
+
+	MainWindow* win = (MainWindow*) QApplication::activeWindow();
+	win->propertiesMessage->setText(QString::fromStdString(this->toString()));
+	update();
 }
 
 void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {

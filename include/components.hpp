@@ -217,7 +217,7 @@ private:
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
-    //std::string toString() const;
+	std::string toString() const;
 
 #ifdef QTPAINT
     QPen penForLines;

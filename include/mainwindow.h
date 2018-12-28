@@ -11,11 +11,13 @@
 #include <QGraphicsScene>
 #include <QHBoxLayout>
 #include <QKeyEvent>
+#include <QLabel>
 
 class MainWindow : public QMainWindow
 {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+	QLabel* propertiesMessage;
 protected:
     void keyPressEvent(QKeyEvent *) override;
 private:
