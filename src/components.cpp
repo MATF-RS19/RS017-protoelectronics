@@ -419,6 +419,11 @@ double Component::power() const {
 	return voltage() * current();
 }
 
+void Component::updateVoltages(const std::shared_ptr<Node>& node) const {
+    for (const auto& component : node->components()) {
+        component->voltage();
+    }
+}
 
 
 //Ground
@@ -751,7 +756,12 @@ double DCVoltage::voltage() const {
 }
 
 void DCVoltage::setVoltage(double voltage) {
-	_voltage = voltage;
+    _voltage = voltage;
+    //if connected to node, set voltage in node
+    if (_nodes.size() != 0) {
+        _nodes.back()->_v = voltage;
+        updateVoltages(_nodes.back());
+    }
 }
 
 //TODO

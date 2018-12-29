@@ -189,6 +189,12 @@ public:
 	*/
     virtual void reconnect(int xFrom, int yFrom, int xTo, int yTo);
 
+    /*
+     * Forces all components connected to given node to calculate their voltage
+     * because voltage in node is changed
+    */
+    void updateVoltages(const std::shared_ptr<Node>& node) const;
+
 	virtual double voltage() const = 0;
 	virtual double current() const = 0;
 	virtual double power() const;
