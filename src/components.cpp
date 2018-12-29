@@ -248,6 +248,8 @@ void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
 	MainWindow * mw = MainWindow::getMainWindow();
 	mw->propertiesMessage->setText(QString::fromStdString(this->toString()));
 	update();
+
+	QGraphicsItem::hoverEnterEvent(event);
 }
 
 void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
@@ -260,6 +262,7 @@ void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
 	mw->propertiesMessage->setText("");
 	update();
 
+	QGraphicsItem::hoverLeaveEvent(event);
 }
 
 QRectF Component::boundingRect() const {
@@ -485,25 +488,36 @@ void Ground::addNode(int x, int y) {
 Wire::Wire()
 	:Component("W" + std::to_string(_counter+1))
 {
+#ifdef QTPAINT
+	// Default values for wire
+	changingBoundingRec = QRectF(0,0,100,100);
+	startWire = QPointF(0,50);
+	endWire = QPointF(100,50);
+#endif
 }
 
 #ifdef QTPAINT
+QRectF Wire::boundingRect() const {
+	return changingBoundingRec;
+}
+
 void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-    // Component::paint(painter, option, widget);
+	Q_UNUSED(option);
+	Q_UNUSED(widget);
+	// Component::paint(painter, option, widget);
 
-    // Setting color for drawing lines
-    painter->setPen(penForLines);
+	// Setting color for drawing lines
+	painter->setPen(penForLines);
 
-    painter->drawLine(0, 50, 100, 50);
+	line.setPoints(startWire, endWire);
+	painter->drawLine(line);
 
-    // Connection points
-    painter->setPen(penForDots);
-	QPointF p1(1, 50);
-	QPointF p2(99, 50);
-    painter->drawPoint(p1);
-    painter->drawPoint(p2);
+	// Connection points
+	painter->setPen(penForDots);
+	QPointF p1(0.8, 50);
+	QPointF p2(changingBoundingRec.width()-0.8, 50);
+	painter->drawPoint(p1);
+	painter->drawPoint(p2);
 }
 
 std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
@@ -524,6 +538,17 @@ std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
     dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
 
     return dots;
+}
+
+void Wire::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	if(event->button() == Qt::LeftButton) {
+		double width = changingBoundingRec.width();
+		double scaleNumber = 1.3;
+		changingBoundingRec.setWidth(scaleNumber*width);
+		endWire.setX(scaleNumber*width);
+		update();
+	}
+	QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
 #endif
@@ -623,6 +648,7 @@ void Resistor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 
 		update();
 	}
+	QGraphicsItem::mouseDoubleClickEvent(event);
 }
 #endif
 
@@ -708,6 +734,7 @@ void DCVoltage::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 
 		update();
 	}
+	QGraphicsItem::mouseDoubleClickEvent(event);
 }
 #endif
 

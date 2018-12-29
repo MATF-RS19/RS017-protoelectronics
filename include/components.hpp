@@ -272,6 +272,18 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
+
+	// Wire has her own boundingRect since it's changing as we make wire longer
+	QRectF boundingRect() const override;
+
+protected:
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+	QRectF changingBoundingRec;
+
+	// Start/End point and line of a wire
+	QPointF startWire;
+	QPointF endWire;
+	QLineF line;
 #endif
 };
 

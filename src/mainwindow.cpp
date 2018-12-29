@@ -99,7 +99,7 @@ void MainWindow::createLayout(){
     frameLayout->addWidget(itemListWidget);
     frameLayout->addWidget(view);
 
-	propertiesMessage = new QLabel("Properties goo here");
+	propertiesMessage = new QLabel();
 	propertiesMessage->setAlignment(Qt::AlignBottom);
 	propertiesMessage->setFixedWidth(130);
 	frameLayout->addWidget(propertiesMessage);
