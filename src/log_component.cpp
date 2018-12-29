@@ -114,6 +114,7 @@ void LogicGate::voltageDependedSetPen(QPainter* painter, unsigned id) {
 void LogicGate::voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned id) {
     voltageDependedSetPen(painter, id);
     painter->drawLine(line);
+    update();
     painter->setPen(penForLines);
 }
 

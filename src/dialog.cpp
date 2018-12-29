@@ -65,7 +65,6 @@ void Dialog::keyPressEvent(QKeyEvent *event) {
 
 
 void Dialog::onOkButtonInDialog() {
-
 	// We save old value in case after apply happeneds cancel
 	// For resistance we have to check new value
 	if(isResistor) {
@@ -78,6 +77,7 @@ void Dialog::onOkButtonInDialog() {
 			applyHappened = true;
 			oldResistanceValue = r->resistance();
 			r->setResistance(newResistanceValue);
+            r->update();
 			this->close();
 		}
 
@@ -85,12 +85,12 @@ void Dialog::onOkButtonInDialog() {
 		applyHappened = true;
 		oldVoltageValue = v->voltage();
 		v->setVoltage(this->lineEdit->text().toDouble());
+        v->update();
 		this->close();
 	}
 }
 
 void Dialog::onCancelButtonInDialog() {
-
 	// If apply button is not clicked before cancel then values on oldResistance and oldVoltage are unknown!
 	if(!applyHappened && isResistor)
 		oldResistanceValue = r->resistance();
