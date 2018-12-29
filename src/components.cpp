@@ -4,6 +4,8 @@
 
 #ifdef QTPAINT
 #include "scene.h" // for itemChange
+#include "mainwindow.h" // for propertiesMessage
+#include "dialog.h"
 #endif
 
 template<typename T>
@@ -11,15 +13,15 @@ int Counter<T>::_counter(0);
 
 std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 
-//std::string Component::toString() const {
-//    std::string str;
-//    str = name() + "\n";
+std::string Component::toString() const {
+	std::string str;
+	str = name() + "\n";
 
-//    str += "U = " + std::to_string(voltage()) + " V\n";
-//    str += "I = " + std::to_string(current()) + " A\n";
-//    str += "P = " + std::to_string(power()) + " W\n";
-//    return str;
-//}
+	str += "U = " + std::to_string(voltage()) + " V\n";
+	str += "I = " + std::to_string(current()) + " A\n";
+	str += "P = " + std::to_string(power()) + " W\n";
+	return str;
+}
 
 std::ostream& operator<<(std::ostream& out, const Component& c) {
     out << "Nodes: [ ";
@@ -178,6 +180,7 @@ Component::Component(const std::string &name)
             QGraphicsItem::ItemSendsGeometryChanges);
 
     penForLines = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap);
+    penForLinesWhite = QPen(Qt::white, 3, Qt::SolidLine, Qt::RoundCap);
     penForDots = QPen(Qt::white, 6, Qt::SolidLine, Qt::RoundCap);
     penForLeadsGreen = QPen(Qt::green, 3, Qt::SolidLine, Qt::RoundCap);
     penForLeadsRed = QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap);
@@ -209,20 +212,17 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
     }
 }
 
-void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    if(event->button() == Qt::RightButton) {
+void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {	
+	if(event->button() == Qt::RightButton) {
         QPointF center = boundingRect().center();
         QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(90).translate(-center.x(), -center.y());
         setTransform(rotation, true);
     }
-
     QGraphicsItem::mousePressEvent(event);
 }
 
 void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if(event->button() == Qt::LeftButton) {
-        qDebug() << "Mis je released";
-
         disconnect();
         connect(connectionPoints());
     }
@@ -231,24 +231,38 @@ void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 void Component::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     auto dots = this->connectionPoints();
-    qDebug() << QString::fromStdString(this->componentType());
-    for(auto e: dots) {
-        qDebug() << e.first << " " << e.second;
-    }
+//    qDebug() << QString::fromStdString(this->componentType());
+//    for(auto e: dots) {
+//        qDebug() << e.first << " " << e.second;
+//    }
     //qDebug() << QString::fromStdString(this->toString());
     QGraphicsItem::mouseMoveEvent(event);
 }
 
 void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
-    qDebug() << "hovering";
     setSelected(true);
     penForLines.setColor(QColor(8, 246, 242));
+    penForLinesWhite.setColor(QColor(8, 246, 242));
+
+	// DONT MAKE GLOBAL, it will crash!
+	MainWindow * mw = MainWindow::getMainWindow();
+	mw->propertiesMessage->setText(QString::fromStdString(this->toString()));
+	update();
+
+	QGraphicsItem::hoverEnterEvent(event);
 }
 
 void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
-    qDebug() << "hoveringg offf";
     setSelected(false);
     penForLines.setColor(QColor(Qt::black));
+    penForLinesWhite.setColor(Qt::white);
+
+	// DONT MAKE GLOBAL, it will crash!
+	MainWindow * mw = MainWindow::getMainWindow();
+	mw->propertiesMessage->setText("");
+	update();
+
+	QGraphicsItem::hoverLeaveEvent(event);
 }
 
 QRectF Component::boundingRect() const {
@@ -405,6 +419,11 @@ double Component::power() const {
 	return voltage() * current();
 }
 
+void Component::updateVoltages(const std::shared_ptr<Node>& node) const {
+    for (const auto& component : node->components()) {
+        component->voltage();
+    }
+}
 
 
 //Ground
@@ -431,7 +450,7 @@ void Ground::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF up(50, 0.5);
+	QPointF up(50, 1);
     painter->drawPoint(up);
 }
 
@@ -474,25 +493,36 @@ void Ground::addNode(int x, int y) {
 Wire::Wire()
 	:Component("W" + std::to_string(_counter+1))
 {
+#ifdef QTPAINT
+	// Default values for wire
+	changingBoundingRec = QRectF(0,0,100,100);
+	startWire = QPointF(0,50);
+	endWire = QPointF(100,50);
+#endif
 }
 
 #ifdef QTPAINT
+QRectF Wire::boundingRect() const {
+	return changingBoundingRec;
+}
+
 void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-    // Component::paint(painter, option, widget);
+	Q_UNUSED(option);
+	Q_UNUSED(widget);
+	// Component::paint(painter, option, widget);
 
-    // Setting color for drawing lines
-    painter->setPen(penForLines);
+	// Setting color for drawing lines
+	painter->setPen(penForLines);
 
-    painter->drawLine(0, 50, 100, 50);
+	line.setPoints(startWire, endWire);
+	painter->drawLine(line);
 
-    // Connection points
-    painter->setPen(penForDots);
-    QPointF p1(0.5, 50);
-    QPointF p2(99.5, 50);
-    painter->drawPoint(p1);
-    painter->drawPoint(p2);
+	// Connection points
+	painter->setPen(penForDots);
+	QPointF p1(0.8, 50);
+	QPointF p2(changingBoundingRec.width()-0.8, 50);
+	painter->drawPoint(p1);
+	painter->drawPoint(p2);
 }
 
 std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
@@ -513,6 +543,17 @@ std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
     dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
 
     return dots;
+}
+
+void Wire::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	if(event->button() == Qt::LeftButton) {
+		double width = changingBoundingRec.width();
+		double scaleNumber = 1.3;
+		changingBoundingRec.setWidth(scaleNumber*width);
+		endWire.setX(scaleNumber*width);
+		update();
+	}
+	QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
 #endif
@@ -560,27 +601,27 @@ void Resistor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->setPen(penForLines);
 
     // Input line
-    painter->drawLine(0, 50, 14, 50);
+    painter->drawLine(0, 50, 18, 50);
 
     // Zigzag lines
-    painter->drawLine(14, 50, 20, 30);
-    painter->drawLine(20, 30, 31, 65);
-    painter->drawLine(31, 65, 42, 30);
-    painter->drawLine(42, 30, 53, 65);
-    painter->drawLine(53, 65, 64, 30);
-    painter->drawLine(64, 30, 75, 65);
-    painter->drawLine(75, 65, 86, 50);
+    painter->drawLine(18, 50, 25, 30);
+    painter->drawLine(25, 30, 35, 65);
+    painter->drawLine(35, 65, 45, 30);
+    painter->drawLine(45, 30, 55, 65);
+    painter->drawLine(55, 65, 65, 30);
+    painter->drawLine(65, 30, 75, 65);
+    painter->drawLine(75, 65, 82, 50);
 
     // Output line
-    painter->drawLine(86, 50, 100, 50);
+    painter->drawLine(82, 50, 100, 50);
 
     painter->setFont(QFont("Times", 12, QFont::Bold));
     painter->drawText(boundingRect(), Qt::AlignHCenter, QString::number(_resistance) + " Ohm");
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF p1(0.5, 50);
-    QPointF p2(99.5, 50);
+	QPointF p1(1, 50);
+	QPointF p2(99, 50);
     painter->drawPoint(p1);
     painter->drawPoint(p2);
 }
@@ -603,10 +644,25 @@ std::vector<std::pair<int, int>> Resistor::connectionPoints(void) const {
     dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
     return dots;
 }
+
+void Resistor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	if(event->button() == Qt::LeftButton) {
+		Dialog* dialog = new Dialog(this);
+		dialog->setModal(false);
+        dialog->show();
+
+		update();
+	}
+	QGraphicsItem::mouseDoubleClickEvent(event);
+}
 #endif
 
 double Resistor::resistance() const {
 	return _resistance;
+}
+
+void Resistor::setResistance(double resistance) {
+	_resistance = resistance;
 }
 
 double Resistor::voltage() const {
@@ -654,7 +710,7 @@ void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF p(50, 0.5);
+	QPointF p(50, 1);
     painter->drawPoint(p);
 
     painter->setPen(QPen(Qt::black));
@@ -674,6 +730,17 @@ std::vector<std::pair<int, int>> DCVoltage::connectionPoints(void) const {
     dots.push_back(std::pair<int, int>(scenePoint.x(), scenePoint.y()));
     return dots;
 }
+
+void DCVoltage::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	if(event->button() == Qt::LeftButton) {
+		Dialog* dialog = new Dialog(this);
+		dialog->setModal(false);
+		dialog->show();
+
+		update();
+	}
+	QGraphicsItem::mouseDoubleClickEvent(event);
+}
 #endif
 
 void DCVoltage::addNode(int x, int y) {
@@ -686,6 +753,15 @@ void DCVoltage::addNode(int x, int y) {
 
 double DCVoltage::voltage() const {
 	return _voltage;
+}
+
+void DCVoltage::setVoltage(double voltage) {
+    _voltage = voltage;
+    //if connected to node, set voltage in node
+    if (_nodes.size() != 0) {
+        _nodes.back()->_v = voltage;
+        updateVoltages(_nodes.back());
+    }
 }
 
 //TODO
@@ -785,7 +861,7 @@ void Switch::open() {
     }
 }
 
-bool Switch::isOpend() const {
+bool Switch::isOpened() const {
     return _state == OPEN;
 }
 
@@ -834,7 +910,59 @@ double Switch::current() const {
 
 #ifdef QTPAINT
 void Switch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    //TODO
+    Q_UNUSED(option);
+    Q_UNUSED(widget);
+    // Component::paint(painter, option, widget);
+
+    // Setting color for drawing lines
+    painter->setPen(penForLines);
+
+    // 2 small lines
+    painter->drawLine(0, 50, 35, 50);
+    painter->drawLine(65, 50, 100, 50);
+
+    // Open/Closed line
+    painter->setPen(penForLinesWhite);
+    if(this->_state == OPEN)
+        painter->drawLine(35, 50, 65, 30);
+    else
+        painter->drawLine(35, 47, 65, 47);
+
+    // Connection points
+    painter->setPen(penForDots);
+	QPointF p1(1, 50);
+	QPointF p2(99, 50);
+    painter->drawPoint(p1);
+    painter->drawPoint(p2);
+}
+
+std::vector<std::pair<int, int>> Switch::connectionPoints(void) const{
+    std::vector<std::pair<int, int>> dots;
+    dots.reserve(2);
+
+    // Find local coordinates of connection point
+    QPointF localPoint1(boundingRect().x(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    QPointF localPoint2(boundingRect().x()+boundingRect().width(),
+                       boundingRect().y()+boundingRect().height()/2);
+
+    // And then map to scene coordinates
+    auto scenePoint1 = mapToScene(localPoint1);
+    auto scenePoint2 = mapToScene(localPoint2);
+    dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+    dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+    return dots;
+}
+
+void Switch::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+    Component::mousePressEvent(event);
+    if(event->button() == Qt::LeftButton) {
+        this->changeState();
+        update();
+    }
+
+    QGraphicsItem::mousePressEvent(event);
 }
 #endif
 

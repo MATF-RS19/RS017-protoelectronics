@@ -114,6 +114,7 @@ void LogicGate::voltageDependedSetPen(QPainter* painter, unsigned id) {
 void LogicGate::voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned id) {
     voltageDependedSetPen(painter, id);
     painter->drawLine(line);
+    update();
     painter->setPen(penForLines);
 }
 
@@ -164,9 +165,9 @@ void ANDGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF in1(0.5, 30);
-    QPointF in2(0.5, 90);
-    QPointF out(179.5, 60);
+	QPointF in1(1, 30);
+	QPointF in2(1, 90);
+	QPointF out(179, 60);
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
@@ -197,9 +198,9 @@ void ORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QW
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF in1(0.5, 30);
-    QPointF in2(0.5, 90);
-    QPointF out(179.5, 60);
+	QPointF in1(1, 30);
+	QPointF in2(1, 90);
+	QPointF out(179, 60);
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
@@ -233,9 +234,9 @@ void XORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF in1(0.5, 30);
-    QPointF in2(0.5, 90);
-    QPointF out(179.5, 60);
+	QPointF in1(1, 30);
+	QPointF in2(1, 90);
+	QPointF out(179, 60);
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
@@ -266,9 +267,9 @@ void NORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF in1(0.5, 30);
-    QPointF in2(0.5, 90);
-    QPointF out(179.5, 60);
+	QPointF in1(1, 30);
+	QPointF in2(1, 90);
+	QPointF out(179, 60);
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
@@ -301,9 +302,9 @@ void NANDGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, 
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF in1(0.5, 30);
-    QPointF in2(0.5, 90);
-    QPointF out(179.5, 60);
+	QPointF in1(1, 30);
+	QPointF in2(1, 90);
+	QPointF out(179, 60);
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
@@ -342,9 +343,9 @@ void NXORGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, 
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF in1(0.5, 30);
-    QPointF in2(0.5, 90);
-    QPointF out(179.5, 60);
+	QPointF in1(1, 30);
+	QPointF in2(1, 90);
+	QPointF out(179, 60);
     painter->drawPoint(in1);
     painter->drawPoint(in2);
     painter->drawPoint(out);
@@ -376,8 +377,8 @@ void NOTGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
 
     // Connection points
     painter->setPen(penForDots);
-    QPointF in(0.5, 60);
-    QPointF out(179.5, 60);
+	QPointF in(1, 60);
+	QPointF out(179, 60);
     painter->drawPoint(in);
     painter->drawPoint(out);
 

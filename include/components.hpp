@@ -189,6 +189,12 @@ public:
 	*/
     virtual void reconnect(int xFrom, int yFrom, int xTo, int yTo);
 
+    /*
+     * Forces all components connected to given node to calculate their voltage
+     * because voltage in node is changed
+    */
+    void updateVoltages(const std::shared_ptr<Node>& node) const;
+
 	virtual double voltage() const = 0;
 	virtual double current() const = 0;
 	virtual double power() const;
@@ -217,10 +223,11 @@ private:
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
-    //std::string toString() const;
+	std::string toString() const;
 
 #ifdef QTPAINT
     QPen penForLines;
+    QPen penForLinesWhite;
     QPen penForDots;
     QPen penForLeadsGreen;
     QPen penForLeadsRed;
@@ -231,7 +238,6 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
-
 #endif
 };
 
@@ -272,6 +278,18 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
+
+	// Wire has her own boundingRect since it's changing as we make wire longer
+	QRectF boundingRect() const override;
+
+protected:
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+	QRectF changingBoundingRec;
+
+	// Start/End point and line of a wire
+	QPointF startWire;
+	QPointF endWire;
+	QLineF line;
 #endif
 };
 
@@ -284,6 +302,8 @@ public:
 
 	double resistance() const;
 
+	void setResistance(double resistance);
+
 	double voltage() const override;
 
 	double current() const override;
@@ -293,6 +313,9 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
+
+protected:
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
 
 private:
@@ -316,7 +339,7 @@ public:
 
     void open();
 
-    bool isOpend() const;
+    bool isOpened() const;
 
     void close();
 
@@ -330,6 +353,10 @@ public:
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
 
 private:
@@ -345,6 +372,8 @@ public:
 
 	double voltage() const override;
 
+	void setVoltage(double voltage);
+
 	double current() const override;
 
 	void addNode(int x, int y) override;
@@ -358,8 +387,10 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
-#endif
 
+protected:
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+#endif
 private:
 	double _voltage;
 };

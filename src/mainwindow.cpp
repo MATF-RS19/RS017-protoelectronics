@@ -2,7 +2,7 @@
 #include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
+	QMainWindow(parent)
 {
     setWindowTitle("ProtoElectronics");
     resize(1000, 800);
@@ -11,14 +11,21 @@ MainWindow::MainWindow(QWidget *parent) :
     createSceneAndView();
     createGraphicsItems();
     createLayout();
+
+//	pMainWindow = this;
 }
+
+//MainWindow *MainWindow::getMainWinPtr()
+//{
+//	return pMainWindow;
+//}
 
 void MainWindow::createListWidget() {
     itemListWidget = new QListWidget;
 
     QStringList itemList;
     itemList << "Wire" << "Resistor" << "Ground" <<
-                "DC Voltage" << "AND" << "OR" <<
+                "DC Voltage" << "Switch" << "AND" << "OR" <<
                 "XOR" << "NAND" << "NOR" <<
                 "NXOR" << "NOT";
     itemListWidget->addItems(itemList);
@@ -83,6 +90,7 @@ void MainWindow::createGraphicsItems(){
     notComponent->setPos(norComponent->pos()+QPointF(0, 160));
     scene->addItem(notComponent);
 */
+
 }
 
 void MainWindow::createLayout(){
@@ -90,14 +98,19 @@ void MainWindow::createLayout(){
     QHBoxLayout *frameLayout = new QHBoxLayout(frame);
     frameLayout->addWidget(itemListWidget);
     frameLayout->addWidget(view);
+
+	propertiesMessage = new QLabel();
+	propertiesMessage->setAlignment(Qt::AlignBottom);
+	propertiesMessage->setFixedWidth(130);
+	frameLayout->addWidget(propertiesMessage);
+
     setCentralWidget(frame);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event){
     // On pressed escape key window is closed
-    if(event->key() == Qt::Key_Escape){
-        this->close();
-    }
+	if(event->key() == Qt::Key_Escape)
+		this->close();
 
-    QMainWindow::keyPressEvent(event);
+	QMainWindow::keyPressEvent(event);
 }
