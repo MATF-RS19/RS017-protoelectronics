@@ -10,6 +10,7 @@
 
 template<typename T>
 int Counter<T>::_counter(0);
+int Wire::_nodeVoltageChanged(-1);
 
 std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 
@@ -217,6 +218,9 @@ void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
         QPointF center = boundingRect().center();
         QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(90).translate(-center.x(), -center.y());
         setTransform(rotation, true);
+
+        disconnect();
+        connect(connectionPoints());
     }
     QGraphicsItem::mousePressEvent(event);
 }
@@ -422,6 +426,7 @@ double Component::power() const {
 void Component::updateVoltages(const std::shared_ptr<Node>& node) const {
     for (const auto& component : node->components()) {
         component->voltage();
+        component->update();
     }
 }
 
@@ -548,9 +553,9 @@ std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
 void Wire::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 	if(event->button() == Qt::LeftButton) {
 		double width = changingBoundingRec.width();
-		double scaleNumber = 1.3;
-		changingBoundingRec.setWidth(scaleNumber*width);
-		endWire.setX(scaleNumber*width);
+        double scaleNumber = 10;
+        changingBoundingRec.setWidth(scaleNumber + width);
+        endWire.setX(scaleNumber + width);
 		update();
 	}
 	QGraphicsItem::mouseDoubleClickEvent(event);
@@ -558,9 +563,42 @@ void Wire::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 
 #endif
 
+std::shared_ptr<Node> Wire::otherNode(int id) const {
+    return _nodes[0]->id() == id ? _nodes[1] : _nodes[0];
+}
+
+
 //TODO
 double Wire::voltage() const {
-	return 0;
+    if (_nodes.size() != 2) return 0;
+
+    //voltage connected to wire
+    if (_nodes[1]->directComponents("voltage").size() != 0) {
+        _nodeVoltageChanged = 0;
+        _nodes[0]->_v = _nodes[1]->_v;
+    }
+    else if(_nodes[0]->directComponents("voltage").size() != 0) {
+        _nodeVoltageChanged = 1;
+        _nodes[1]->_v = _nodes[0]->_v;
+    }
+
+    //other voltage sources, from logic gates...
+    if (_nodeVoltageChanged != 0 && _nodes[0]->_v != 0.0) {
+        _nodes[1]->_v = _nodes[0]->_v;
+        _nodeVoltageChanged = 1;
+    }
+    else if (_nodeVoltageChanged != 1 && _nodes[1]->_v != 0.0) {
+        _nodes[0]->_v = _nodes[1]->_v;
+        _nodeVoltageChanged = 0;
+    }
+    else {
+        _nodes[0]->_v = 0;
+        _nodes[1]->_v = 0;
+        return 0;
+    }
+
+
+    return _nodes[0]->_v;
 }
 
 //TODO
@@ -568,15 +606,46 @@ double Wire::current() const {
 	return 0;
 }
 
-std::shared_ptr<Node> Wire::otherNode(int id) {
-	return _nodes[0]->id() == id ? _nodes[1] : _nodes[0];
-}
-
 void Wire::addNode(int x, int y) {
     if (_nodes.size() >= 2) {
         throw std::runtime_error("Wire already connected!");
     }
+
     Component::addNode(x, y);
+
+    voltage();
+}
+
+void Wire::disconnect(int x, int y) {
+    auto it = Node::find(x, y);
+    if (it == Node::_allNodes.end()) return;
+
+    if ((*it) == _nodes[0] && _nodeVoltageChanged == 0) {
+        (*it)->_v = 0;
+    }
+    if ((*it) == _nodes[1] && _nodeVoltageChanged == 1) {
+        (*it)->_v = 0;
+    }
+
+    Component::disconnect(x, y);
+}
+
+void Wire::disconnect() {
+    for (int i = 0; i < _nodes.size() ; ++i) {
+        if (_nodeVoltageChanged == i) {
+            _nodes[i]->_v = 0;
+        }
+    }
+
+    Component::disconnect();
+}
+
+void Wire::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
+    auto start = Node::find(xFrom, yFrom);
+    if (start != Node::_allNodes.end()) {
+        voltage();
+    }
+    Component::reconnect(xFrom, yFrom, xTo, yTo);
 }
 
 
@@ -813,12 +882,14 @@ void DCVoltage::disconnect(int x, int y) {
     if (it == Node::_allNodes.end()) return;
 
     (*it)->_v = 0;
+    updateVoltages((*it));
     Component::disconnect(x, y);
 }
 
 void DCVoltage::disconnect() {
     for (const auto& node : _nodes) {
         node->_v = 0;
+        updateVoltages(node);
     }
     Component::disconnect();
 }
@@ -826,6 +897,7 @@ void DCVoltage::disconnect() {
 void DCVoltage::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
     auto start = Node::find(xFrom, yFrom);
     if (start != Node::_allNodes.end()) (*start)->_v = 0;
+    updateVoltages(*start);
     Component::reconnect(xFrom, yFrom, xTo, yTo);
 }
 
@@ -872,20 +944,13 @@ void Switch::close() {
     if (_nodes.size() != 2) return;
 
     //There is voltage source (exactly one) on one side
-    auto voltageComponent = _nodes[0]->components("voltage");
-    if (voltageComponent.size() == 1) {
-        assert(_nodes[1]->_v == 0);
+    if (_nodes[0]->_v != 0.0) {
+        assert(_nodes[1]->_v == 0.0);
         //Delegate that voltage to another side
-        _nodes[1]->_v = voltageComponent[0]->voltage();
-    }
-    //There is voltage source (exactly one) on another side
-    else {
-        voltageComponent = _nodes[1]->components("voltage");
-        if (voltageComponent.size() == 1) {
-            assert(_nodes[0]->_v == 0);
-            //Delegate that voltage to another side
-            _nodes[0]->_v = voltageComponent[0]->voltage();
-        }
+        _nodes[1]->_v = _nodes[0]->_v;
+    } else {
+        assert(_nodes[0]->_v == 0.0);
+        _nodes[0]->_v = _nodes[1]->_v;
     }
 }
 

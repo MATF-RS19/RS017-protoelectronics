@@ -195,7 +195,7 @@ public:
     */
     void updateVoltages(const std::shared_ptr<Node>& node) const;
 
-	virtual double voltage() const = 0;
+    virtual double voltage() const = 0;
 	virtual double current() const = 0;
 	virtual double power() const;
 
@@ -223,7 +223,7 @@ private:
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
-	std::string toString() const;
+    std::string toString() const;
 
 #ifdef QTPAINT
     QPen penForLines;
@@ -248,7 +248,7 @@ public:
 
     std::string componentType() const override { return "ground"; }
 
-	double voltage() const override;
+    double voltage() const override;
 
 	double current() const override;
 
@@ -267,13 +267,19 @@ public:
 
     std::string componentType() const override { return "wire"; }
 
-	double voltage() const override;
+    double voltage() const override;
 
 	double current() const override;
 
-    std::shared_ptr<Node> otherNode(int id);
+    std::shared_ptr<Node> otherNode(int id) const;
 
     void addNode(int x, int y) override;
+
+    void disconnect(int x, int y) override;
+
+    void disconnect() override;
+
+    void reconnect(int xFrom, int yFrom, int xTo, int yTo) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -291,6 +297,7 @@ protected:
 	QPointF endWire;
 	QLineF line;
 #endif
+    static int _nodeVoltageChanged;
 };
 
 
@@ -304,7 +311,7 @@ public:
 
 	void setResistance(double resistance);
 
-	double voltage() const override;
+    double voltage() const override;
 
 	double current() const override;
 
@@ -370,7 +377,7 @@ public:
 
     std::string componentType() const override {return "voltage";}
 
-	double voltage() const override;
+    double voltage() const override;
 
 	void setVoltage(double voltage);
 
