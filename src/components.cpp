@@ -929,12 +929,16 @@ void Switch::open() {
 
     if (_nodes[0]->components("voltage").size() != 0) {
         _nodes[1]->_v = 0;
+        updateVoltages(_nodes[1]);
     }
     else if (_nodes[1]->components("voltage").size() != 0) {
         _nodes[0]->_v = 0;
+        updateVoltages(_nodes[0]);
     } else {
         _nodes[0]->_v = 0;
         _nodes[1]->_v = 0;
+        updateVoltages(_nodes[0]);
+        updateVoltages(_nodes[1]);
     }
 }
 
@@ -953,9 +957,11 @@ void Switch::close() {
         assert(_nodes[1]->_v == 0.0);
         //Delegate that voltage to another side
         _nodes[1]->_v = _nodes[0]->_v;
+        updateVoltages(_nodes[1]);
     } else {
         assert(_nodes[0]->_v == 0.0);
         _nodes[0]->_v = _nodes[1]->_v;
+        updateVoltages(_nodes[0]);
     }
 }
 
