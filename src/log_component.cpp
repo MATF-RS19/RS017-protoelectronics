@@ -34,6 +34,16 @@ bool LogicGate::getBoolVoltage(double v){
     }
 }
 
+std::string LogicGate::toString() const {
+	std::string str;
+	str = name() + "\n";
+
+	str += "in1: " + std::to_string(_nodes[0]->_v) + " V\n";
+	str += "in2: " + std::to_string(_nodes[1]->_v) + " V\n";
+	str += "out = " + std::to_string(_nodes[2]->_v) + " V\n";
+	return str;
+}
+
 
 ANDGate::ANDGate()
    : LogicGate("AND" + std::to_string(_counter+1))
@@ -204,6 +214,7 @@ void LogicGate::voltageDependedSetPen(QPainter* painter, unsigned id) {
         return;
     }
 
+	// Setting color for painter depended on voltage
     if(nodes()[id]->_v > 0)
         painter->setPen(penForLeadsGreen);
     else if(nodes()[id]->_v < 0)
@@ -213,9 +224,12 @@ void LogicGate::voltageDependedSetPen(QPainter* painter, unsigned id) {
 }
 
 void LogicGate::voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned id) {
+	// Draw line depending on voltage
     voltageDependedSetPen(painter, id);
     painter->drawLine(line);
     update();
+
+	// Set color of line back to default
     painter->setPen(penForLines);
 }
 
@@ -508,5 +522,15 @@ std::vector<std::pair<int, int>> NOTGate::connectionPoints(void) const {
 
 	return dots;
 }
+
+std::string NOTGate::toString() const {
+	std::string str;
+	str = name() + "\n";
+
+	str += "in: " + std::to_string(_nodes[0]->_v) + " V\n";
+	str += "out: " + std::to_string(_nodes[1]->_v) + " V\n";
+	return str;
+}
+
 
 #endif

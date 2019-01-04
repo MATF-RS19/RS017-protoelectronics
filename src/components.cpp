@@ -30,7 +30,7 @@ std::ostream& operator<<(std::ostream& out, const Component& c) {
     }
 
     out << "]\n";
-    //out << c.toString();
+	out << c.toString();
     return out;
 }
 
@@ -174,11 +174,15 @@ Component::Component(const std::string &name)
     _nodes.reserve(3);
 
 #ifdef QTPAINT
+	// Components can accept hover actions
     setAcceptHoverEvents(true);
+
+	// Setting some flags for components
     setFlags(QGraphicsItem::ItemIsSelectable |
             QGraphicsItem::ItemIsMovable |
             QGraphicsItem::ItemSendsGeometryChanges);
 
+	// Creating different pens for drawing
     penForLines = QPen(Qt::black, 3, Qt::SolidLine, Qt::RoundCap);
     penForLinesWhite = QPen(Qt::white, 3, Qt::SolidLine, Qt::RoundCap);
     penForDots = QPen(Qt::white, 6, Qt::SolidLine, Qt::RoundCap);
@@ -213,6 +217,7 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
 }
 
 void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {	
+	// If mouse right button is pressed over component we rotate it
 	if(event->button() == Qt::RightButton) {
         QPointF center = boundingRect().center();
         QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(90).translate(-center.x(), -center.y());
@@ -225,6 +230,7 @@ void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 }
 
 void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+	// If we released mouse left button then update current state: disconnect and connect
     if(event->button() == Qt::LeftButton) {
         disconnect();
         connect(connectionPoints());
@@ -233,19 +239,19 @@ void Component::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 }
 
 void Component::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
-    auto dots = this->connectionPoints();
-//    qDebug() << QString::fromStdString(this->componentType());
-//    for(auto e: dots) {
-//        qDebug() << e.first << " " << e.second;
-//    }
-    //qDebug() << QString::fromStdString(this->toString());
     QGraphicsItem::mouseMoveEvent(event);
 }
 
 void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     setSelected(true);
+
+	// Changing color to blue if we put mouse over the component
     penForLines.setColor(QColor(8, 246, 242));
     penForLinesWhite.setColor(QColor(8, 246, 242));
+
+	// Alos printing out properties of the component
+	// Since we have 2 more windows except main one (for resistor and dc voltage) we have to find the main one,
+	// because only main window has label propertiesMessage
 
 	// DONT MAKE GLOBAL, it will crash!
 	MainWindow * mw = MainWindow::getMainWindow();
@@ -257,9 +263,12 @@ void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
 
 void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     setSelected(false);
+
+	// Changing color back to default if we are not over the component with mouse
     penForLines.setColor(QColor(Qt::black));
     penForLinesWhite.setColor(Qt::white);
 
+	// Setting label back to empty
 	// DONT MAKE GLOBAL, it will crash!
 	MainWindow * mw = MainWindow::getMainWindow();
 	mw->propertiesMessage->setText("");
@@ -269,6 +278,7 @@ void Component::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
 }
 
 QRectF Component::boundingRect() const {
+	// Representing bounding rectangle for each component, we need this for drawing and some functions such as componentPoints
     return QRectF(0,0,100,100);
 }
 
@@ -511,8 +521,18 @@ Wire::Wire()
 #endif
 }
 
+std::string Wire::toString() const {
+	std::string str;
+	str = name() + "\n";
+
+	str += "U = " + std::to_string(voltage()) + " V\n";
+	return str;
+}
+
+
 #ifdef QTPAINT
 QRectF Wire::boundingRect() const {
+	// Wire must have her own changing bounding rectangle since it is different every time we make wire longer
 	return changingBoundingRec;
 }
 
@@ -521,8 +541,13 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 	Q_UNUSED(widget);
 	// Component::paint(painter, option, widget);
 
-	// Setting color for drawing lines
-	painter->setPen(penForLines);
+	// Setting color for drawing lines depending on voltage
+	if(_nodes[0]->_v > 0 || _nodes[1]->_v > 0)
+		painter->setPen(penForLeadsGreen);
+	else if(_nodes[0]->_v < 0 || _nodes[1]->_v < 0)
+		painter->setPen(penForLeadsRed);
+	else
+		painter->setPen(penForLines);
 
 	line.setPoints(startWire, endWire);
 	painter->drawLine(line);
@@ -556,6 +581,7 @@ std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
 }
 
 void Wire::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	// Double click on wire makes her longer
 	if(event->button() == Qt::LeftButton) {
 		double width = changingBoundingRec.width();
         double scaleNumber = 10;
@@ -738,6 +764,7 @@ std::vector<std::pair<int, int>> Resistor::connectionPoints(void) const {
 }
 
 void Resistor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	// If we double click on resistor new dialog for property changing pops out
 	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
 		dialog->setModal(false);
@@ -1012,16 +1039,32 @@ void Switch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     // Setting color for drawing lines
     painter->setPen(penForLines);
 
-    // 2 small lines
-    painter->drawLine(0, 50, 35, 50);
-    painter->drawLine(65, 50, 100, 50);
-
     // Open/Closed line
     painter->setPen(penForLinesWhite);
     if(this->_state == OPEN)
         painter->drawLine(35, 50, 65, 30);
     else
         painter->drawLine(35, 47, 65, 47);
+
+	// Input line
+	if(_nodes[0]->_v > 0)
+		painter->setPen(penForLeadsGreen);
+	else if(_nodes[0]->_v < 0)
+		painter->setPen(penForLeadsRed);
+	else
+		painter->setPen(penForLines);
+
+	painter->drawLine(0, 50, 35, 50);
+
+	// Output line
+	if(_nodes[1]->_v > 0)
+		painter->setPen(penForLeadsGreen);
+	else if(_nodes[1]->_v < 0)
+		painter->setPen(penForLeadsRed);
+	else
+		painter->setPen(penForLines);
+
+	painter->drawLine(65, 50, 100, 50);
 
     // Connection points
     painter->setPen(penForDots);
@@ -1051,6 +1094,7 @@ std::vector<std::pair<int, int>> Switch::connectionPoints(void) const{
 }
 
 void Switch::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+	// If we press on switch it changes state: open/close
     Component::mousePressEvent(event);
     if(event->button() == Qt::LeftButton) {
         this->changeState();

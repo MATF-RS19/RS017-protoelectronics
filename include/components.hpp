@@ -145,7 +145,7 @@ public:
 
     virtual ~Component();
 
-    virtual std::string componentType() const = 0;
+	virtual std::string componentType() const = 0;
 
     Component(const Component&) = delete;
     Component& operator=(const Component&) = delete;
@@ -220,10 +220,12 @@ private:
 
     //friend std::ostream& operator<<(std::ostream& out, const Component& c);
 
+friend std::ostream& operator<<(std::ostream& out, const Component& c);
+
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
-    std::string toString() const;
+	virtual std::string toString() const;
 
 #ifdef QTPAINT
     QPen penForLines;
@@ -291,6 +293,7 @@ public:
 	QRectF boundingRect() const override;
 
 protected:
+	std::string toString() const override;
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 	QRectF changingBoundingRec;
 

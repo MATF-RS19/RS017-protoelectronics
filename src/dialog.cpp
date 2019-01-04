@@ -7,13 +7,15 @@ Dialog::~Dialog() {}
 Dialog::Dialog(Component* component, QWidget* parent)
 	: QDialog (parent), component(component)
 {
-
+	// Making dialog for resistor
 	if(component->componentType()=="resistor") {
 		nameLabel = new QLabel(tr("Resistance:"));
 		setWindowTitle(tr("Resistor edit"));
 		r = dynamic_cast<Resistor*>(component);
 		isResistor = true;
 	}
+
+	// Making dialog for voltage
 	else if(component->componentType() == "voltage") {
 		nameLabel = new QLabel(tr("Voltage:"));
 		setWindowTitle(tr("DC Voltage edit"));
@@ -21,12 +23,15 @@ Dialog::Dialog(Component* component, QWidget* parent)
 		isDCVoltage = true;
 	}
 
+	// Everything else is the same for both
+	// Labels
     lineEdit = new QLineEdit;
 	nameLabel->setBuddy(lineEdit);
 
 	errorLabel = new QLabel(tr(""));
 	errorLabel->setStyleSheet("QLabel{color:red;}");
 
+	// Buttons
 	buttonBox = new QDialogButtonBox(Qt::Horizontal);
 
 	cancelButton = new QPushButton(tr("&Cancel"));
@@ -38,9 +43,11 @@ Dialog::Dialog(Component* component, QWidget* parent)
 	buttonBox->addButton(cancelButton, QDialogButtonBox::RejectRole);
 	buttonBox->addButton(okButton, QDialogButtonBox::ApplyRole);
 
+	// Connecting buttons with slots
 	connect(this->cancelButton, SIGNAL(clicked(bool)), this, SLOT(onCancelButtonInDialog()));
 	connect(this->okButton, SIGNAL(clicked(bool)), this, SLOT(onOkButtonInDialog()));
 
+	// Layouts
     QHBoxLayout *topLayout = new QHBoxLayout;
 	topLayout->addWidget(nameLabel);
     topLayout->addWidget(lineEdit);
@@ -51,6 +58,7 @@ Dialog::Dialog(Component* component, QWidget* parent)
 
     setLayout(mainLayout);
 
+	// Only resistor needs errorLabel
 	if(isResistor)
 		mainLayout->addWidget(errorLabel);
 }
