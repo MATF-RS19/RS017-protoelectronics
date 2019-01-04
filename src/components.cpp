@@ -14,13 +14,14 @@ int Counter<T>::_counter(0);
 std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 
 std::string Component::toString() const {
-	std::string str;
-	str = name() + "\n";
+    std::stringstream stream;
+    stream << name() << std::endl;
 
-	str += "U = " + std::to_string(voltage()) + " V\n";
-	str += "I = " + std::to_string(current()) + " A\n";
-	str += "P = " + std::to_string(power()) + " W\n";
-	return str;
+    stream << std::fixed << std::setprecision(2);
+    stream << "U = " << voltage() << " V" << std::endl;
+    stream << "I = " << current() << " A" << std::endl;
+    stream << "P = " << power()   << " W" << std::endl;
+    return stream.str();
 }
 
 std::ostream& operator<<(std::ostream& out, const Component& c) {
@@ -522,11 +523,12 @@ Wire::Wire()
 }
 
 std::string Wire::toString() const {
-	std::string str;
-	str = name() + "\n";
+    std::stringstream str;
+    str << name() << std::endl;
 
-	str += "U = " + std::to_string(voltage()) + " V\n";
-	return str;
+    str << std::fixed << std::setprecision(2);
+    str << "U = " << voltage() << " V" << std::endl;
+    return str.str();
 }
 
 

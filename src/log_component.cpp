@@ -35,13 +35,14 @@ bool LogicGate::getBoolVoltage(double v){
 }
 
 std::string LogicGate::toString() const {
-	std::string str;
-	str = name() + "\n";
+    std::stringstream str;
+    str << name() << std::endl;
 
-	str += "in1: " + std::to_string(_nodes[0]->_v) + " V\n";
-	str += "in2: " + std::to_string(_nodes[1]->_v) + " V\n";
-	str += "out = " + std::to_string(_nodes[2]->_v) + " V\n";
-	return str;
+    str << std::fixed << std::setprecision(2);
+    str << "in1: " << _nodes[0]->_v << " V" << std::endl;
+    str << "in2: " << _nodes[1]->_v << " V" << std::endl;
+    str << "out: " << _nodes[2]->_v << " V" << std::endl;
+    return str.str();
 }
 
 
@@ -525,10 +526,11 @@ std::vector<std::pair<int, int>> NOTGate::connectionPoints(void) const {
 #endif
 
 std::string NOTGate::toString() const {
-	std::string str;
-	str = name() + "\n";
+    std::stringstream str;
+    str << name() << std::endl;
 
-	str += "in: " + std::to_string(_nodes[0]->_v) + " V\n";
-	str += "out: " + std::to_string(_nodes[1]->_v) + " V\n";
-	return str;
+    str << std::fixed << std::setprecision(2);
+    str << "in: " << _nodes[0]->_v << " V" << std::endl;
+    str << "out: " << _nodes[1]->_v << " V" << std::endl;
+    return str.str();
 }

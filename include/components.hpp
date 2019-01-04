@@ -23,6 +23,8 @@
 #include <set>
 #include <algorithm> //std::find_if
 #include <cassert>
+#include <iomanip> //std::setprecision
+#include <sstream> // stringstream
 
 //Interface for counting and naming components in the same class
 template <class T>
