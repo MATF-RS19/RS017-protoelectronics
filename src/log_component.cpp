@@ -490,12 +490,23 @@ void NOTGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
 }
 
 std::vector<std::pair<int, int>> NOTGate::connectionPoints(void) const {
-    //FIXME
     std::vector<std::pair<int, int>> dots;
     dots.reserve(2);
-    dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
-    dots.push_back(std::pair<int, int>(this->x()+this->y()+boundingRect().width(), this->y()+boundingRect().height()/2));
-    return dots;
+
+	// Find local coordinates of connection point
+	QPointF localPoint1(boundingRect().x(),
+						boundingRect().y()+boundingRect().height()/2);
+
+	QPointF localPoint2(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+boundingRect().height()/2);
+
+	// And then map to scene coordinates
+	auto scenePoint1 = mapToScene(localPoint1);
+	auto scenePoint2 = mapToScene(localPoint2);
+	dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+	dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+
+	return dots;
 }
 
 #endif
