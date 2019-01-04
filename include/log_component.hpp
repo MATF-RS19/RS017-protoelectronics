@@ -8,7 +8,6 @@ public:
     // From given voltage returns their logical value
     static bool getBoolVoltage(double v);
 
-    double voltage() const override;
     double power() const override{
         return 0;
     }
@@ -16,6 +15,9 @@ public:
         return 0;
     }
 
+    void disconnect(int x, int y) override;
+
+    void disconnect() override;
 #ifdef QTPAINT
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 protected:
@@ -35,6 +37,7 @@ public:
     
     void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
+    double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -49,6 +52,7 @@ public:
 
     void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
+    double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -63,6 +67,7 @@ public:
 
     void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
+    double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -77,6 +82,7 @@ public:
     
     void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
+    double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -91,6 +97,7 @@ public:
 
     void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
+    double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -105,6 +112,7 @@ public:
 
     void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
+    double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 #endif
@@ -119,6 +127,11 @@ public:
 
     void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
+    double voltage() const override;
+
+    void disconnect(int x, int y) override;
+
+    void disconnect() override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;

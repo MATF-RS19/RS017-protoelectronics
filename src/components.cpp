@@ -10,7 +10,6 @@
 
 template<typename T>
 int Counter<T>::_counter(0);
-int Wire::_nodeVoltageChanged(-1);
 
 std::set<std::shared_ptr<Node>, Node::lex_node_cmp> Node::_allNodes;
 
@@ -87,7 +86,7 @@ std::vector<Component*> Node::components() const{
             allComponents.push_back(c);
         } else {
             //If it's wire, we need to recursively take components from another side of wire
-            auto otherNode = ((Wire*)c)->otherNode(this->id());
+            auto otherNode = (static_cast<Wire*>(c))->otherNode(this->id());
             //To prevent infinite recursion,
             //disconnect node from component through which we came to that node
             //but after recursion establish removed connection
@@ -424,9 +423,13 @@ double Component::power() const {
 }
 
 void Component::updateVoltages(const std::shared_ptr<Node>& node) const {
-    for (const auto& component : node->components()) {
-        component->voltage();
-        component->update();
+    for (const auto& component : node->directComponents()) {
+        if (component != this) {
+            component->voltage();
+#ifdef QTPAINT
+            component->update();
+#endif
+        }
     }
 }
 
@@ -496,7 +499,9 @@ void Ground::addNode(int x, int y) {
 
 //Wire
 Wire::Wire()
-	:Component("W" + std::to_string(_counter+1))
+    :Component("W" + std::to_string(_counter+1)),
+      _leftV(0), _rightV(0),
+      _nodeVoltageChanged(-1)
 {
 #ifdef QTPAINT
 	// Default values for wire
@@ -572,32 +577,34 @@ std::shared_ptr<Node> Wire::otherNode(int id) const {
 double Wire::voltage() const {
     if (_nodes.size() != 2) return 0;
 
-    //voltage connected to wire
-    if (_nodes[1]->directComponents("voltage").size() != 0) {
-        _nodeVoltageChanged = 0;
-        _nodes[0]->_v = _nodes[1]->_v;
-    }
-    else if(_nodes[0]->directComponents("voltage").size() != 0) {
+    //left node is changed
+    if (_leftV != _nodes[0]->_v) {
+        //update old value
+        _leftV = _nodes[0]->_v;
+
+        //delegate to another node
+        _nodes[1]->_v = _leftV;
+        _rightV = _leftV;
         _nodeVoltageChanged = 1;
-        _nodes[1]->_v = _nodes[0]->_v;
-    }
 
-    //other voltage sources, from logic gates...
-    if (_nodeVoltageChanged != 0 && _nodes[0]->_v != 0.0) {
-        _nodes[1]->_v = _nodes[0]->_v;
-        _nodeVoltageChanged = 1;
+        //update other components
+        updateVoltages(_nodes[1]);
     }
-    else if (_nodeVoltageChanged != 1 && _nodes[1]->_v != 0.0) {
-        _nodes[0]->_v = _nodes[1]->_v;
+    //right node is changed
+    if (_rightV != _nodes[1]->_v) {
+        //update old value
+        _rightV = _nodes[1]->_v;
+
+        //delegate to another node
+        _nodes[0]->_v = _rightV;
+        _leftV = _rightV;
         _nodeVoltageChanged = 0;
-    }
-    else {
-        _nodes[0]->_v = 0;
-        _nodes[1]->_v = 0;
-        return 0;
+
+        //update other components
+        updateVoltages(_nodes[0]);
     }
 
-
+    //both nodes have the same voltage
     return _nodes[0]->_v;
 }
 
@@ -606,14 +613,18 @@ double Wire::current() const {
 	return 0;
 }
 
+void Wire::connect(const std::vector<std::pair<int, int>> &connPts) {
+    Component::connect(connPts);
+    voltage();
+    //update();
+}
+
 void Wire::addNode(int x, int y) {
     if (_nodes.size() >= 2) {
         throw std::runtime_error("Wire already connected!");
     }
-
+    //update();
     Component::addNode(x, y);
-
-    voltage();
 }
 
 void Wire::disconnect(int x, int y) {
@@ -622,29 +633,41 @@ void Wire::disconnect(int x, int y) {
 
     if ((*it) == _nodes[0] && _nodeVoltageChanged == 0) {
         (*it)->_v = 0;
+        _leftV = 0;
+        _nodeVoltageChanged = -1;
+        updateVoltages(_nodes[0]);
     }
     if ((*it) == _nodes[1] && _nodeVoltageChanged == 1) {
         (*it)->_v = 0;
+        _rightV = 0;
+        _nodeVoltageChanged = -1;
+        updateVoltages(_nodes[1]);
     }
 
     Component::disconnect(x, y);
 }
 
 void Wire::disconnect() {
-    for (int i = 0; i < _nodes.size() ; ++i) {
-        if (_nodeVoltageChanged == i) {
+    for (unsigned i = 0; i < _nodes.size() ; ++i) {
+        if (_nodeVoltageChanged == int(i)) {
             _nodes[i]->_v = 0;
+            updateVoltages(_nodes[i]);
         }
     }
-
+    _leftV = 0;
+    _rightV = 0;
+    _nodeVoltageChanged = -1;
+    //update();
     Component::disconnect();
 }
 
+//NOTE not used
 void Wire::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
     auto start = Node::find(xFrom, yFrom);
     if (start != Node::_allNodes.end()) {
         voltage();
     }
+    //update();
     Component::reconnect(xFrom, yFrom, xTo, yTo);
 }
 
@@ -818,6 +841,7 @@ void DCVoltage::addNode(int x, int y) {
     }
     Component::addNode(x, y);
     _nodes.back()->_v = _voltage;
+    updateVoltages(_nodes.back());
 }
 
 double DCVoltage::voltage() const {
@@ -924,12 +948,16 @@ void Switch::open() {
 
     if (_nodes[0]->components("voltage").size() != 0) {
         _nodes[1]->_v = 0;
+        updateVoltages(_nodes[1]);
     }
     else if (_nodes[1]->components("voltage").size() != 0) {
         _nodes[0]->_v = 0;
+        updateVoltages(_nodes[0]);
     } else {
         _nodes[0]->_v = 0;
         _nodes[1]->_v = 0;
+        updateVoltages(_nodes[0]);
+        updateVoltages(_nodes[1]);
     }
 }
 
@@ -948,9 +976,11 @@ void Switch::close() {
         assert(_nodes[1]->_v == 0.0);
         //Delegate that voltage to another side
         _nodes[1]->_v = _nodes[0]->_v;
+        updateVoltages(_nodes[1]);
     } else {
         assert(_nodes[0]->_v == 0.0);
         _nodes[0]->_v = _nodes[1]->_v;
+        updateVoltages(_nodes[0]);
     }
 }
 
