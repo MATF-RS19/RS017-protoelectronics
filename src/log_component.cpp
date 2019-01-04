@@ -114,6 +114,7 @@ void LogicGate::voltageDependedSetPen(QPainter* painter, unsigned id) {
         return;
     }
 
+	// Setting color for painter depended on voltage
     if(nodes()[id]->_v > 0)
         painter->setPen(penForLeadsGreen);
     else if(nodes()[id]->_v < 0)
@@ -123,9 +124,12 @@ void LogicGate::voltageDependedSetPen(QPainter* painter, unsigned id) {
 }
 
 void LogicGate::voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned id) {
+	// Draw line depending on voltage
     voltageDependedSetPen(painter, id);
     painter->drawLine(line);
     update();
+
+	// Set color of line back to default
     painter->setPen(penForLines);
 }
 

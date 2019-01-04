@@ -37,7 +37,6 @@ private:
 
     void createListWidget();
     void createSceneAndView();
-    void createGraphicsItems();
     void createLayout();
 };
 

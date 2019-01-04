@@ -42,6 +42,7 @@ void GridZone::dragLeaveEvent(QGraphicsSceneDragDropEvent *event) {
 }
 
 void GridZone::dropEvent(QGraphicsSceneDragDropEvent *event) {
+	// Taking from the side component which we drop on our grid
     if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
             QByteArray itemData = event->mimeData()->data("application/x-qabstractitemmodeldatalist");
             QDataStream stream(&itemData, QIODevice::ReadOnly);
@@ -55,34 +56,30 @@ void GridZone::dropEvent(QGraphicsSceneDragDropEvent *event) {
                 QString componentType = valueMap.value(0).toString();
                 qreal xV = round(event->scenePos().x()/gridSize)*gridSize;
                 qreal yV = round(event->scenePos().y()/gridSize)*gridSize;
-                QPointF newPos(xV, yV);
+				QPointF newPos(xV, yV);
 
                 if(componentType == "Wire") {
                     Wire* wire = new Wire();
-
                     //Set position
                     wire->setPos(newPos);
 
                     //Establish connection
                     wire->connect(wire->connectionPoints());
 
+					// Add item
                     this->addItem(wire);
                 }
-                else if(componentType == "Resistor") {
-                        Resistor* resistor = new Resistor();
-                        resistor->setPos(newPos);
-
-                        resistor->connect(resistor->connectionPoints());
-
-                        this->addItem(resistor);
+				else if(componentType == "Resistor") {
+					Resistor* resistor = new Resistor();
+					resistor->setPos(newPos);
+					resistor->connect(resistor->connectionPoints());
+					this->addItem(resistor);
                 }
-                else if(componentType == "Ground") {
-                        Ground* gnd = new Ground();
-                        gnd->setPos(newPos);
-
-                        gnd->connect(gnd->connectionPoints());
-
-                        this->addItem(gnd);
+				else if(componentType == "Ground") {
+					Ground* gnd = new Ground();
+					gnd->setPos(newPos);
+					gnd->connect(gnd->connectionPoints());
+					this->addItem(gnd);
                 }
                 else if (componentType == "DC Voltage") {
                     DCVoltage* dcv = new DCVoltage();
