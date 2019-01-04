@@ -277,6 +277,8 @@ public:
 
     void addNode(int x, int y) override;
 
+    void connect(const std::vector<std::pair<int, int>> &connPts) override;
+
     void disconnect(int x, int y) override;
 
     void disconnect() override;
@@ -300,7 +302,8 @@ protected:
 	QPointF endWire;
 	QLineF line;
 #endif
-    static int _nodeVoltageChanged;
+    mutable double _leftV, _rightV;
+    mutable int _nodeVoltageChanged;
 };
 
 
