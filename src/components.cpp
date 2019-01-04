@@ -425,8 +425,12 @@ double Component::power() const {
 
 void Component::updateVoltages(const std::shared_ptr<Node>& node) const {
     for (const auto& component : node->components()) {
+        if (component != this) {
         component->voltage();
+#ifdef QTPAINT
         component->update();
+#endif
+        }
     }
 }
 
@@ -818,6 +822,7 @@ void DCVoltage::addNode(int x, int y) {
     }
     Component::addNode(x, y);
     _nodes.back()->_v = _voltage;
+    updateVoltages(_nodes.back());
 }
 
 double DCVoltage::voltage() const {

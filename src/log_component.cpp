@@ -5,9 +5,26 @@ int Counter<T>::_counter(0);
 LogicGate::LogicGate(const std::string &name)
     :Component(name)
 {}
-double LogicGate::voltage() const{
-    return _nodes.back()->_v;
+
+void LogicGate::disconnect(int x, int y) {
+    auto it = Node::find(x, y);
+    if (it == Node::_allNodes.end()) return;
+
+    //Remove possible voltage on output node
+    if (_nodes.size() == 3 && (*it) == _nodes[2]) (*it)->_v = 0;
+    updateVoltages((*it));
+    Component::disconnect(x, y);
 }
+
+void LogicGate::disconnect() {
+    for (const auto& node : _nodes) {
+        //Remove possible voltage on output node
+        if (_nodes.size() == 3 && node == _nodes[2]) node->_v = 0;
+        updateVoltages(node);
+    }
+    Component::disconnect();
+}
+
 bool LogicGate::getBoolVoltage(double v){
     if(v >= 2.5){
         return true;
@@ -16,81 +33,165 @@ bool LogicGate::getBoolVoltage(double v){
         return false;
     }
 }
+
+
 ANDGate::ANDGate()
    : LogicGate("AND" + std::to_string(_counter+1))
    {}
 
+double ANDGate::voltage() const {
+    if (_nodes.size() != 3) return 0;
+
+    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);
+    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);
+    _nodes[2]->_v = (a && b ? 5.0 : 0.0);
+    updateVoltages(_nodes[2]);
+    return _nodes[2]->_v;
+}
+
 void ANDGate::connect(const std::vector<std::pair<int, int>>& connPts){
     Component::connect(connPts);
-
-    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);  
-    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);  
-    _nodes[2]->_v = a && b == true ? 5.0 : 0.0;
+    voltage();
 }
+
+
 ORGate::ORGate()
    : LogicGate("OR" + std::to_string(_counter+1))
    {}
 
+double ORGate::voltage() const {
+    if (_nodes.size() != 3) return 0;
+
+    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);
+    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);
+    _nodes[2]->_v = (a || b ? 5.0 : 0.0);
+    updateVoltages(_nodes[2]);
+    return _nodes[2]->_v;
+}
+
 void ORGate::connect(const std::vector<std::pair<int, int>>& connPts){
     Component::connect(connPts);
-
-    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);  
-    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);  
-    _nodes[2]->_v = a || b == true ? 5.0 : 0.0;
+    voltage();
 }
+
+
 XORGate::XORGate()
    : LogicGate("XOR" + std::to_string(_counter+1))
    {}
 
+double XORGate::voltage() const {
+    if (_nodes.size() != 3) return 0;
+
+    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);
+    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);
+    _nodes[2]->_v = (a == b ? 0.0 : 5.0);
+    updateVoltages(_nodes[2]);
+    return _nodes[2]->_v;
+}
+
 void XORGate::connect(const std::vector<std::pair<int, int>>& connPts){
     Component::connect(connPts);
-
-    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);  
-    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);  
-    _nodes[2]->_v = a == b  ? 0.0 : 5.0;
+    voltage();
 }
+
+
 NORGate::NORGate()
    : LogicGate("NOR" + std::to_string(_counter+1))
    {}
 
+double NORGate::voltage() const {
+    if (_nodes.size() != 3) return 0;
+
+    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);
+    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);
+    _nodes[2]->_v = (a || b ? 0.0 : 5.0);
+    updateVoltages(_nodes[2]);
+    return _nodes[2]->_v;
+}
+
 void NORGate::connect(const std::vector<std::pair<int, int>>& connPts){
     Component::connect(connPts);
-
-    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);  
-    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);  
-    _nodes[2]->_v = a || b == true ? 0.0 : 5.0;
+    voltage();
 }
+
+
 NANDGate::NANDGate()
    : LogicGate("AND" + std::to_string(_counter+1))
    {}
 
-void NANDGate::connect(const std::vector<std::pair<int, int>>& connPts){
-    Component::connect(connPts);
+double NANDGate::voltage() const {
+    if (_nodes.size() != 3) return 0;
 
     bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);
-    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);  
-    _nodes[2]->_v = a && b == true ? 0.0 : 5.0;
+    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);
+    _nodes[2]->_v = (a && b ? 0.0 : 5.0);
+    updateVoltages(_nodes[2]);
+    return _nodes[2]->_v;
 }
+
+void NANDGate::connect(const std::vector<std::pair<int, int>>& connPts){
+    Component::connect(connPts);
+    voltage();
+}
+
+
 NXORGate::NXORGate()
    : LogicGate("XOR" + std::to_string(_counter+1))
    {}
 
+double NXORGate::voltage() const {
+    if (_nodes.size() != 3) return 0;
+
+    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);
+    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);
+    _nodes[2]->_v = (a == b ? 5.0 : 0.0);
+    updateVoltages(_nodes[2]);
+    return _nodes[2]->_v;
+}
+
 void NXORGate::connect(const std::vector<std::pair<int, int>>& connPts){
     Component::connect(connPts);
-
-    bool a = LogicGate::getBoolVoltage(_nodes[0]->_v);  
-    bool b = LogicGate::getBoolVoltage(_nodes[1]->_v);  
-    _nodes[2]->_v = a == b  ? 5.0 : 0.0;
+    voltage();
 }
+
 
 NOTGate::NOTGate()
     : LogicGate ("NOT" + std::to_string(_counter+1))
     {}
 
-void NOTGate::connect(const std::vector<std::pair<int, int>>& connPts){
-    Component::connect(connPts);
-    // TODO DENISE
+double NOTGate::voltage() const {
+    if (_nodes.size() != 2) return 0;
+
+    bool in = LogicGate::getBoolVoltage(_nodes[0]->_v);
+    _nodes[1]->_v = (in ? 0.0 : 5.0);
+    updateVoltages(_nodes[1]);
+    return _nodes[1]->_v;
 }
+
+void NOTGate::connect(const std::vector<std::pair<int, int>>& connPts) {
+    Component::connect(connPts);
+    voltage();
+}
+
+void NOTGate::disconnect(int x, int y) {
+    auto it = Node::find(x, y);
+    if (it == Node::_allNodes.end()) return;
+
+    //Remove possible voltage on output node
+    if (_nodes.size() == 2 && (*it) == _nodes[1]) (*it)->_v = 0;
+    updateVoltages((*it));
+    Component::disconnect(x, y);
+}
+
+void NOTGate::disconnect() {
+    for (const auto& node : _nodes) {
+        //Remove possible voltage on output node
+        if (_nodes.size() == 2 && node == _nodes[1]) node->_v = 0;
+        updateVoltages(node);
+    }
+    Component::disconnect();
+}
+
 
 #ifdef QTPAINT
 QRectF LogicGate::boundingRect() const {
@@ -389,6 +490,7 @@ void NOTGate::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
 }
 
 std::vector<std::pair<int, int>> NOTGate::connectionPoints(void) const {
+    //FIXME
     std::vector<std::pair<int, int>> dots;
     dots.reserve(2);
     dots.push_back(std::pair<int, int>(this->x(), this->y()+boundingRect().height()/2));
