@@ -31,7 +31,7 @@ std::ostream& operator<<(std::ostream& out, const Component& c) {
     }
 
     out << "]\n";
-    //out << c.toString();
+	out << c.toString();
     return out;
 }
 
@@ -506,6 +506,15 @@ Wire::Wire()
 #endif
 }
 
+std::string Wire::toString() const {
+	std::string str;
+	str = name() + "\n";
+
+	str += "U = " + std::to_string(voltage()) + " V\n";
+	return str;
+}
+
+
 #ifdef QTPAINT
 QRectF Wire::boundingRect() const {
 	return changingBoundingRec;
@@ -517,7 +526,12 @@ void Wire::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
 	// Component::paint(painter, option, widget);
 
 	// Setting color for drawing lines
-	painter->setPen(penForLines);
+	if(_nodes[0]->_v > 0 || _nodes[1]->_v > 0)
+		painter->setPen(penForLeadsGreen);
+	else if(_nodes[0]->_v < 0 || _nodes[1]->_v < 0)
+		painter->setPen(penForLeadsRed);
+	else
+		painter->setPen(penForLines);
 
 	line.setPoints(startWire, endWire);
 	painter->drawLine(line);
@@ -982,16 +996,32 @@ void Switch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     // Setting color for drawing lines
     painter->setPen(penForLines);
 
-    // 2 small lines
-    painter->drawLine(0, 50, 35, 50);
-    painter->drawLine(65, 50, 100, 50);
-
     // Open/Closed line
     painter->setPen(penForLinesWhite);
     if(this->_state == OPEN)
         painter->drawLine(35, 50, 65, 30);
     else
         painter->drawLine(35, 47, 65, 47);
+
+	// Input line
+	if(_nodes[0]->_v > 0)
+		painter->setPen(penForLeadsGreen);
+	else if(_nodes[0]->_v < 0)
+		painter->setPen(penForLeadsRed);
+	else
+		painter->setPen(penForLines);
+
+	painter->drawLine(0, 50, 35, 50);
+
+	// Output line
+	if(_nodes[1]->_v > 0)
+		painter->setPen(penForLeadsGreen);
+	else if(_nodes[1]->_v < 0)
+		painter->setPen(penForLeadsRed);
+	else
+		painter->setPen(penForLines);
+
+	painter->drawLine(65, 50, 100, 50);
 
     // Connection points
     painter->setPen(penForDots);

@@ -17,13 +17,17 @@ public:
     }
 
 #ifdef QTPAINT
-    std::vector<std::pair<int, int>> connectionPoints(void) const override;
+	std::vector<std::pair<int, int>> connectionPoints(void) const override;
+#endif
+
 protected:
+	std::string toString() const override;
+
+#ifdef QTPAINT
     QRectF boundingRect() const override;
 
     void voltageDependedSetPen(QPainter* painter, unsigned id);
     void voltageDependedDrawLine(QLineF line, QPainter* painter, unsigned id);
-
 #endif
 };
 
@@ -124,6 +128,8 @@ public:
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
+protected:
+	std::string toString() const override;
 };
 
 #endif /* ifndef LOG_COMPONENTS */

@@ -16,6 +16,17 @@ bool LogicGate::getBoolVoltage(double v){
         return false;
     }
 }
+
+std::string LogicGate::toString() const {
+	std::string str;
+	str = name() + "\n";
+
+	str += "in1: " + std::to_string(_nodes[0]->_v) + " V\n";
+	str += "in2: " + std::to_string(_nodes[1]->_v) + " V\n";
+	str += "out = " + std::to_string(_nodes[2]->_v) + " V\n";
+	return str;
+}
+
 ANDGate::ANDGate()
    : LogicGate("AND" + std::to_string(_counter+1))
    {}
@@ -395,5 +406,15 @@ std::vector<std::pair<int, int>> NOTGate::connectionPoints(void) const {
     dots.push_back(std::pair<int, int>(this->x()+this->y()+boundingRect().width(), this->y()+boundingRect().height()/2));
     return dots;
 }
+
+std::string NOTGate::toString() const {
+	std::string str;
+	str = name() + "\n";
+
+	str += "in: " + std::to_string(_nodes[0]->_v) + " V\n";
+	str += "out: " + std::to_string(_nodes[1]->_v) + " V\n";
+	return str;
+}
+
 
 #endif
