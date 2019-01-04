@@ -522,11 +522,6 @@ SCENARIO("logic components circuit", "[.circuit]"){
         int x4 = 10, y4 = 8;
         int x5 = 5, y5 = 11;
 
-        //Ovako radi, ali treba da radi i kada se povezu logicka kola
-        //pa tek onda doda napon na neke cvorove
-        //v1.addNode(x1, y1);
-        //v2.addNode(x2, y2);
-
         //connections
         and1.connect(std::vector<std::pair<int, int>>{
                     std::pair<int, int>(x1,y1),

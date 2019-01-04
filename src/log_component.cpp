@@ -522,6 +522,7 @@ std::vector<std::pair<int, int>> NOTGate::connectionPoints(void) const {
 
 	return dots;
 }
+#endif
 
 std::string NOTGate::toString() const {
 	std::string str;
@@ -531,6 +532,3 @@ std::string NOTGate::toString() const {
 	str += "out: " + std::to_string(_nodes[1]->_v) + " V\n";
 	return str;
 }
-
-
-#endif

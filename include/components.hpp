@@ -293,7 +293,6 @@ public:
 	QRectF boundingRect() const override;
 
 protected:
-	std::string toString() const override;
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 	QRectF changingBoundingRec;
 
@@ -302,6 +301,7 @@ protected:
 	QPointF endWire;
 	QLineF line;
 #endif
+	std::string toString() const override;
     mutable double _leftV, _rightV;
     mutable int _nodeVoltageChanged;
 };
