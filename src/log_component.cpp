@@ -6,6 +6,10 @@ LogicGate::LogicGate(const std::string &name)
     :Component(name)
 {}
 
+LogicGate::~LogicGate() {
+    disconnect();
+}
+
 void LogicGate::disconnect(int x, int y) {
     auto it = Node::find(x, y);
     if (it == Node::_allNodes.end()) return;
@@ -17,10 +21,10 @@ void LogicGate::disconnect(int x, int y) {
 }
 
 void LogicGate::disconnect() {
-    for (const auto& node : _nodes) {
+    if (_nodes.size() == 3) {
         //Remove possible voltage on output node
-        if (_nodes.size() == 3 && node == _nodes[2]) node->_v = 0;
-        updateVoltages(node);
+        _nodes.back()->_v = 0;
+        updateVoltages(_nodes.back());
     }
     Component::disconnect();
 }
@@ -170,6 +174,10 @@ NOTGate::NOTGate()
     : LogicGate ("NOT" + std::to_string(_counter+1))
     {}
 
+NOTGate::~NOTGate() {
+    disconnect();
+}
+
 double NOTGate::voltage() const {
     if (_nodes.size() != 2) return 0;
 
@@ -195,10 +203,10 @@ void NOTGate::disconnect(int x, int y) {
 }
 
 void NOTGate::disconnect() {
-    for (const auto& node : _nodes) {
+    if (_nodes.size() == 2) {
         //Remove possible voltage on output node
-        if (_nodes.size() == 2 && node == _nodes[1]) node->_v = 0;
-        updateVoltages(node);
+        _nodes.back()->_v = 0;
+        updateVoltages(_nodes.back());
     }
     Component::disconnect();
 }

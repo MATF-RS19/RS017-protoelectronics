@@ -291,6 +291,8 @@ void Component::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 #endif
 
 Component::~Component() {
+    disconnect();
+    /*
     for (auto it = _nodes.begin(); it != _nodes.end(); ++it) {
         //disconnect node->component
         (*it)->disconnectFromComponent(this);
@@ -303,6 +305,7 @@ Component::~Component() {
         //"disconnect" component->node
         *it = nullptr;
     }
+    */
 }
 
 std::string Component::name() const {
@@ -520,6 +523,10 @@ Wire::Wire()
 	startWire = QPointF(0,50);
 	endWire = QPointF(100,50);
 #endif
+}
+
+Wire::~Wire() {
+    disconnect();
 }
 
 std::string Wire::toString() const {
@@ -811,6 +818,10 @@ DCVoltage::DCVoltage(double voltage)
 	_voltage(voltage)
 {}
 
+DCVoltage::~DCVoltage() {
+    disconnect();
+}
+
 #ifdef QTPAINT
 void DCVoltage::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     Q_UNUSED(option);
@@ -960,6 +971,10 @@ Switch::Switch(state s)
 _state(s)
 {
 
+}
+
+Switch::~Switch() {
+    disconnect();
 }
 
 void Switch::addNode(int x, int y) {

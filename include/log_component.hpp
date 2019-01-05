@@ -5,6 +5,9 @@
 class LogicGate : public Component{
 public:
     LogicGate(const std::string &name);
+
+    virtual ~LogicGate() override;
+
     // From given voltage returns their logical value
     static bool getBoolVoltage(double v);
 
@@ -127,6 +130,8 @@ class NOTGate: public LogicGate, public Counter<NOTGate> {
 public:
     NOTGate();
 
+    ~NOTGate() override;
+
     std::string componentType() const override { return "not"; }
 
     void connect(const std::vector<std::pair<int, int>>& connPts) override;
@@ -141,7 +146,7 @@ public:
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
-protected:
+private:
 	std::string toString() const override;
 };
 

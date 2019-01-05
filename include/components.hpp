@@ -88,7 +88,7 @@ public:
      * Checks if node have connection with component
      * NOTE: only connections from node to component
     */
-     bool isConnectedTo(Component* const e);
+    bool isConnectedTo(Component* const e);
 
     //Disconnects node from component (delete connection node->component)
 	void disconnectFromComponent(Component* const e);
@@ -267,7 +267,9 @@ public:
 
 class Wire : public Component, public Counter<Wire> {
 public:
-	Wire();
+    Wire();
+
+    ~Wire() override;
 
     std::string componentType() const override { return "wire"; }
 
@@ -295,7 +297,7 @@ public:
 	QRectF boundingRect() const override;
 
 protected:
-	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 	QRectF changingBoundingRec;
 
 	// Start/End point and line of a wire
@@ -304,6 +306,8 @@ protected:
 	QLineF line;
 #endif
 	std::string toString() const override;
+
+private:
     mutable double _leftV, _rightV;
     mutable int _nodeVoltageChanged;
 };
@@ -330,7 +334,7 @@ public:
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 
 protected:
-	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
 
 private:
@@ -347,6 +351,8 @@ public:
     };
 
     Switch(state s = OPEN);
+
+    ~Switch() override;
 
     std::string componentType() const override {return ( _state == CLOSE )? "wire" : "switch";}
 
@@ -383,6 +389,8 @@ class DCVoltage : public Component, public Counter<DCVoltage> {
 public:
 	DCVoltage(double voltage = 5);
 
+    ~DCVoltage() override;
+
     std::string componentType() const override {return "voltage";}
 
     double voltage() const override;
@@ -404,7 +412,7 @@ public:
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 
 protected:
-	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
 private:
 	double _voltage;
