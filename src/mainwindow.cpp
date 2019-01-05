@@ -55,8 +55,9 @@ void MainWindow::createLayout(){
 
 void MainWindow::keyPressEvent(QKeyEvent *event){
     // On pressed escape key window is closed
-	if(event->key() == Qt::Key_Escape)
-		this->close();
-
+	if(event->key() == Qt::Key_Escape){
+			scene->clear();
+			qApp->quit();
+	}
 	QMainWindow::keyPressEvent(event);
 }

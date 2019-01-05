@@ -12,7 +12,8 @@
 #include <QHBoxLayout>
 #include <QKeyEvent>
 #include <QLabel>
-
+#include <QPushButton>
+#include <QDialogButtonBox>
 
 class MainWindow : public QMainWindow
 {
