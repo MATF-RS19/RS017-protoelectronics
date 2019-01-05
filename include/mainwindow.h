@@ -17,6 +17,7 @@
 
 class MainWindow : public QMainWindow
 {
+	Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
 	QLabel* propertiesMessage;
@@ -27,18 +28,30 @@ public:
 				return mainWin;
 		return nullptr;
 	}
+	~MainWindow() override;
 
 protected:
     void keyPressEvent(QKeyEvent *) override;
+
+private slots:
+	void onOpenFile();
+	void onSaveFile();
 
 private:
     QGraphicsView* view;
     QGraphicsScene* scene;
     QListWidget* itemListWidget;
 
+	QPushButton *openFileButton;
+	QPushButton *saveFileButton;
+	QDialogButtonBox *buttonBox;
+
     void createListWidget();
     void createSceneAndView();
     void createLayout();
+
+	void saveFile();
+	QString currentFile;
 };
 
 #endif // MAINWINDOW_H

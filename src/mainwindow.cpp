@@ -1,5 +1,10 @@
 #include "mainwindow.h"
 #include <QDebug>
+#include <QFileDialog>
+#include <QFile>
+#include <QMessageBox>
+
+MainWindow::~MainWindow() {}
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
@@ -44,13 +49,94 @@ void MainWindow::createLayout(){
     frameLayout->addWidget(itemListWidget);
     frameLayout->addWidget(view);
 
-	// Adding label for printing properties
+	// Buttons OPEN & SAVE
+	buttonBox = new QDialogButtonBox(Qt::Vertical);
+
+	openFileButton = new QPushButton(tr("&Open"));
+	openFileButton->setDefault(true);
+
+	saveFileButton = new QPushButton(tr("&Save"));
+	saveFileButton->setDefault(true);
+
+	buttonBox->addButton(openFileButton, QDialogButtonBox::ApplyRole);
+	buttonBox->addButton(saveFileButton, QDialogButtonBox::ApplyRole);
+
+	// Setting fixed widt and stylesheet
+	buttonBox->setFixedWidth(130);
+	buttonBox->setStyleSheet("background-color: rgb(8, 246, 242); border-radius: 10px; padding: 6px; ");
+
+	// Connecting buttons with slots
+	connect(this->openFileButton, SIGNAL(clicked(bool)), this, SLOT(onOpenFile()));
+	connect(this->saveFileButton, SIGNAL(clicked(bool)), this, SLOT(onSaveFile()));
+
+	// Label for printing properties
 	propertiesMessage = new QLabel();
 	propertiesMessage->setAlignment(Qt::AlignBottom);
 	propertiesMessage->setFixedWidth(130);
 	frameLayout->addWidget(propertiesMessage);
 
+	// Layouts
+	QVBoxLayout *rightLayout = new QVBoxLayout;
+	rightLayout->addWidget(buttonBox);
+	rightLayout->addWidget(propertiesMessage);
+
+	frameLayout->addLayout(rightLayout);
+
     setCentralWidget(frame);
+}
+
+void MainWindow::onOpenFile() {
+	// Open already existing scheme
+
+	// TODO
+	QString filename = QFileDialog::getOpenFileName(
+				this,
+				tr("Open File"),
+				"/Users",
+				"All files (*.*);;Text File (*.txt)"
+				);
+
+	qDebug() << filename;
+}
+
+void MainWindow::onSaveFile() {
+	// Save the scheme
+
+	// TODO
+	QString fileName = QFileDialog::getSaveFileName(
+				this,
+				tr("Save as"),
+				"*.json"
+				);
+
+	if(!fileName.isEmpty()) {
+		currentFile = fileName;
+		saveFile();
+	}
+
+	qDebug() << fileName;
+
+}
+
+void MainWindow::saveFile() {
+	// TODO
+	QString text = "save me";
+
+
+	QFile file(currentFile);
+
+	if(file.open(QFile::WriteOnly)) {
+		file.write(text.toUtf8());
+	}
+	else {
+		QMessageBox::warning(
+					this,
+					"TextEditor",
+					tr("Cannot write file %1.\nError: %2")
+					.arg(currentFile)
+					.arg(file.errorString())
+					);
+	}
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event){

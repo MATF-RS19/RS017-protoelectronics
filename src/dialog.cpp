@@ -43,6 +43,10 @@ Dialog::Dialog(Component* component, QWidget* parent)
 	buttonBox->addButton(cancelButton, QDialogButtonBox::RejectRole);
 	buttonBox->addButton(okButton, QDialogButtonBox::ApplyRole);
 
+	// Aligning buttons on center and setting stylesheet
+	buttonBox->setCenterButtons(true);
+	buttonBox->setStyleSheet("background-color: rgb(8, 246, 242); border-radius: 10px; padding: 6px; ");
+
 	// Connecting buttons with slots
 	connect(this->cancelButton, SIGNAL(clicked(bool)), this, SLOT(onCancelButtonInDialog()));
 	connect(this->okButton, SIGNAL(clicked(bool)), this, SLOT(onOkButtonInDialog()));
