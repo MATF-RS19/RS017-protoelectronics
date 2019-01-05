@@ -1,5 +1,5 @@
-#ifndef LOG_COMPONENTS
-#define LOG_COMPONENTS 
+#ifndef LOG_COMPONENTS_HPP
+#define LOG_COMPONENTS_HPP
 #include "components.hpp"
 
 class LogicGate : public Component{
@@ -150,4 +150,4 @@ private:
 	std::string toString() const override;
 };
 
-#endif /* ifndef LOG_COMPONENTS */
+#endif /* ifndef LOG_COMPONENTS_HPP */

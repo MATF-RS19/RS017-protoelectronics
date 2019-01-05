@@ -1,5 +1,5 @@
-#ifndef COMPONENTS_H
-#define COMPONENTS_H
+#ifndef COMPONENTS_HPP
+#define COMPONENTS_HPP
 
 #define QTPAINT
 
@@ -51,6 +51,7 @@ public:
 	}
 };
 
+bool doubleEquals(double a, double b, double epsilon = 1e-5);
 
 class Component;
 
@@ -382,6 +383,14 @@ protected:
 
 private:
     state _state;
+
+    enum _side {
+        LEFT = 0,
+        RIGHT = 1
+    };
+
+    mutable double _leftV, _rightV;
+    mutable int _nodeVoltageChanged;
 };
 
 
@@ -423,4 +432,4 @@ std::ostream& operator<<(std::ostream& out, const Component& r);
 
 std::ostream& operator<<(std::ostream& out, const Node& r);
 
-#endif /*COMPONENTS_H */
+#endif /*COMPONENTS_HPP */

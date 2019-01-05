@@ -1,9 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "components.hpp"
+//#include "components.hpp"
 #include "log_component.hpp"
-#include "scene.h"
+#include "scene.h" // for itemChange
 
 #include <QMainWindow>
 #include <QListWidget>

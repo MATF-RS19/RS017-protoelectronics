@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 #ifdef QTPAINT
-#include "scene.h" // for itemChange
 #include "mainwindow.h" // for propertiesMessage
 #include "dialog.h"
 #endif
@@ -48,6 +47,9 @@ std::ostream& operator<<(std::ostream& out, const Node& n) {
 	return out;
 }
 
+bool doubleEquals(double a, double b, double epsilon) {
+    return std::abs(a - b) < epsilon;
+}
 
 //Node
 Node::Node(int x, int y, Component* const component = nullptr)
@@ -613,7 +615,7 @@ double Wire::voltage() const {
     if (_nodes.size() != 2) return 0;
 
     //left node is changed
-    if (_leftV != _nodes[0]->_v) {
+    if (!doubleEquals(_leftV, _nodes[0]->_v)) {
         //update old value
         _leftV = _nodes[0]->_v;
 
@@ -626,7 +628,7 @@ double Wire::voltage() const {
         updateVoltages(_nodes[1]);
     }
     //right node is changed
-    if (_rightV != _nodes[1]->_v) {
+    if (!doubleEquals(_rightV, _nodes[1]->_v)) {
         //update old value
         _rightV = _nodes[1]->_v;
 
@@ -968,7 +970,9 @@ void DCVoltage::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
 //Switch
 Switch::Switch(state s)
 :Component("S" + std::to_string(_counter+1)),
-_state(s)
+    _state(s),
+    _leftV(0), _rightV(0),
+    _nodeVoltageChanged(-1)
 {
 
 }
@@ -988,20 +992,15 @@ void Switch::open() {
     _state = OPEN;
 
     //Switch should be connected
-    if (_nodes.size() != 2) return;
+    if (_nodes.size() != 2 || _nodeVoltageChanged == -1) return;
 
-    if (_nodes[0]->components("voltage").size() != 0) {
-        _nodes[1]->_v = 0;
-        updateVoltages(_nodes[1]);
+    if (_nodeVoltageChanged == LEFT) {
+        _leftV = _nodes[LEFT]->_v = 0;
+        updateVoltages(_nodes[LEFT]);
     }
-    else if (_nodes[1]->components("voltage").size() != 0) {
-        _nodes[0]->_v = 0;
-        updateVoltages(_nodes[0]);
-    } else {
-        _nodes[0]->_v = 0;
-        _nodes[1]->_v = 0;
-        updateVoltages(_nodes[0]);
-        updateVoltages(_nodes[1]);
+    else if (_nodeVoltageChanged == RIGHT) {
+        _rightV = _nodes[RIGHT]->_v = 0;
+        updateVoltages(_nodes[RIGHT]);
     }
 }
 
@@ -1011,21 +1010,7 @@ bool Switch::isOpened() const {
 
 void Switch::close() {
     _state = CLOSE;
-
-    //Switch should be connected
-    if (_nodes.size() != 2) return;
-
-    //There is voltage source (exactly one) on one side
-    if (_nodes[0]->_v != 0.0) {
-        assert(_nodes[1]->_v == 0.0);
-        //Delegate that voltage to another side
-        _nodes[1]->_v = _nodes[0]->_v;
-        updateVoltages(_nodes[1]);
-    } else {
-        assert(_nodes[0]->_v == 0.0);
-        _nodes[0]->_v = _nodes[1]->_v;
-        updateVoltages(_nodes[0]);
-    }
+    voltage();
 }
 
 bool Switch::isClosed() const {
@@ -1039,10 +1024,64 @@ void Switch::changeState() {
 
 double Switch::voltage() const {
     if (_nodes.size() != 2) return 0;
-    return _nodes[0]->_v;
+    if (_state == OPEN) {
+        //if voltage on node is disconnected
+        _leftV = doubleEquals(_nodes[LEFT]->_v, .0) ? _nodes[LEFT]->_v : _leftV;
+        _rightV = doubleEquals(_nodes[RIGHT]->_v, .0) ? _nodes[RIGHT]->_v : _rightV;
+        return 0;
+    }
+
+    //left node is changed from outside
+    //delegate to another side
+    if (!doubleEquals(_leftV, _nodes[LEFT]->_v)) {
+        //update old value
+        _leftV = _nodes[LEFT]->_v;
+
+        //delegate voltage to another node
+        _nodes[RIGHT]->_v = _leftV;
+        _rightV = _leftV;
+        _nodeVoltageChanged = RIGHT;
+
+        //update other components
+        updateVoltages(_nodes[RIGHT]);
+    }
+    //left node is changed from "inside" -> with opening switch
+    //take voltage from another node
+    else if (_nodeVoltageChanged == LEFT) {
+        _nodes[LEFT]->_v = _rightV;
+        _leftV = _rightV;
+
+        //update other components
+        updateVoltages(_nodes[LEFT]);
+    }
+    //right node is changed from outside
+    //delegate to another side
+    if (!doubleEquals(_rightV, _nodes[RIGHT]->_v)) {
+        //update old value
+        _rightV = _nodes[RIGHT]->_v;
+
+        //delegate to another node
+        _nodes[LEFT]->_v = _rightV;
+        _leftV = _rightV;
+        _nodeVoltageChanged = LEFT;
+
+        //update other components
+        updateVoltages(_nodes[LEFT]);
+    }
+    //right node is changed from "inside" -> with opening switch
+    //take voltage from another node
+    else if(_nodeVoltageChanged == RIGHT) {
+        //take from another node
+        _nodes[RIGHT]->_v = _leftV;
+        _rightV = _leftV;
+
+        //update other components
+        updateVoltages(_nodes[RIGHT]);
+    }
+
+    return _nodes[LEFT]->_v;
 }
 
-//TODO
 double Switch::current() const {
     return 0;
 }
@@ -1058,10 +1097,11 @@ void Switch::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 
     // Open/Closed line
     painter->setPen(penForLinesWhite);
-    if(this->_state == OPEN)
+    if(this->_state == OPEN) {
         painter->drawLine(35, 50, 65, 30);
-    else
+    } else {
         painter->drawLine(35, 47, 65, 47);
+    }
 
 	// Input line
 	if(_nodes[0]->_v > 0)
