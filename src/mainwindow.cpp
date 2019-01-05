@@ -25,7 +25,7 @@ void MainWindow::createListWidget() {
 
     QStringList itemList;
     itemList << "Wire" << "Resistor" << "Ground" <<
-                "DC Voltage" << "Switch" << "AND" << "OR" <<
+				"DC Voltage" << "Clock" << "Switch" << "AND" << "OR" <<
                 "XOR" << "NAND" << "NOR" <<
                 "NXOR" << "NOT";
     itemListWidget->addItems(itemList);
@@ -79,7 +79,7 @@ void MainWindow::createLayout(){
 	QVBoxLayout *rightLayout = new QVBoxLayout;
 	rightLayout->addWidget(buttonBox);
 	rightLayout->addWidget(propertiesMessage);
-
+	rightLayout->setSpacing(8);
 	frameLayout->addLayout(rightLayout);
 
     setCentralWidget(frame);

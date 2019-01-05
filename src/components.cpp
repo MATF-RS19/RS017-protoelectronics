@@ -6,6 +6,7 @@
 #include "scene.h" // for itemChange
 #include "mainwindow.h" // for propertiesMessage
 #include "dialog.h"
+#include <QObject>
 #endif
 
 template<typename T>
@@ -803,8 +804,6 @@ void Resistor::addNode(int x, int y) {
 }
 
 
-
-
 //DCVoltage
 DCVoltage::DCVoltage(double voltage)
 	:Component("U" + std::to_string(_counter+1)),
@@ -853,6 +852,7 @@ std::vector<std::pair<int, int>> DCVoltage::connectionPoints(void) const {
 }
 
 void DCVoltage::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	// If we double click on dc voltage new dialog for property changing pops out
 	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
 		dialog->setModal(false);
@@ -953,6 +953,55 @@ void DCVoltage::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
     updateVoltages(*start);
     Component::reconnect(xFrom, yFrom, xTo, yTo);
 }
+
+//Clock
+Clock::Clock(double voltage, int timeInterval)
+	: DCVoltage(voltage), _oldVoltage(voltage), _timeInterval(timeInterval)
+{
+	// Start timer
+	_timerId = startTimer(_timeInterval);
+}
+
+Clock::~Clock() {
+	// Kill timer
+	killTimer(_timerId);
+}
+
+int Clock::timeInterval() const {
+	return _timeInterval;
+}
+
+void Clock::setTimeInterval(int timeInterval) {
+	_timeInterval = timeInterval;
+}
+
+#ifdef QTPAINT
+void Clock::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+	// If we double click on clock new dialog for property changing pops out
+
+	killTimer(_timerId);
+
+	if(event->button() == Qt::LeftButton) {
+		Dialog* dialog = new Dialog(this);
+		dialog->setModal(false);
+		dialog->show();
+
+		// Start timer again with new _timeInterval value
+		_timerId = startTimer(_timeInterval);
+		update();
+	}
+	QGraphicsItem::mouseDoubleClickEvent(event);
+}
+
+void Clock::timerEvent(QTimerEvent *event) {
+	if(voltage() == 0.0)
+		setVoltage(_oldVoltage);
+	else
+		setVoltage(0.0);
+	update();
+	// TODO MOZDA OVDE TREBA DODATI da iskoristi event kao i pre
+}
+#endif
 
 //Switch
 Switch::Switch(state s)

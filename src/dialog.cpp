@@ -15,7 +15,7 @@ Dialog::Dialog(Component* component, QWidget* parent)
 		isResistor = true;
 	}
 
-	// Making dialog for voltage
+	// Making dialog for dc voltage
 	else if(component->componentType() == "voltage") {
 		nameLabel = new QLabel(tr("Voltage:"));
 		setWindowTitle(tr("DC Voltage edit"));
@@ -23,7 +23,15 @@ Dialog::Dialog(Component* component, QWidget* parent)
 		isDCVoltage = true;
 	}
 
-	// Everything else is the same for both
+	// Making dialog for clock
+	else if(component->componentType() == "clock") {
+		nameLabel = new QLabel(tr("Clock:"));
+		setWindowTitle(tr("Clock's time interval edit"));
+		cl = dynamic_cast<Clock*>(component);
+		isClock = true;
+	}
+
+	// Everything else is the same for all
 	// Labels
     lineEdit = new QLineEdit;
 	nameLabel->setBuddy(lineEdit);
@@ -59,11 +67,12 @@ Dialog::Dialog(Component* component, QWidget* parent)
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(topLayout);
     mainLayout->addWidget(buttonBox);
+	mainLayout->addSpacing(8);
 
     setLayout(mainLayout);
 
-	// Only resistor needs errorLabel
-	if(isResistor)
+	// Only resistor and clock need errorLabel
+	if(isResistor || isClock)
 		mainLayout->addWidget(errorLabel);
 }
 
@@ -100,20 +109,40 @@ void Dialog::onOkButtonInDialog() {
         v->update();
 		this->close();
 	}
+
+	// For clock we have to check new value
+	else if(isClock) {
+		int newTimeIntervalValue = this->lineEdit->text().toInt();
+		if(newTimeIntervalValue <= 0) {
+			errorLabel->setText("Time interval value must be positive!");
+			update();
+		}
+		else {
+			applyHappened = true;
+			oldTimeIntervalValue = cl->timeInterval();
+			cl->setTimeInterval(newTimeIntervalValue);
+			cl->update();
+			this->close();
+		}
+	}
 }
 
 void Dialog::onCancelButtonInDialog() {
-	// If apply button is not clicked before cancel then values on oldResistance and oldVoltage are unknown!
+	// If apply button is not clicked before cancel then values on oldResistance and oldVoltage and oldTimeInterval are unknown!
 	if(!applyHappened && isResistor)
 		oldResistanceValue = r->resistance();
 	else if(!applyHappened && isDCVoltage)
 		oldVoltageValue = v->voltage();
+	else if(!applyHappened && isClock)
+		oldTimeIntervalValue = cl->timeInterval();
 
 	// Either way on cancel we should set old value
 	if(isResistor)
 		r->setResistance(oldResistanceValue);
 	else if(isDCVoltage)
 		v->setVoltage(oldVoltageValue);
+	else if(isClock)
+		cl->setTimeInterval(oldTimeIntervalValue);
 
 	this->close();
 }
