@@ -14,6 +14,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QDialogButtonBox>
+#include <QJsonDocument>
 
 class MainWindow : public QMainWindow
 {
@@ -50,7 +51,7 @@ private:
     void createSceneAndView();
     void createLayout();
 
-	void saveFile();
+    void saveFile(QJsonDocument);
 	QString currentFile;
 };
 

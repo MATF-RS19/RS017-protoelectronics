@@ -3,6 +3,10 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QMessageBox>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QDebug>
 
 MainWindow::~MainWindow() {}
 
@@ -58,8 +62,8 @@ void MainWindow::createLayout(){
 	saveFileButton = new QPushButton(tr("&Save"));
 	saveFileButton->setDefault(true);
 
-	buttonBox->addButton(openFileButton, QDialogButtonBox::ApplyRole);
-	buttonBox->addButton(saveFileButton, QDialogButtonBox::ApplyRole);
+    buttonBox->addButton(openFileButton, QDialogButtonBox::ApplyRole);
+    buttonBox->addButton(saveFileButton, QDialogButtonBox::ApplyRole);
 
 	// Setting fixed widt and stylesheet
 	buttonBox->setFixedWidth(130);
@@ -97,36 +101,131 @@ void MainWindow::onOpenFile() {
 				);
 
 	qDebug() << filename;
+
 }
 
 void MainWindow::onSaveFile() {
 	// Save the scheme
+         QJsonArray or_components;
+         QJsonArray xor_components;
+         QJsonArray and_components;
+         QJsonArray nand_components;
+         QJsonArray nor_components;
+         QJsonArray nxor_components;
+         QJsonArray not_components;
+         QJsonArray wire_components;
+         QJsonArray dcvoltage_components;
+         QJsonArray clock_components;
+         QJsonArray resistor_components;
+         QJsonArray switch_components;
+         QJsonArray ground_components;
+         QList<QGraphicsItem*> allItems = scene->items();
+         for (int i = 0; i < allItems.size(); ++i) {
+              QGraphicsItem *component = allItems[i];
+              if(component->parentItem() == nullptr){
+                       qreal x = component->x();
+                       qreal y = component->y();
+                       //std::cout << "x: " << x  << " y: " << y << std::endl;
+                       QJsonArray points;
+                       points.push_back(x);
+                       points.push_back(y);
+                       Component *rItem = qgraphicsitem_cast<Component*> (component);
+                       std::string type = rItem->componentType();
+                       //std::cout << "Type: " << rItem->componentType() << std::endl;
+                       if (type == "or"){
+                          or_components.push_back(points);
+                       }
+                       if (type == "nor"){
+                          nor_components.push_back(points);
+                       }
+                       if (type == "and"){
+                          and_components.push_back(points);
+                       }
+                       if (type == "nand"){
+                          nand_components.push_back(points);
+                       }
+                       if (type == "xor"){
+                          xor_components.push_back(points);
+                       }
+                       if (type == "nxor"){
+                          nxor_components.push_back(points);
+                       }
+                       if( type == "not"){
+                          not_components.push_back(points);
+                       }
+                       if(type == "voltage"){
+                          //std::cout << rItem->voltage() << std::endl;
+                          points.push_back(rItem->voltage());
+                          dcvoltage_components.push_back(points);
+                       }
+                       if(type == "resistor"){
+                          Resistor* rItem = static_cast<Resistor*>(rItem);
+                          //std::cout << rItem->resistance() << std::endl;
+                          points.push_back(rItem->resistance());
+                          resistor_components.push_back(points);
+                       }
+                       if(type == "clock"){
+                          //std::cout << "Voltage: " << rItem->voltage() << std::endl;
+                          Clock* rItem = static_cast<Clock*>(rItem);
+                          //std::cout << "Interval: " << rItem->timeInterval() <<std::endl;
+                          int interval = rItem->timeInterval();
+                          double voltage = rItem->oldVoltage();
+
+                          points.push_back(voltage);
+                          points.push_back(interval);
+                          clock_components.push_back(points);
+                       }
+                       if (type == "ground"){
+                          ground_components.push_back(points);
+                       }
+                       if (type == "wire"){
+                          wire_components.push_back(points);
+                       }
+
+              }
+            }
+            QJsonObject topQuery;
+            topQuery["or"] = or_components;
+            topQuery["nor"] = nor_components;
+            topQuery["and"] = and_components;
+            topQuery["nand"] = nand_components;
+            topQuery["xor"] = xor_components;
+            topQuery["nxor"] = nxor_components;
+            topQuery["not"] = not_components;
+            topQuery["clock"] = clock_components;
+            topQuery["wire"] = wire_components;
+            topQuery["ground"] = ground_components;
+            topQuery["voltage"] = dcvoltage_components;
+            topQuery["resistor"] = resistor_components;
+            QJsonDocument document(topQuery);
+            //qDebug() << document.toJson();
 
 	// TODO
-	QString fileName = QFileDialog::getSaveFileName(
-				this,
-				tr("Save as"),
-				"*.json"
-				);
+    //QString fileName = QFileDialog::getSaveFileName(
+      //          new MainWindow(),
+        //        tr("Save as"),
+          //      "*.json"
+            //    );
+    //qDebug() << "A";
+    //if(!fileName.isEmpty()) {
+        currentFile = QString("sema2.json");
+        saveFile(document);
+    //}
 
-	if(!fileName.isEmpty()) {
-		currentFile = fileName;
-		saveFile();
-	}
-
-	qDebug() << fileName;
+    //qDebug() << fileName;
 
 }
 
-void MainWindow::saveFile() {
+
+void MainWindow::saveFile(QJsonDocument document) {
 	// TODO
-	QString text = "save me";
+    //QString text = "save me";
 
 
 	QFile file(currentFile);
 
-	if(file.open(QFile::WriteOnly)) {
-		file.write(text.toUtf8());
+    if(file.open(QFile::WriteOnly)) {
+        file.write(document.toJson());
 	}
 	else {
 		QMessageBox::warning(
