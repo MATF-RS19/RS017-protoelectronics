@@ -140,8 +140,25 @@ void GridZone::dropEvent(QGraphicsSceneDragDropEvent *event) {
 					notGate->Component::connect(notGate->connectionPoints());
                     this->addItem(notGate);
                 }
-            }
-
+				else if (componentType == "JK Flip Flop") {
+					JKFlipFlop* jkFlipFlop = new JKFlipFlop();
+					jkFlipFlop->setPos(newPos);
+					jkFlipFlop->Component::connect(jkFlipFlop->connectionPoints());
+					this->addItem(jkFlipFlop);
+				}
+				else if (componentType == "Decoder") {
+					Decoder* decoder = new Decoder();
+					decoder->setPos(newPos);
+					decoder->Component::connect(decoder->connectionPoints());
+					this->addItem(decoder);
+				}
+				else if (componentType == "LCD Display") {
+					LCDDisplay* lcdDisplay = new LCDDisplay();
+					lcdDisplay->setPos(newPos);
+					lcdDisplay->Component::connect(lcdDisplay->connectionPoints());
+					this->addItem(lcdDisplay);
+				}
+			}
             event->accept();
     }
     else event->ignore();
