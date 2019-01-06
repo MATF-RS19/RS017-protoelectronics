@@ -188,7 +188,10 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
+protected:
+	QRectF boundingRect() const override;
 #endif
+
 private:
     int  inputToBinaryInt(double a, double b, double c, double d) const;
     void decodeOutput(int input) const;

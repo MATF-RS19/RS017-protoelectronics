@@ -28,7 +28,7 @@ void MainWindow::createListWidget() {
 				"DC Voltage" << "Clock" << "Switch" << "AND" << "OR" <<
                 "XOR" << "NAND" << "NOR" <<
 				"NXOR" << "NOT" <<
-				"JK Flip Flop";
+				"JK Flip Flop" << "Decoder" << "LCD Display";
 
     itemListWidget->addItems(itemList);
     itemListWidget->setFixedWidth(120);

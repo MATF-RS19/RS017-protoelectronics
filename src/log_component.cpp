@@ -593,17 +593,14 @@ void JKFlipFlop::paint(QPainter* painter, const QStyleOptionGraphicsItem *option
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
 
-	// Setting color for drawing lines
-	painter->setPen(penForLines);
-
 	// Input lines
-    painter->drawLine(0, 40, 20, 40);
-    painter->drawLine(0, 90, 20, 90);
-    painter->drawLine(0, 140, 20, 140);
+	voltageDependedDrawLine(QLineF(0, 40, 20, 40), painter, 0);
+	voltageDependedDrawLine(QLineF(0, 90, 20, 90), painter, 1);
+	voltageDependedDrawLine(QLineF(0, 140, 20, 140), painter, 2);
 
 	// Output liness
-    painter->drawLine(140, 40, 160, 40);
-    painter->drawLine(140, 140, 160, 140);
+	voltageDependedDrawLine(QLineF(140, 40, 160, 40), painter, 3);
+	voltageDependedDrawLine(QLineF(140, 140, 160, 140), painter, 4);
 
 	// Body
 	QRectF rect(20, 15, 120, 150);
@@ -638,24 +635,22 @@ void JKFlipFlop::paint(QPainter* painter, const QStyleOptionGraphicsItem *option
 std::vector<std::pair<int, int>> JKFlipFlop::connectionPoints(void) const {
 	std::vector<std::pair<int, int>> dots;
 	dots.reserve(5);
-    //TODO verovatno je promenjeno jer sam tacke pomerio za 0.5
-    //J, K, Q i Qc. Clock je ostao isti
 
 	// Find local coordinates of connection point
 	QPointF localPoint1(boundingRect().x(),
-						boundingRect().y()+boundingRect().height()/4);
+						boundingRect().y()+boundingRect().height()+40);
 
 	QPointF localPoint2(boundingRect().x(),
 						boundingRect().y()+boundingRect().height()/2);
 
 	QPointF localPoint3(boundingRect().x(),
-						boundingRect().y()+boundingRect().height()*3/4);
+						boundingRect().y()+boundingRect().height()+140);
 
 	QPointF localPoint4(boundingRect().x()+boundingRect().width(),
-						boundingRect().y()+boundingRect().height()/4);
+						boundingRect().y()+boundingRect().height()+40);
 
 	QPointF localPoint5(boundingRect().x()+boundingRect().width(),
-						boundingRect().y()+boundingRect().height()*3/4);
+						boundingRect().y()+boundingRect().height()+140);
 
 	// And then map to scene coordinates
 	auto scenePoint1 = mapToScene(localPoint1);
@@ -673,8 +668,50 @@ std::vector<std::pair<int, int>> JKFlipFlop::connectionPoints(void) const {
 	return dots;
 }
 
+QRectF Decoder::boundingRect() const {
+	return QRectF(0, 0, 150, 210);
+}
+
 void Decoder::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    //TODO
+	Q_UNUSED(option);
+	Q_UNUSED(widget);
+	LogicGate::paint(painter, option, widget);
+
+	// Setting color for drawing lines
+	painter->setPen(penForLines);
+
+	// Input lines
+	painter->drawLine(0, 40, 20, 40);
+
+
+	// Output liness
+	voltageDependedDrawLine(QLineF(140, 40, 160, 40), painter, 3);
+	voltageDependedDrawLine(QLineF(140, 140, 160, 140), painter, 4);
+
+	// Body
+	QRectF rect(20, 15, 120, 150);
+	painter->drawRect(rect);
+
+	// Letters
+	painter->setFont(QFont("Times", 25, QFont::Bold));
+	painter->drawText(rect, Qt::AlignLeft, " J");
+	painter->drawText(rect, Qt::AlignRight, "Q ");
+	painter->drawText(rect, Qt::AlignBottom , " K");
+	painter->drawText(rect, Qt::AlignBottom | Qt::AlignRight, "Qc ");
+
+	// Connection points
+	painter->setPen(penForDots);
+	QPointF in1(1, 40);
+	QPointF in2(1, 90);
+	QPointF in3(1, 140);
+	QPointF out1(159, 40);
+	QPointF out2(159, 140);
+	painter->drawPoint(in1);
+	painter->drawPoint(in2);
+	painter->drawPoint(in3);
+	painter->drawPoint(out1);
+	painter->drawPoint(out2);
+
 }
 
 std::vector<std::pair<int, int>> Decoder::connectionPoints(void) const {
