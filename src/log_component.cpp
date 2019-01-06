@@ -742,7 +742,6 @@ void Decoder::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
 	painter->drawText(out5 - QPointF(23, 0), "e");
 	painter->drawText(out6 - QPointF(23, 0), "f");
 	painter->drawText(out7 - QPointF(23, 0), "g");
-
 }
 
 std::vector<std::pair<int, int>> Decoder::connectionPoints(void) const {
@@ -811,12 +810,135 @@ std::vector<std::pair<int, int>> Decoder::connectionPoints(void) const {
 	return dots;
 }
 
+QRectF LCDDisplay::boundingRect() const {
+	return QRectF(0, 0, 150, 180);
+}
+
 void LCDDisplay::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    //TODO
+	Q_UNUSED(option);
+	Q_UNUSED(widget);
+//	LogicGate::paint(painter, option, widget);
+
+	// Setting color for drawing lines
+	painter->setPen(penForLines);
+
+	// Input lines
+	voltageDependedDrawLine(QLineF(0, 30, 10, 30), painter, 0);
+	voltageDependedDrawLine(QLineF(0, 50, 10, 50), painter, 1);
+	voltageDependedDrawLine(QLineF(0, 70, 10, 70), painter, 2);
+	voltageDependedDrawLine(QLineF(0, 90, 10, 90), painter, 3);
+	voltageDependedDrawLine(QLineF(0, 110, 10, 110), painter, 4);
+	voltageDependedDrawLine(QLineF(0, 130, 10, 130), painter, 5);
+	voltageDependedDrawLine(QLineF(0, 150, 10, 150), painter, 6);
+
+	// Body
+	QRectF rect(10, 5, 130, 170);
+	painter->drawRect(rect);
+
+	// Drawing digits
+	painter->setPen(penForDigit);
+	if(getBoolVoltage(_nodes[a]->_v)) {
+		painter->drawLine(50, 30, 80, 30);
+		update();
+	}
+	if(getBoolVoltage(_nodes[b]->_v)) {
+		painter->drawLine(80, 30, 80, 60);
+		update();
+	}
+	if(getBoolVoltage(_nodes[c]->_v)) {
+		painter->drawLine(80, 60, 80, 90);
+		update();
+	}
+	if(getBoolVoltage(_nodes[d]->_v)) {
+		painter->drawLine(50, 90, 80, 90);
+		update();
+	}
+	if(getBoolVoltage(_nodes[e]->_v)) {
+		painter->drawLine(50, 60, 50, 90);
+		update();
+	}
+	if(getBoolVoltage(_nodes[f]->_v)) {
+		painter->drawLine(50, 30, 50, 60);
+		update();
+	}
+	if(getBoolVoltage(_nodes[g]->_v)) {
+		painter->drawLine(50, 60, 80, 60);
+		update();
+	}
+
+	// Connection points
+	painter->setPen(penForDots);
+	QPointF in1(1, 30);
+	QPointF in2(1, 50);
+	QPointF in3(1, 70);
+	QPointF in4(1, 90);
+	QPointF in5(1, 110);
+	QPointF in6(1, 130);
+	QPointF in7(1, 150);
+
+	painter->drawPoint(in1);
+	painter->drawPoint(in2);
+	painter->drawPoint(in3);
+	painter->drawPoint(in4);
+	painter->drawPoint(in5);
+	painter->drawPoint(in6);
+	painter->drawPoint(in7);
+
+	// Letters
+	painter->setFont(QFont("Times", 20, QFont::Thin));
+	painter->drawText(in1 + QPointF(15, 5), "a");
+	painter->drawText(in2 + QPointF(15, 5), "b");
+	painter->drawText(in3 + QPointF(15, 5), "c");
+	painter->drawText(in4 + QPointF(15, 5), "d");
+	painter->drawText(in5 + QPointF(15, 5), "e");
+	painter->drawText(in6 + QPointF(15, 5), "f");
+	painter->drawText(in7 + QPointF(15, 5), "g");
 }
 
 std::vector<std::pair<int, int>> LCDDisplay::connectionPoints(void) const {
-    //TODO
+	std::vector<std::pair<int, int>> dots;
+	dots.reserve(7);
+
+	// Find local coordinates of connection point
+	QPointF localPoint1(boundingRect().x(),
+						boundingRect().y()+30);
+
+	QPointF localPoint2(boundingRect().x(),
+						boundingRect().y()+50);
+
+	QPointF localPoint3(boundingRect().x(),
+						boundingRect().y()+70);
+
+	QPointF localPoint4(boundingRect().x(),
+						boundingRect().y()+90);
+
+	QPointF localPoint5(boundingRect().x(),
+						boundingRect().y()+110);
+
+	QPointF localPoint6(boundingRect().x(),
+						boundingRect().y()+130);
+
+	QPointF localPoint7(boundingRect().x(),
+						boundingRect().y()+150);
+
+	// And then map to scene coordinates
+	auto scenePoint1 = mapToScene(localPoint1);
+	auto scenePoint2 = mapToScene(localPoint2);
+	auto scenePoint3 = mapToScene(localPoint3);
+	auto scenePoint4 = mapToScene(localPoint4);
+	auto scenePoint5 = mapToScene(localPoint5);
+	auto scenePoint6 = mapToScene(localPoint6);
+	auto scenePoint7 = mapToScene(localPoint7);
+
+	dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+	dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+	dots.push_back(std::pair<int, int>(scenePoint3.x(), scenePoint3.y()));
+	dots.push_back(std::pair<int, int>(scenePoint4.x(), scenePoint4.y()));
+	dots.push_back(std::pair<int, int>(scenePoint5.x(), scenePoint5.y()));
+	dots.push_back(std::pair<int, int>(scenePoint6.x(), scenePoint6.y()));
+	dots.push_back(std::pair<int, int>(scenePoint7.x(), scenePoint7.y()));
+
+	return dots;
 }
 
 #endif

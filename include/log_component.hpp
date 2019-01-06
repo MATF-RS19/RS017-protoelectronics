@@ -217,6 +217,8 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
+protected:
+	QRectF boundingRect() const override;
 #endif
 };
 

@@ -149,15 +149,15 @@ void GridZone::dropEvent(QGraphicsSceneDragDropEvent *event) {
 				else if (componentType == "Decoder") {
 					Decoder* decoder = new Decoder();
 					decoder->setPos(newPos);
-					//decoder->Component::connect(decoder->connectionPoints());
+					decoder->Component::connect(decoder->connectionPoints());
 					this->addItem(decoder);
 				}
-//				else if (componentType == "LCD Display") {
-//					LCDDisplay* lcdDisplay = new LCDDisplay();
-//					lcdDisplay->setPos(newPos);
-//					//lcdDisplay->Component::connect(lcdDisplay->connectionPoints());
-//					this->addItem(lcdDisplay);
-//				}
+				else if (componentType == "LCD Display") {
+					LCDDisplay* lcdDisplay = new LCDDisplay();
+					lcdDisplay->setPos(newPos);
+					lcdDisplay->Component::connect(lcdDisplay->connectionPoints());
+					this->addItem(lcdDisplay);
+				}
 			}
             event->accept();
     }

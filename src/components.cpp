@@ -192,6 +192,7 @@ Component::Component(const std::string &name)
     penForDots = QPen(Qt::white, 6, Qt::SolidLine, Qt::RoundCap);
     penForLeadsGreen = QPen(Qt::green, 3, Qt::SolidLine, Qt::RoundCap);
     penForLeadsRed = QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap);
+	penForDigit = QPen(Qt::red, 5, Qt::SolidLine, Qt::RoundCap);
 #endif
 }
 
