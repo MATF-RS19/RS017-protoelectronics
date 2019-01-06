@@ -1,5 +1,4 @@
 #include "scene.h"
-#include "components.hpp"
 #include "log_component.hpp"
 
 GridZone::GridZone(QObject* parent) :
