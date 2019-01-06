@@ -63,8 +63,8 @@ void GridZone::dropEvent(QGraphicsSceneDragDropEvent *event) {
                     //Set position
                     wire->setPos(newPos);
 
-                    //Establish connection
-                    wire->connect(wire->connectionPoints());
+					//Establish connection
+					wire->connect(wire->connectionPoints());
 
 					// Add item
                     this->addItem(wire);
@@ -84,55 +84,61 @@ void GridZone::dropEvent(QGraphicsSceneDragDropEvent *event) {
                 else if (componentType == "DC Voltage") {
                     DCVoltage* dcv = new DCVoltage();
                     dcv->setPos(newPos);
-                    dcv->connect(dcv->connectionPoints());
+					dcv->Component::connect(dcv->connectionPoints());
                     this->addItem(dcv);
                 }
+				else if (componentType == "Clock") {
+					Clock* cl = new Clock();
+					cl->setPos(newPos);
+					cl->Component::connect(cl->connectionPoints());
+					this->addItem(cl);
+				}
                 else if(componentType == "Switch") {
                     Switch* sw = new Switch();
                     sw->setPos(newPos);
-                    sw->connect(sw->connectionPoints());
+					sw->Component::connect(sw->connectionPoints());
                     this->addItem(sw);
                 }
                 else if (componentType == "AND") {
                     ANDGate* andGate = new ANDGate();
                     andGate->setPos(newPos);
-                    andGate->connect(andGate->connectionPoints());
+					andGate->Component::connect(andGate->connectionPoints());
                     this->addItem(andGate);
                 }
                 else if (componentType == "OR") {
                     ORGate* orGate = new ORGate();
                     orGate->setPos(newPos);
-                    orGate->connect(orGate->connectionPoints());
+					orGate->Component::connect(orGate->connectionPoints());
                     this->addItem(orGate);
                 }
                 else if (componentType == "XOR") {
                     XORGate* xorGate = new XORGate();
                     xorGate->setPos(newPos);
-                    xorGate->connect(xorGate->connectionPoints());
+					xorGate->Component::connect(xorGate->connectionPoints());
                     this->addItem(xorGate);
                 }
                 else if (componentType == "NAND") {
                     NANDGate* nandGate = new NANDGate();
                     nandGate->setPos(newPos);
-                    nandGate->connect(nandGate->connectionPoints());
+					nandGate->Component::connect(nandGate->connectionPoints());
                     this->addItem(nandGate);
                 }
                 else if (componentType == "NOR") {
                     NORGate* norGate = new NORGate();
                     norGate->setPos(newPos);
-                    norGate->connect(norGate->connectionPoints());
+					norGate->Component::connect(norGate->connectionPoints());
                     this->addItem(norGate);
                 }
                 else if (componentType == "NXOR") {
                     NXORGate* nxorGate = new NXORGate();
                     nxorGate->setPos(newPos);
-                    nxorGate->connect(nxorGate->connectionPoints());
+					nxorGate->Component::connect(nxorGate->connectionPoints());
                     this->addItem(nxorGate);
                 }
                 else if (componentType == "NOT") {
                     NOTGate* notGate = new NOTGate();
                     notGate->setPos(newPos);
-                    notGate->connect(notGate->connectionPoints());
+					notGate->Component::connect(notGate->connectionPoints());
                     this->addItem(notGate);
                 }
             }

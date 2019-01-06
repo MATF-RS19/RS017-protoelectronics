@@ -36,12 +36,16 @@ private:
 
 	double oldResistanceValue;
 	double oldVoltageValue;
+	int oldTimeIntervalValue;
+
 	Resistor* r;
 	DCVoltage* v;
+	Clock* cl;
 
 	bool applyHappened = false;
 	bool isResistor = false;
 	bool isDCVoltage = false;
+	bool isClock = false;
 };
 
 #endif // DIALOG_H

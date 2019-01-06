@@ -15,6 +15,8 @@
 #include <QPen>
 #include <QDebug>
 #include <QSize>
+#include <QTimer>
+#include <qobject.h>
 #endif
 
 #include <string>
@@ -397,7 +399,7 @@ public:
 
     void disconnect() override;
 
-    void reconnect(int xFrom, int yFrom, int xTo, int yTo) override;
+	void reconnect(int xFrom, int yFrom, int xTo, int yTo) override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -406,10 +408,31 @@ public:
 protected:
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 #endif
+
 private:
 	double _voltage;
 };
 
+class Clock : public DCVoltage, public QObject {
+public:
+	Clock(double voltage = 5, int clockFrequency = 500);
+	std::string componentType() const override {return "clock";}
+
+	int timeInterval() const;
+	void setTimeInterval(int timeInterval);
+
+	~Clock() override;
+
+#ifdef QTPAINT
+	void timerEvent(QTimerEvent *event) override;
+	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+#endif
+
+private:
+	double _oldVoltage;
+	int _timeInterval;
+	int	_timerId;
+};
 
 std::ostream& operator<<(std::ostream& out, const Component& r);
 
