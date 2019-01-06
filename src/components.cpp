@@ -987,6 +987,9 @@ int Clock::timeInterval() const {
 void Clock::setTimeInterval(int timeInterval) {
 	_timeInterval = timeInterval;
 }
+double Clock::oldVoltage() const{
+    return _oldVoltage;
+}
 
 #ifdef QTPAINT
 void Clock::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {

@@ -437,6 +437,7 @@ public:
 
 	int timeInterval() const;
 	void setTimeInterval(int timeInterval);
+    double oldVoltage() const;
 
 	~Clock() override;
 
