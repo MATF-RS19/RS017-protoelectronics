@@ -174,7 +174,7 @@ private:
 class Decoder : public LogicGate, public Counter<Decoder> {
 public:
     Decoder();
-    ~Decoder() override;
+	~Decoder() override;
 
     std::string componentType() const override { return "decoder"; }
 
@@ -183,7 +183,7 @@ public:
         a, b, c, d, e, f, g
     };
 
-    double voltage() const override;
+	double voltage() const override;
 
     void disconnect(int x, int y) override;
 
@@ -197,9 +197,10 @@ protected:
 #endif
 
 private:
-    int  inputToBinaryInt(double a, double b, double c, double d) const;
-    void decodeOutput(int input) const;
-    void updateVoltages() const;
+	int  inputToBinaryInt(double a, double b, double c, double d) const;
+	void decodeOutput(int input) const;
+	void updateVoltages() const;
+	std::string toString() const override;
 };
 
 class LCDDisplay : public LogicGate, public Counter<LCDDisplay> {
@@ -220,6 +221,8 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
+protected:
+	QRectF boundingRect() const override;
 #endif
 };
 

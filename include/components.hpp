@@ -238,6 +238,8 @@ protected:
     QPen penForDots;
     QPen penForLeadsGreen;
     QPen penForLeadsRed;
+	QPen penForDigit;
+
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
