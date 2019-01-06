@@ -38,6 +38,11 @@ bool LogicGate::getBoolVoltage(double v){
     }
 }
 
+void LogicGate::connect(const std::vector<std::pair<int, int>>& connPts) {
+    Component::connect(connPts);
+    voltage();
+}
+
 std::string LogicGate::toString() const {
     std::stringstream str;
     str << name() << std::endl;
@@ -64,10 +69,6 @@ double ANDGate::voltage() const {
     return _nodes[2]->_v;
 }
 
-void ANDGate::connect(const std::vector<std::pair<int, int>>& connPts){
-    Component::connect(connPts);
-    voltage();
-}
 
 
 ORGate::ORGate()
@@ -82,11 +83,6 @@ double ORGate::voltage() const {
     _nodes[2]->_v = (a || b ? 5.0 : 0.0);
     updateVoltages(_nodes[2]);
     return _nodes[2]->_v;
-}
-
-void ORGate::connect(const std::vector<std::pair<int, int>>& connPts){
-    Component::connect(connPts);
-    voltage();
 }
 
 
@@ -104,11 +100,6 @@ double XORGate::voltage() const {
     return _nodes[2]->_v;
 }
 
-void XORGate::connect(const std::vector<std::pair<int, int>>& connPts){
-    Component::connect(connPts);
-    voltage();
-}
-
 
 NORGate::NORGate()
    : LogicGate("NOR" + std::to_string(_counter+1))
@@ -122,11 +113,6 @@ double NORGate::voltage() const {
     _nodes[2]->_v = (a || b ? 0.0 : 5.0);
     updateVoltages(_nodes[2]);
     return _nodes[2]->_v;
-}
-
-void NORGate::connect(const std::vector<std::pair<int, int>>& connPts){
-    Component::connect(connPts);
-    voltage();
 }
 
 
@@ -144,11 +130,6 @@ double NANDGate::voltage() const {
     return _nodes[2]->_v;
 }
 
-void NANDGate::connect(const std::vector<std::pair<int, int>>& connPts){
-    Component::connect(connPts);
-    voltage();
-}
-
 
 NXORGate::NXORGate()
    : LogicGate("XOR" + std::to_string(_counter+1))
@@ -162,11 +143,6 @@ double NXORGate::voltage() const {
     _nodes[2]->_v = (a == b ? 5.0 : 0.0);
     updateVoltages(_nodes[2]);
     return _nodes[2]->_v;
-}
-
-void NXORGate::connect(const std::vector<std::pair<int, int>>& connPts){
-    Component::connect(connPts);
-    voltage();
 }
 
 
@@ -187,10 +163,6 @@ double NOTGate::voltage() const {
     return _nodes[1]->_v;
 }
 
-void NOTGate::connect(const std::vector<std::pair<int, int>>& connPts) {
-    Component::connect(connPts);
-    voltage();
-}
 
 void NOTGate::disconnect(int x, int y) {
     auto it = Node::find(x, y);
@@ -225,17 +197,12 @@ double JKFlipFlop::voltage() const {
     return 0;
 }
 
-void JKFlipFlop::connect(const std::vector<std::pair<int, int>>& connPts) {
-    Component::connect(connPts);
-    voltage();
-}
-
 void JKFlipFlop::disconnect(int x, int y) {
     auto it = Node::find(x, y);
     if (it == Node::_allNodes.end()) return;
 
     //Remove possible voltage on output node
-    if (_nodes.size() == 4 && (*it) == _nodes[1]) (*it)->_v = 0;
+    if (_nodes.size() == 4 && ((*it) == _nodes[Q] || *(it) == _nodes[Qc])) (*it)->_v = 0;
     updateVoltages((*it));
     Component::disconnect(x, y);
 }
@@ -243,8 +210,10 @@ void JKFlipFlop::disconnect(int x, int y) {
 void JKFlipFlop::disconnect() {
     if (_nodes.size() == 4) {
         //Remove possible voltage on output node
-        _nodes.back()->_v = 0;
-        updateVoltages(_nodes.back());
+        _nodes[Q]->_v = 0;
+        _nodes[Qc]->_v = 0;
+        updateVoltages(_nodes[Q]);
+        updateVoltages(_nodes[Qc]);
     }
     Component::disconnect();
 }

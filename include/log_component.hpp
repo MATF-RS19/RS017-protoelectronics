@@ -18,6 +18,8 @@ public:
         return 0;
     }
 
+    void connect(const std::vector<std::pair<int, int>>& connPts) override;
+
     void disconnect(int x, int y) override;
 
     void disconnect() override;
@@ -42,8 +44,6 @@ public:
 
     std::string componentType() const override { return "and"; }
     
-    void connect(const std::vector<std::pair<int, int>>& connPts) override;
-
     double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -56,8 +56,6 @@ public:
     ORGate();
 
     std::string componentType() const override { return "or"; }
-
-    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
     double voltage() const override;
 #ifdef QTPAINT
@@ -72,8 +70,6 @@ public:
 
     std::string componentType() const override { return "xor"; }
 
-    void connect(const std::vector<std::pair<int, int>>& connPts) override;
-
     double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -87,8 +83,6 @@ public:
 
     std::string componentType() const override { return "nand"; }
     
-    void connect(const std::vector<std::pair<int, int>>& connPts) override;
-
     double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -102,8 +96,6 @@ public:
     
     std::string componentType() const override { return "nor"; }
 
-    void connect(const std::vector<std::pair<int, int>>& connPts) override;
-
     double voltage() const override;
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -116,8 +108,6 @@ public:
     NXORGate();
     
     std::string componentType() const override { return "nxor"; }
-
-    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
     double voltage() const override;
 #ifdef QTPAINT
@@ -133,8 +123,6 @@ public:
     ~NOTGate() override;
 
     std::string componentType() const override { return "not"; }
-
-    void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
     double voltage() const override;
 
@@ -157,9 +145,11 @@ public:
 
     ~JKFlipFlop() override;
 
-    std::string componentType() const override { return "flipflop"; }
+    enum pin {
+        J, K, Q, Qc
+    };
 
-    void connect(const std::vector<std::pair<int, int>>& connPts) override;
+    std::string componentType() const override { return "flipflop"; }
 
     double voltage() const override;
 
