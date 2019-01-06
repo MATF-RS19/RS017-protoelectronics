@@ -19,8 +19,6 @@ std::string Component::toString() const {
 
     stream << std::fixed << std::setprecision(2);
     stream << "U = " << voltage() << " V" << std::endl;
-    stream << "I = " << current() << " A" << std::endl;
-    stream << "P = " << power()   << " W" << std::endl;
     return stream.str();
 }
 
@@ -192,6 +190,7 @@ Component::Component(const std::string &name)
     penForDots = QPen(Qt::white, 6, Qt::SolidLine, Qt::RoundCap);
     penForLeadsGreen = QPen(Qt::green, 3, Qt::SolidLine, Qt::RoundCap);
     penForLeadsRed = QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap);
+    penForDigit = QPen(Qt::darkRed, 5, Qt::SolidLine, Qt::RoundCap);
 #endif
 }
 
@@ -253,7 +252,7 @@ void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     penForLines.setColor(QColor(8, 246, 242));
     penForLinesWhite.setColor(QColor(8, 246, 242));
 
-	// Alos printing out properties of the component
+	// Also printing out properties of the component
 	// Since we have 2 more windows except main one (for resistor and dc voltage) we have to find the main one,
 	// because only main window has label propertiesMessage
 
@@ -435,10 +434,6 @@ void Component::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
 	}
 }
 
-double Component::power() const {
-	return voltage() * current();
-}
-
 void Component::updateVoltages(const std::shared_ptr<Node>& node) const {
     for (const auto& component : node->directComponents()) {
         if (component != this) {
@@ -498,11 +493,6 @@ double Ground::voltage() const {
 	return 0;
 }
 
-//TODO
-double Ground::current() const {
-	return 0;
-}
-
 void Ground::addNode(int x, int y) {
     if (_nodes.size() >= 1) {
         throw std::runtime_error("Ground already connected!");
@@ -531,16 +521,6 @@ Wire::Wire()
 Wire::~Wire() {
     disconnect();
 }
-
-std::string Wire::toString() const {
-    std::stringstream str;
-    str << name() << std::endl;
-
-    str << std::fixed << std::setprecision(2);
-    str << "U = " << voltage() << " V" << std::endl;
-    return str.str();
-}
-
 
 #ifdef QTPAINT
 QRectF Wire::boundingRect() const {
@@ -611,7 +591,6 @@ std::shared_ptr<Node> Wire::otherNode(int id) const {
 }
 
 
-//TODO
 double Wire::voltage() const {
     if (_nodes.size() != 2) return 0;
 
@@ -644,11 +623,6 @@ double Wire::voltage() const {
 
     //both nodes have the same voltage
     return _nodes[0]->_v;
-}
-
-//TODO
-double Wire::current() const {
-	return 0;
 }
 
 void Wire::connect(const std::vector<std::pair<int, int>> &connPts) {
@@ -812,6 +786,16 @@ void Resistor::addNode(int x, int y) {
     Component::addNode(x, y);
 }
 
+std::string Resistor::toString() const {
+    std::stringstream str;
+    str << Component::toString();
+
+    str << "I = " << current() << " A" << std::endl;
+    str << "P = " << voltage() * current() << " W" << std::endl;
+    return str.str();
+}
+
+
 
 //DCVoltage
 DCVoltage::DCVoltage(double voltage)
@@ -899,11 +883,6 @@ void DCVoltage::setVoltage(double voltage) {
     }
 }
 
-//TODO
-double DCVoltage::current() const {
-	return 0;
-}
-
 /* TODO 2 terminals
 #ifdef QTPAINT
 void VoltageSource::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -967,6 +946,7 @@ void DCVoltage::reconnect(int xFrom, int yFrom, int xTo, int yTo) {
     Component::reconnect(xFrom, yFrom, xTo, yTo);
 }
 
+#ifdef QTPAINT
 //Clock
 Clock::Clock(double voltage, int timeInterval)
 	: DCVoltage(voltage), _oldVoltage(voltage), _timeInterval(timeInterval)
@@ -988,7 +968,16 @@ void Clock::setTimeInterval(int timeInterval) {
 	_timeInterval = timeInterval;
 }
 
-#ifdef QTPAINT
+std::string Clock::toString() const {
+    std::stringstream str;
+    str << DCVoltage::toString();
+
+    str << std::fixed << std::setprecision(2);
+    str << "time = " << _timeInterval << " ms" << std::endl;
+    str << "f = " << 1000.0/_timeInterval << " Hz" << std::endl;
+    return str.str();
+}
+
 void Clock::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 	// If we double click on clock new dialog for property changing pops out
 
@@ -1001,12 +990,13 @@ void Clock::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 
 		// Start timer again with new _timeInterval value
 		_timerId = startTimer(_timeInterval);
-		update();
-	}
-	QGraphicsItem::mouseDoubleClickEvent(event);
+        update();
+    }
+    QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
 void Clock::timerEvent(QTimerEvent *event) {
+    Q_UNUSED(event);
 	if(voltage() == 0.0)
 		setVoltage(_oldVoltage);
 	else
@@ -1028,6 +1018,18 @@ Switch::Switch(state s)
 
 Switch::~Switch() {
     disconnect();
+}
+
+std::string Switch::toString() const {
+    std::stringstream str;
+    str << Component::toString();
+
+    if (_state == OPEN)
+        str << "State: open" << std::endl;
+    else
+        str << "State: close" << std::endl;
+
+    return str.str();
 }
 
 void Switch::addNode(int x, int y) {
@@ -1129,10 +1131,6 @@ double Switch::voltage() const {
     }
 
     return _nodes[LEFT]->_v;
-}
-
-double Switch::current() const {
-    return 0;
 }
 
 #ifdef QTPAINT
