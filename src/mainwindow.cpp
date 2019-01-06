@@ -121,19 +121,20 @@ void MainWindow::onSaveFile() {
          QJsonArray resistor_components;
          QJsonArray switch_components;
          QJsonArray ground_components;
+         QJsonArray flipflop_components;
+         QJsonArray lcd_components;
+         QJsonArray decoder_components;
          QList<QGraphicsItem*> allItems = scene->items();
          for (int i = 0; i < allItems.size(); ++i) {
               QGraphicsItem *component = allItems[i];
               if(component->parentItem() == nullptr){
                        qreal x = component->x();
                        qreal y = component->y();
-                       //std::cout << "x: " << x  << " y: " << y << std::endl;
                        QJsonArray points;
                        points.push_back(x);
                        points.push_back(y);
                        Component *rItem = qgraphicsitem_cast<Component*> (component);
                        std::string type = rItem->componentType();
-                       //std::cout << "Type: " << rItem->componentType() << std::endl;
                        if (type == "or"){
                           or_components.push_back(points);
                        }
@@ -156,25 +157,15 @@ void MainWindow::onSaveFile() {
                           not_components.push_back(points);
                        }
                        if(type == "voltage"){
-                          //std::cout << rItem->voltage() << std::endl;
                           points.push_back(rItem->voltage());
                           dcvoltage_components.push_back(points);
                        }
                        if(type == "resistor"){
                           Resistor* rItem = static_cast<Resistor*>(rItem);
-                          //std::cout << rItem->resistance() << std::endl;
                           points.push_back(rItem->resistance());
                           resistor_components.push_back(points);
                        }
                        if(type == "clock"){
-                          //std::cout << "Voltage: " << rItem->voltage() << std::endl;
-                          Clock* rItem = static_cast<Clock*>(rItem);
-                          //std::cout << "Interval: " << rItem->timeInterval() <<std::endl;
-                          int interval = rItem->timeInterval();
-                          double voltage = rItem->oldVoltage();
-
-                          points.push_back(voltage);
-                          points.push_back(interval);
                           clock_components.push_back(points);
                        }
                        if (type == "ground"){
@@ -182,6 +173,20 @@ void MainWindow::onSaveFile() {
                        }
                        if (type == "wire"){
                           wire_components.push_back(points);
+                       }
+                       if (type == "switch"){
+                            Switch* rItem = static_cast<Switch*>(rItem);
+                            points.push_back(rItem->isOpened());
+                            switch_components.push_back(points);
+                       }
+                       if (type == "flipflop"){
+                           flipflop_components.push_back(points);
+                       }
+                       if (type == "lcd"){
+                           lcd_components.push_back(points);
+                       }
+                       if (type == "decoder"){
+                           decoder_components.push_back(points);
                        }
 
               }
@@ -199,6 +204,10 @@ void MainWindow::onSaveFile() {
             topQuery["ground"] = ground_components;
             topQuery["voltage"] = dcvoltage_components;
             topQuery["resistor"] = resistor_components;
+            topQuery["switch"] = switch_components;
+            topQuery["decoder"] = decoder_components;
+            topQuery["lcd"] = lcd_components;
+            topQuery["flipflop"] = flipflop_components;
             QJsonDocument document(topQuery);
             //qDebug() << document.toJson();
 
@@ -210,7 +219,7 @@ void MainWindow::onSaveFile() {
             //    );
     //qDebug() << "A";
     //if(!fileName.isEmpty()) {
-        currentFile = QString("sema2.json");
+        currentFile = QString("sema5.json");
         saveFile(document);
     //}
 
