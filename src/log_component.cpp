@@ -729,19 +729,20 @@ void Decoder::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, Q
 	painter->drawPoint(out6);
 	painter->drawPoint(out7);
 
-	// Letters
-	painter->setFont(QFont("Times", 20, QFont::Thin));
-	painter->drawText(in1 + QPointF(15, 5), "I3");
-	painter->drawText(in2 + QPointF(15, 5), "I2");
-	painter->drawText(in3 + QPointF(15, 5), "I1");
-	painter->drawText(in4 + QPointF(15, 5), "I0");
-	painter->drawText(out1 - QPointF(23, 0), "a");
-	painter->drawText(out2 - QPointF(23, 0), "b");
-	painter->drawText(out3 - QPointF(23, 0), "c");
-	painter->drawText(out4 - QPointF(23, 0), "d");
-	painter->drawText(out5 - QPointF(23, 0), "e");
-	painter->drawText(out6 - QPointF(23, 0), "f");
-	painter->drawText(out7 - QPointF(23, 0), "g");
+    // Letters
+    painter->setPen(penForLines);
+    painter->setFont(QFont("Times", 18, QFont::Thin));
+    painter->drawText(in1 + QPointF(15, 5), "I3");
+    painter->drawText(in2 + QPointF(15, 5), "I2");
+    painter->drawText(in3 + QPointF(15, 5), "I1");
+    painter->drawText(in4 + QPointF(15, 5), "I0");
+    painter->drawText(out1 - QPointF(30, -5), "a");
+    painter->drawText(out2 - QPointF(30, -5), "b");
+    painter->drawText(out3 - QPointF(30, -5), "c");
+    painter->drawText(out4 - QPointF(30, -5), "d");
+    painter->drawText(out5 - QPointF(30, -5), "e");
+    painter->drawText(out6 - QPointF(30, -5), "f");
+    painter->drawText(out7 - QPointF(30, -5), "g");
 }
 
 std::vector<std::pair<int, int>> Decoder::connectionPoints(void) const {
@@ -838,31 +839,31 @@ void LCDDisplay::paint(QPainter* painter, const QStyleOptionGraphicsItem *option
 	// Drawing digits
 	painter->setPen(penForDigit);
 	if(getBoolVoltage(_nodes[a]->_v)) {
-		painter->drawLine(50, 30, 80, 30);
+        painter->drawLine(70, 30, 100, 30);
 		update();
 	}
 	if(getBoolVoltage(_nodes[b]->_v)) {
-		painter->drawLine(80, 30, 80, 60);
+        painter->drawLine(100, 30, 100, 60);
 		update();
 	}
 	if(getBoolVoltage(_nodes[c]->_v)) {
-		painter->drawLine(80, 60, 80, 90);
+        painter->drawLine(100, 60, 100, 90);
 		update();
 	}
 	if(getBoolVoltage(_nodes[d]->_v)) {
-		painter->drawLine(50, 90, 80, 90);
+        painter->drawLine(70, 90, 100, 90);
 		update();
 	}
 	if(getBoolVoltage(_nodes[e]->_v)) {
-		painter->drawLine(50, 60, 50, 90);
+        painter->drawLine(70, 60, 70, 90);
 		update();
 	}
 	if(getBoolVoltage(_nodes[f]->_v)) {
-		painter->drawLine(50, 30, 50, 60);
+        painter->drawLine(70, 30, 70, 60);
 		update();
 	}
 	if(getBoolVoltage(_nodes[g]->_v)) {
-		painter->drawLine(50, 60, 80, 60);
+        painter->drawLine(70, 60, 100, 60);
 		update();
 	}
 
@@ -885,14 +886,15 @@ void LCDDisplay::paint(QPainter* painter, const QStyleOptionGraphicsItem *option
 	painter->drawPoint(in7);
 
 	// Letters
-	painter->setFont(QFont("Times", 20, QFont::Thin));
-	painter->drawText(in1 + QPointF(15, 5), "a");
-	painter->drawText(in2 + QPointF(15, 5), "b");
-	painter->drawText(in3 + QPointF(15, 5), "c");
-	painter->drawText(in4 + QPointF(15, 5), "d");
-	painter->drawText(in5 + QPointF(15, 5), "e");
-	painter->drawText(in6 + QPointF(15, 5), "f");
-	painter->drawText(in7 + QPointF(15, 5), "g");
+    painter->setPen(penForLines);
+    painter->setFont(QFont("Times", 18, QFont::Thin));
+    painter->drawText(in1 + QPointF(20, 5), "a");
+    painter->drawText(in2 + QPointF(20, 5), "b");
+    painter->drawText(in3 + QPointF(20, 5), "c");
+    painter->drawText(in4 + QPointF(20, 5), "d");
+    painter->drawText(in5 + QPointF(20, 5), "e");
+    painter->drawText(in6 + QPointF(20, 5), "f");
+    painter->drawText(in7 + QPointF(20, 5), "g");
 }
 
 std::vector<std::pair<int, int>> LCDDisplay::connectionPoints(void) const {
