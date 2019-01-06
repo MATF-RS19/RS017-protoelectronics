@@ -243,15 +243,15 @@ void JKFlipFlop::disconnect(int x, int y) {
     auto it = Node::find(x, y);
     if (it == Node::_allNodes.end()) return;
 
-    //Remove possible voltage on output node
-    if (_nodes.size() == 4 && ((*it) == _nodes[Q] || *(it) == _nodes[Qc])) (*it)->_v = 0;
+    //Remove possible voltage on output nodes
+    if (_nodes.size() == 5 && ((*it) == _nodes[Q] || *(it) == _nodes[Qc])) (*it)->_v = 0;
     updateVoltages((*it));
     Component::disconnect(x, y);
 }
 
 void JKFlipFlop::disconnect() {
-    if (_nodes.size() == 4) {
-        //Remove possible voltage on output node
+    if (_nodes.size() == 5) {
+        //Remove possible voltage on output nodes
         _nodes[Q]->_v = 0;
         _nodes[Qc]->_v = 0;
         updateVoltages(_nodes[Q]);
@@ -638,19 +638,19 @@ std::vector<std::pair<int, int>> JKFlipFlop::connectionPoints(void) const {
 
 	// Find local coordinates of connection point
 	QPointF localPoint1(boundingRect().x(),
-						boundingRect().y()+boundingRect().height()+40);
+                        boundingRect().y()+40);
 
 	QPointF localPoint2(boundingRect().x(),
 						boundingRect().y()+boundingRect().height()/2);
 
 	QPointF localPoint3(boundingRect().x(),
-						boundingRect().y()+boundingRect().height()+140);
+                        boundingRect().y()+140);
 
 	QPointF localPoint4(boundingRect().x()+boundingRect().width(),
-						boundingRect().y()+boundingRect().height()+40);
+                        boundingRect().y()+40);
 
 	QPointF localPoint5(boundingRect().x()+boundingRect().width(),
-						boundingRect().y()+boundingRect().height()+140);
+                        boundingRect().y()+140);
 
 	// And then map to scene coordinates
 	auto scenePoint1 = mapToScene(localPoint1);
@@ -918,6 +918,31 @@ double Decoder::voltage() const {
     return 0;
 }
 
+void Decoder::disconnect(int x, int y) {
+    auto it = Node::find(x, y);
+    if (it == Node::_allNodes.end()) return;
+
+    //Remove possible voltage on output nodes, pin from 'a' to 'g'
+    if (_nodes.size() == 11) {
+        for (unsigned i = a; i <= g; ++i) {
+            if ((*it) == _nodes[i])
+                (*it)->_v = 0;
+        }
+    }
+    LogicGate::updateVoltages((*it));
+    Component::disconnect(x, y);
+}
+
+void Decoder::disconnect() {
+    if (_nodes.size() == 11) {
+        //Remove possible voltage on output node
+        for (unsigned i = a; i <= g; ++i) {
+            _nodes[i]->_v = 0;
+        }
+        updateVoltages();
+    }
+    Component::disconnect();
+}
 
 LCDDisplay::LCDDisplay()
     :LogicGate("LCD display" + std::to_string(_counter+1))

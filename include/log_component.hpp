@@ -185,6 +185,10 @@ public:
 
     double voltage() const override;
 
+    void disconnect(int x, int y) override;
+
+    void disconnect() override;
+
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
