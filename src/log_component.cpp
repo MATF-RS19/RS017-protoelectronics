@@ -543,19 +543,91 @@ std::vector<std::pair<int, int>> NOTGate::connectionPoints(void) const {
 	return dots;
 }
 
+QRectF JKFlipFlop::boundingRect() const {
+	return QRectF(0, 0, 160, 180);
+}
+
 void JKFlipFlop::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    //TODO
+	Q_UNUSED(option);
+	Q_UNUSED(widget);
+	LogicGate::paint(painter, option, widget);
+
+	// Setting color for drawing lines
+	painter->setPen(penForLines);
+
+	// Input lines
+	painter->drawLine(0, 45, 20, 45);
+	painter->drawLine(0, 90, 20, 90);
+	painter->drawLine(0, 135, 20, 135);
+
+	// Output liness
+	painter->drawLine(140, 45, 160, 45);
+	painter->drawLine(140, 135, 160, 135);
+
+	// Body
+	QRectF rect(20, 15, 120, 150);
+	painter->drawRect(rect);
+
+	// Letters
+	painter->setFont(QFont("Times", 30, QFont::Bold));
+	painter->drawText(rect, Qt::AlignLeft, "J");
+	painter->drawText(rect, Qt::AlignRight, "Q");
+	painter->drawText(rect, Qt::AlignBottom , "K");
+	painter->drawText(rect, Qt::AlignBottom | Qt::AlignRight, "Qc");
+
+	// Connection points
+	painter->setPen(penForDots);
+	QPointF in1(1, 45);
+	QPointF in2(1, 90);
+	QPointF in3(1, 135);
+	QPointF out1(159, 45);
+	QPointF out2(159, 135);
+	painter->drawPoint(in1);
+	painter->drawPoint(in2);
+	painter->drawPoint(in3);
+	painter->drawPoint(out1);
+	painter->drawPoint(out2);
+
+	// Circle on middle line
+	QPainterPath path;
+	path.addEllipse(QPointF(20, 90), 1, 1);
+	painter->drawPath(path);
 }
 
 std::vector<std::pair<int, int>> JKFlipFlop::connectionPoints(void) const {
-    //TODO
-}
+	std::vector<std::pair<int, int>> dots;
+	dots.reserve(5);
 
-void SevenSegmentComponent::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    //TODO
-    //virualan
-    //i za dekoder i za LCD isto je crtanje tela - veliina pravougaonika
-    //mozda moze nesto da se izdvoji
+	// Find local coordinates of connection point
+	QPointF localPoint1(boundingRect().x(),
+						boundingRect().y()+boundingRect().height()/4);
+
+	QPointF localPoint2(boundingRect().x(),
+						boundingRect().y()+boundingRect().height()/2);
+
+	QPointF localPoint3(boundingRect().x(),
+						boundingRect().y()+boundingRect().height()*3/4);
+
+	QPointF localPoint4(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+boundingRect().height()/4);
+
+	QPointF localPoint5(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+boundingRect().height()*3/4);
+
+	// And then map to scene coordinates
+	auto scenePoint1 = mapToScene(localPoint1);
+	auto scenePoint2 = mapToScene(localPoint2);
+	auto scenePoint3 = mapToScene(localPoint3);
+	auto scenePoint4 = mapToScene(localPoint4);
+	auto scenePoint5 = mapToScene(localPoint5);
+
+	dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+	dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+	dots.push_back(std::pair<int, int>(scenePoint3.x(), scenePoint3.y()));
+	dots.push_back(std::pair<int, int>(scenePoint4.x(), scenePoint4.y()));
+	dots.push_back(std::pair<int, int>(scenePoint5.x(), scenePoint5.y()));
+
+	return dots;
 }
 
 void Decoder::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

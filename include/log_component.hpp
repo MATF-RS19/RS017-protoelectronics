@@ -146,7 +146,7 @@ public:
     ~JKFlipFlop() override;
 
     enum pin {
-        J, K, Q, Qc
+		J, CLK, K, Q, Qc
     };
 
     std::string componentType() const override { return "flipflop"; }
@@ -159,20 +159,18 @@ public:
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
+protected:
+	QRectF boundingRect() const override;
 #endif
 
 private:
     std::string toString() const override;
 };
 
-
 class SevenSegmentComponent : public LogicGate {
 public:
     SevenSegmentComponent(const std::string &name);
     virtual ~SevenSegmentComponent() override;
-#ifdef QTPAINT
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-#endif
 };
 
 class Decoder : public SevenSegmentComponent, public Counter<Decoder> {
