@@ -13,7 +13,6 @@
 #include <QGraphicsSceneHoverEvent>
 #include <QApplication>
 #include <QPen>
-#include <QDebug>
 #include <QSize>
 #include <QTimer>
 #include <qobject.h>
@@ -201,9 +200,6 @@ public:
     void updateVoltages(const std::shared_ptr<Node>& node) const;
 
     virtual double voltage() const = 0;
-	virtual double current() const = 0;
-	virtual double power() const;
-
 private:
 	std::string _name;
 
@@ -259,8 +255,6 @@ public:
 
     double voltage() const override;
 
-	double current() const override;
-
     void addNode(int x, int y) override;
 
 #ifdef QTPAINT
@@ -279,8 +273,6 @@ public:
     std::string componentType() const override { return "wire"; }
 
     double voltage() const override;
-
-	double current() const override;
 
     std::shared_ptr<Node> otherNode(int id) const;
 
@@ -310,8 +302,6 @@ protected:
 	QPointF endWire;
 	QLineF line;
 #endif
-	std::string toString() const override;
-
 private:
     mutable double _leftV, _rightV;
     mutable int _nodeVoltageChanged;
@@ -330,9 +320,11 @@ public:
 
     double voltage() const override;
 
-	double current() const override;
+    double current() const;
 
     void addNode(int x, int y) override;
+
+    std::string toString() const override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -375,7 +367,7 @@ public:
 
     double voltage() const override;
 
-    double current() const override;
+    std::string toString() const override;
 
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
@@ -410,8 +402,6 @@ public:
 
 	void setVoltage(double voltage);
 
-	double current() const override;
-
 	void addNode(int x, int y) override;
 
     void disconnect(int x, int y) override;
@@ -432,6 +422,7 @@ private:
 	double _voltage;
 };
 
+#ifdef QTPAINT
 class Clock : public DCVoltage, public QObject {
 public:
 	Clock(double voltage = 5, int clockFrequency = 500);
@@ -442,16 +433,17 @@ public:
 
 	~Clock() override;
 
-#ifdef QTPAINT
+    std::string toString() const override;
+
 	void timerEvent(QTimerEvent *event) override;
 	void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-#endif
 
 private:
 	double _oldVoltage;
 	int _timeInterval;
 	int	_timerId;
 };
+#endif
 
 std::ostream& operator<<(std::ostream& out, const Component& r);
 

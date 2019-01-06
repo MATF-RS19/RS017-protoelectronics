@@ -197,6 +197,16 @@ JKFlipFlop::~JKFlipFlop() {
     disconnect();
 }
 
+std::string JKFlipFlop::toString() const {
+    std::stringstream str;
+    str << name() << std::endl;
+
+    str << "J = " << _nodes[J]->_v << " V" << std::endl;
+    str << "K = " << _nodes[K]->_v << " V" << std::endl;
+    str << "Q = " << _nodes[Q]->_v << " V" << std::endl;
+    return str.str();
+}
+
 void JKFlipFlop::set() const {
     _nodes[Q]->_v = 5;
     _nodes[Qc]->_v = 0;
@@ -262,11 +272,6 @@ void JKFlipFlop::disconnect() {
         updateVoltages(_nodes[Qc]);
     }
     Component::disconnect();
-}
-
-std::string JKFlipFlop::toString() const {
-    //TODO David
-    return Component::toString();
 }
 
 #ifdef QTPAINT
@@ -961,8 +966,16 @@ Decoder::Decoder()
 {}
 
 std::string Decoder::toString() const {
-	// TODO David
-	return Component::toString();
+    std::stringstream str;
+    str << name() << std::endl;
+
+    str << "I3: " << _nodes[I3]->_v << " V; " << "I2: " << _nodes[I2]->_v << " V" << std::endl;
+    str << "I1: " << _nodes[I1]->_v << " V; " << "I0: " << _nodes[I0]->_v << " V" << std::endl;
+    str << "a: " << _nodes[a]->_v << " V; " << "b: " << _nodes[b]->_v << " V" << std::endl;
+    str << "c: " << _nodes[c]->_v << " V; " << "d: " << _nodes[d]->_v << " V" << std::endl;
+    str << "e: " << _nodes[e]->_v << " V; " << "f: " << _nodes[f]->_v << " V" << std::endl;
+    str << "g: " << _nodes[g]->_v << " V" << std::endl;
+    return str.str();
 }
 
 Decoder::~Decoder() {
@@ -1174,3 +1187,13 @@ LCDDisplay::~LCDDisplay() {
     disconnect();
 }
 
+std::string LCDDisplay::toString() const {
+    std::stringstream str;
+    str << name() << std::endl;
+
+    str << "a: " << _nodes[a]->_v << " V; " << "b: " << _nodes[b]->_v << " V" << std::endl;
+    str << "c: " << _nodes[c]->_v << " V; " << "d: " << _nodes[d]->_v << " V" << std::endl;
+    str << "e: " << _nodes[e]->_v << " V; " << "f: " << _nodes[f]->_v << " V" << std::endl;
+    str << "g: " << _nodes[g]->_v << " V" << std::endl;
+    return str.str();
+}

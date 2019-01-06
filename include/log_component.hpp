@@ -11,13 +11,6 @@ public:
     // From given voltage returns their logical value
     static bool getBoolVoltage(double v);
 
-    double power() const override{
-        return 0;
-    }
-	double current() const override{
-        return 0;
-    }
-
     void connect(const std::vector<std::pair<int, int>>& connPts) override;
 
     void disconnect(int x, int y) override;
@@ -151,6 +144,8 @@ public:
 
     std::string componentType() const override { return "flipflop"; }
 
+    std::string toString() const override;
+
     double voltage() const override;
 
     void disconnect(int x, int y) override;
@@ -166,7 +161,6 @@ protected:
     void set() const;
     void reset() const;
 private:
-    std::string toString() const override;
     mutable bool _old_clk;
 };
 
@@ -206,7 +200,10 @@ private:
 class LCDDisplay : public LogicGate, public Counter<LCDDisplay> {
 public:
     LCDDisplay();
+
     ~LCDDisplay() override;
+
+    std::string toString() const override;
 
     std::string componentType() const override { return "lcd"; }
 
