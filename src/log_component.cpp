@@ -212,6 +212,48 @@ void NOTGate::disconnect() {
 }
 
 
+JKFlipFlop::JKFlipFlop()
+    : LogicGate ("JKFlipFlop" + std::to_string(_counter+1))
+    {}
+
+JKFlipFlop::~JKFlipFlop() {
+    disconnect();
+}
+
+double JKFlipFlop::voltage() const {
+    //TODO David
+    return 0;
+}
+
+void JKFlipFlop::connect(const std::vector<std::pair<int, int>>& connPts) {
+    Component::connect(connPts);
+    voltage();
+}
+
+void JKFlipFlop::disconnect(int x, int y) {
+    auto it = Node::find(x, y);
+    if (it == Node::_allNodes.end()) return;
+
+    //Remove possible voltage on output node
+    if (_nodes.size() == 4 && (*it) == _nodes[1]) (*it)->_v = 0;
+    updateVoltages((*it));
+    Component::disconnect(x, y);
+}
+
+void JKFlipFlop::disconnect() {
+    if (_nodes.size() == 4) {
+        //Remove possible voltage on output node
+        _nodes.back()->_v = 0;
+        updateVoltages(_nodes.back());
+    }
+    Component::disconnect();
+}
+
+std::string JKFlipFlop::toString() const {
+    //TODO David
+    return Component::toString();
+}
+
 #ifdef QTPAINT
 QRectF LogicGate::boundingRect() const {
     return QRectF(0, 0, 180, 120);
@@ -531,6 +573,38 @@ std::vector<std::pair<int, int>> NOTGate::connectionPoints(void) const {
 
 	return dots;
 }
+
+void JKFlipFlop::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    //TODO
+}
+
+std::vector<std::pair<int, int>> JKFlipFlop::connectionPoints(void) const {
+    //TODO
+}
+
+void SevenSegmentComponent::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    //TODO
+    //virualan
+    //i za dekoder i za LCD isto je crtanje tela - veliina pravougaonika
+    //mozda moze nesto da se izdvoji
+}
+
+void Decoder::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    //TODO
+}
+
+std::vector<std::pair<int, int>> Decoder::connectionPoints(void) const {
+    //TODO
+}
+
+void LCDDisplay::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
+    //TODO
+}
+
+std::vector<std::pair<int, int>> LCDDisplay::connectionPoints(void) const {
+    //TODO
+}
+
 #endif
 
 std::string NOTGate::toString() const {
@@ -542,3 +616,18 @@ std::string NOTGate::toString() const {
     str << "out: " << _nodes[1]->_v << " V" << std::endl;
     return str.str();
 }
+
+
+SevenSegmentComponent::SevenSegmentComponent(const std::string &name)
+    :LogicGate(name)
+{}
+
+SevenSegmentComponent::~SevenSegmentComponent() {
+    disconnect();
+}
+
+
+
+
+
+

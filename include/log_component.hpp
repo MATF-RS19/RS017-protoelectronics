@@ -150,4 +150,59 @@ private:
 	std::string toString() const override;
 };
 
+
+class JKFlipFlop: public LogicGate, public Counter<JKFlipFlop> {
+public:
+    JKFlipFlop();
+
+    ~JKFlipFlop() override;
+
+    std::string componentType() const override { return "flipflop"; }
+
+    void connect(const std::vector<std::pair<int, int>>& connPts) override;
+
+    double voltage() const override;
+
+    void disconnect(int x, int y) override;
+
+    void disconnect() override;
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
+#endif
+
+private:
+    std::string toString() const override;
+};
+
+
+class SevenSegmentComponent : public LogicGate {
+public:
+    SevenSegmentComponent(const std::string &name);
+    virtual ~SevenSegmentComponent() override;
+#ifdef QTPAINT
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+#endif
+};
+
+class Decoder : public SevenSegmentComponent, public Counter<Decoder> {
+public:
+    Decoder();
+    ~Decoder() override;
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
+#endif
+};
+
+class LCDDisplay : public SevenSegmentComponent, public Counter<LCDDisplay> {
+public:
+    LCDDisplay();
+    ~LCDDisplay() override;
+#ifdef QTPAINT
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    std::vector<std::pair<int, int>> connectionPoints(void) const override;
+#endif
+};
+
 #endif /* ifndef LOG_COMPONENTS_HPP */
