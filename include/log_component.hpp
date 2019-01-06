@@ -189,16 +189,37 @@ class Decoder : public SevenSegmentComponent, public Counter<Decoder> {
 public:
     Decoder();
     ~Decoder() override;
+
+    enum pin {
+        I3, I2, I1, I0,
+        a, b, c, d, e, f, g
+    };
+
+    double voltage() const override;
+
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
+private:
+    int  inputToBinaryInt(double a, double b, double c, double d) const;
+    void decodeOutput(int input) const;
+    void updateVoltages() const;
 };
 
 class LCDDisplay : public SevenSegmentComponent, public Counter<LCDDisplay> {
 public:
     LCDDisplay();
     ~LCDDisplay() override;
+
+    enum pin {
+        a, b, c, d, e, f, g
+    };
+
+    double voltage() const override {
+        return 0;
+    }
+
 #ifdef QTPAINT
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     std::vector<std::pair<int, int>> connectionPoints(void) const override;

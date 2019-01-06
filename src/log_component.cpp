@@ -626,8 +626,191 @@ SevenSegmentComponent::~SevenSegmentComponent() {
     disconnect();
 }
 
+Decoder::Decoder()
+    :SevenSegmentComponent("Decoder" + std::to_string(_counter+1))
+{}
+
+Decoder::~Decoder() {
+    disconnect();
+}
+
+void Decoder::updateVoltages() const {
+    for(unsigned i = a; i <= g; ++i) {
+        SevenSegmentComponent::updateVoltages(_nodes[i]);
+    }
+}
+
+int Decoder::inputToBinaryInt(double a, double b, double c, double d) const {
+    int in = getBoolVoltage(a) * 1000
+           + getBoolVoltage(b) * 100
+           + getBoolVoltage(c) * 10
+           + getBoolVoltage(d);
+
+    return in;
+}
+
+void Decoder::decodeOutput(int input) const {
+    switch (input) {
+        case 0:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 0;
+        break;
+        case 1:
+                _nodes[a]->_v = 0;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 0;
+                _nodes[e]->_v = 0;
+                _nodes[f]->_v = 0;
+                _nodes[g]->_v = 0;
+        break;
+        case 10:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 0;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 0;
+                _nodes[g]->_v = 5;
+        break;
+        case 11:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 0;
+                _nodes[f]->_v = 0;
+                _nodes[g]->_v = 5;
+        break;
+        case 100:
+                _nodes[a]->_v = 0;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 0;
+                _nodes[e]->_v = 0;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 5;
+        break;
+        case 101:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 0;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 0;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 5;
+        break;
+        case 110:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 0;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 5;
+        break;
+        case 111:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 0;
+                _nodes[e]->_v = 0;
+                _nodes[f]->_v = 0;
+                _nodes[g]->_v = 0;
+        break;
+        case 1000:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 5;
+        break;
+        case 1001:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 0;
+                _nodes[e]->_v = 0;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 5;
+        break;
+        case 1010:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 0;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 5;
+        break;
+        case 1011:
+                _nodes[a]->_v = 0;
+                _nodes[b]->_v = 0;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 5;
+        break;
+        case 1100:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 0;
+                _nodes[c]->_v = 0;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 0;
+        break;
+        case 1101:
+                _nodes[a]->_v = 0;
+                _nodes[b]->_v = 5;
+                _nodes[c]->_v = 5;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 0;
+                _nodes[g]->_v = 5;
+        break;
+        case 1110:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 0;
+                _nodes[c]->_v = 0;
+                _nodes[d]->_v = 5;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 5;
+        break;
+        case 1111:
+                _nodes[a]->_v = 5;
+                _nodes[b]->_v = 0;
+                _nodes[c]->_v = 0;
+                _nodes[d]->_v = 0;
+                _nodes[e]->_v = 5;
+                _nodes[f]->_v = 5;
+                _nodes[g]->_v = 5;
+        break;
+    }
+    updateVoltages();
+}
+
+double Decoder::voltage() const {
+    int in = inputToBinaryInt(_nodes[I3]->_v, _nodes[I2]->_v, _nodes[I1]->_v, _nodes[I0]->_v);
+    decodeOutput(in);
+    return 0;
+}
 
 
+LCDDisplay::LCDDisplay()
+    :SevenSegmentComponent("LCD display" + std::to_string(_counter+1))
+{}
 
-
+LCDDisplay::~LCDDisplay() {
+    disconnect();
+}
 
