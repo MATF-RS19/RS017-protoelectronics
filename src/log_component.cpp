@@ -1,5 +1,9 @@
 #include "log_component.hpp"
 
+#ifdef QTPAINT
+#include <QFontMetrics>
+#endif
+
 template <typename T>
 int Counter<T>::_counter(0);
 LogicGate::LogicGate(const std::string &name)
@@ -669,53 +673,142 @@ std::vector<std::pair<int, int>> JKFlipFlop::connectionPoints(void) const {
 }
 
 QRectF Decoder::boundingRect() const {
-	return QRectF(0, 0, 150, 210);
+	return QRectF(0, 0, 150, 180);
 }
 
 void Decoder::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
-	LogicGate::paint(painter, option, widget);
+//	LogicGate::paint(painter, option, widget);
 
 	// Setting color for drawing lines
 	painter->setPen(penForLines);
 
 	// Input lines
-	painter->drawLine(0, 40, 20, 40);
+	voltageDependedDrawLine(QLineF(0, 30, 10, 30), painter, 0);
+	voltageDependedDrawLine(QLineF(0, 50, 10, 50), painter, 1);
+	voltageDependedDrawLine(QLineF(0, 70, 10, 70), painter, 2);
+	voltageDependedDrawLine(QLineF(0, 90, 10, 90), painter, 3);
 
-
-	// Output liness
-	voltageDependedDrawLine(QLineF(140, 40, 160, 40), painter, 3);
-	voltageDependedDrawLine(QLineF(140, 140, 160, 140), painter, 4);
+	// Output lines
+	voltageDependedDrawLine(QLineF(140, 30, 150, 30), painter, 4);
+	voltageDependedDrawLine(QLineF(140, 50, 150, 50), painter, 5);
+	voltageDependedDrawLine(QLineF(140, 70, 150, 70), painter, 6);
+	voltageDependedDrawLine(QLineF(140, 90, 150, 90), painter, 7);
+	voltageDependedDrawLine(QLineF(140, 110, 150, 110), painter, 8);
+	voltageDependedDrawLine(QLineF(140, 130, 150, 130), painter, 9);
+	voltageDependedDrawLine(QLineF(140, 150, 150, 150), painter, 10);
 
 	// Body
-	QRectF rect(20, 15, 120, 150);
+	QRectF rect(10, 5, 130, 170);
 	painter->drawRect(rect);
-
-	// Letters
-	painter->setFont(QFont("Times", 25, QFont::Bold));
-	painter->drawText(rect, Qt::AlignLeft, " J");
-	painter->drawText(rect, Qt::AlignRight, "Q ");
-	painter->drawText(rect, Qt::AlignBottom , " K");
-	painter->drawText(rect, Qt::AlignBottom | Qt::AlignRight, "Qc ");
 
 	// Connection points
 	painter->setPen(penForDots);
-	QPointF in1(1, 40);
-	QPointF in2(1, 90);
-	QPointF in3(1, 140);
-	QPointF out1(159, 40);
-	QPointF out2(159, 140);
+	QPointF in1(1, 30);
+	QPointF in2(1, 50);
+	QPointF in3(1, 70);
+	QPointF in4(1, 90);
+	QPointF out1(149, 30);
+	QPointF out2(149, 50);
+	QPointF out3(149, 70);
+	QPointF out4(149, 90);
+	QPointF out5(149, 110);
+	QPointF out6(149, 130);
+	QPointF out7(149, 150);
+
 	painter->drawPoint(in1);
 	painter->drawPoint(in2);
 	painter->drawPoint(in3);
+	painter->drawPoint(in4);
 	painter->drawPoint(out1);
 	painter->drawPoint(out2);
+	painter->drawPoint(out3);
+	painter->drawPoint(out4);
+	painter->drawPoint(out5);
+	painter->drawPoint(out6);
+	painter->drawPoint(out7);
+
+	// Letters
+	painter->setFont(QFont("Times", 20, QFont::Thin));
+	painter->drawText(in1 + QPointF(15, 5), "I3");
+	painter->drawText(in2 + QPointF(15, 5), "I2");
+	painter->drawText(in3 + QPointF(15, 5), "I1");
+	painter->drawText(in4 + QPointF(15, 5), "I0");
+	painter->drawText(out1 - QPointF(23, 0), "a");
+	painter->drawText(out2 - QPointF(23, 0), "b");
+	painter->drawText(out3 - QPointF(23, 0), "c");
+	painter->drawText(out4 - QPointF(23, 0), "d");
+	painter->drawText(out5 - QPointF(23, 0), "e");
+	painter->drawText(out6 - QPointF(23, 0), "f");
+	painter->drawText(out7 - QPointF(23, 0), "g");
 
 }
 
 std::vector<std::pair<int, int>> Decoder::connectionPoints(void) const {
-    //TODO
+	std::vector<std::pair<int, int>> dots;
+	dots.reserve(11);
+
+	// Find local coordinates of connection point
+	QPointF localPoint1(boundingRect().x(),
+						boundingRect().y()+30);
+
+	QPointF localPoint2(boundingRect().x(),
+						boundingRect().y()+50);
+
+	QPointF localPoint3(boundingRect().x(),
+						boundingRect().y()+70);
+
+	QPointF localPoint4(boundingRect().x(),
+						boundingRect().y()+90);
+
+	QPointF localPoint5(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+30);
+
+	QPointF localPoint6(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+50);
+
+	QPointF localPoint7(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+70);
+
+	QPointF localPoint8(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+90);
+
+	QPointF localPoint9(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+110);
+
+	QPointF localPoint10(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+130);
+
+	QPointF localPoint11(boundingRect().x()+boundingRect().width(),
+						boundingRect().y()+150);
+
+	// And then map to scene coordinates
+	auto scenePoint1 = mapToScene(localPoint1);
+	auto scenePoint2 = mapToScene(localPoint2);
+	auto scenePoint3 = mapToScene(localPoint3);
+	auto scenePoint4 = mapToScene(localPoint4);
+	auto scenePoint5 = mapToScene(localPoint5);
+	auto scenePoint6 = mapToScene(localPoint6);
+	auto scenePoint7 = mapToScene(localPoint7);
+	auto scenePoint8 = mapToScene(localPoint8);
+	auto scenePoint9 = mapToScene(localPoint9);
+	auto scenePoint10 = mapToScene(localPoint10);
+	auto scenePoint11 = mapToScene(localPoint11);
+
+	dots.push_back(std::pair<int, int>(scenePoint1.x(), scenePoint1.y()));
+	dots.push_back(std::pair<int, int>(scenePoint2.x(), scenePoint2.y()));
+	dots.push_back(std::pair<int, int>(scenePoint3.x(), scenePoint3.y()));
+	dots.push_back(std::pair<int, int>(scenePoint4.x(), scenePoint4.y()));
+	dots.push_back(std::pair<int, int>(scenePoint5.x(), scenePoint5.y()));
+	dots.push_back(std::pair<int, int>(scenePoint6.x(), scenePoint6.y()));
+	dots.push_back(std::pair<int, int>(scenePoint7.x(), scenePoint7.y()));
+	dots.push_back(std::pair<int, int>(scenePoint8.x(), scenePoint8.y()));
+	dots.push_back(std::pair<int, int>(scenePoint9.x(), scenePoint9.y()));
+	dots.push_back(std::pair<int, int>(scenePoint10.x(), scenePoint10.y()));
+	dots.push_back(std::pair<int, int>(scenePoint11.x(), scenePoint11.y()));
+
+	return dots;
 }
 
 void LCDDisplay::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -743,179 +836,184 @@ Decoder::Decoder()
     :LogicGate("Decoder" + std::to_string(_counter+1))
 {}
 
+std::string Decoder::toString() const {
+	// TODO David
+	return Component::toString();
+}
+
 Decoder::~Decoder() {
-    disconnect();
+	disconnect();
 }
 
 void Decoder::updateVoltages() const {
-    for(unsigned i = a; i <= g; ++i) {
-        LogicGate::updateVoltages(_nodes[i]);
-    }
+	for(unsigned i = a; i <= g; ++i) {
+		LogicGate::updateVoltages(_nodes[i]);
+	}
 }
 
 int Decoder::inputToBinaryInt(double a, double b, double c, double d) const {
-    int in = getBoolVoltage(a) * 1000
-           + getBoolVoltage(b) * 100
-           + getBoolVoltage(c) * 10
-           + getBoolVoltage(d);
+	int in = getBoolVoltage(a) * 1000
+		   + getBoolVoltage(b) * 100
+		   + getBoolVoltage(c) * 10
+		   + getBoolVoltage(d);
 
-    return in;
+	return in;
 }
 
 void Decoder::decodeOutput(int input) const {
-    switch (input) {
-        case 0:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 0;
-        break;
-        case 1:
-                _nodes[a]->_v = 0;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 0;
-                _nodes[e]->_v = 0;
-                _nodes[f]->_v = 0;
-                _nodes[g]->_v = 0;
-        break;
-        case 10:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 0;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 0;
-                _nodes[g]->_v = 5;
-        break;
-        case 11:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 0;
-                _nodes[f]->_v = 0;
-                _nodes[g]->_v = 5;
-        break;
-        case 100:
-                _nodes[a]->_v = 0;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 0;
-                _nodes[e]->_v = 0;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 5;
-        break;
-        case 101:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 0;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 0;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 5;
-        break;
-        case 110:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 0;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 5;
-        break;
-        case 111:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 0;
-                _nodes[e]->_v = 0;
-                _nodes[f]->_v = 0;
-                _nodes[g]->_v = 0;
-        break;
-        case 1000:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 5;
-        break;
-        case 1001:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 0;
-                _nodes[e]->_v = 0;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 5;
-        break;
-        case 1010:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 0;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 5;
-        break;
-        case 1011:
-                _nodes[a]->_v = 0;
-                _nodes[b]->_v = 0;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 5;
-        break;
-        case 1100:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 0;
-                _nodes[c]->_v = 0;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 0;
-        break;
-        case 1101:
-                _nodes[a]->_v = 0;
-                _nodes[b]->_v = 5;
-                _nodes[c]->_v = 5;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 0;
-                _nodes[g]->_v = 5;
-        break;
-        case 1110:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 0;
-                _nodes[c]->_v = 0;
-                _nodes[d]->_v = 5;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 5;
-        break;
-        case 1111:
-                _nodes[a]->_v = 5;
-                _nodes[b]->_v = 0;
-                _nodes[c]->_v = 0;
-                _nodes[d]->_v = 0;
-                _nodes[e]->_v = 5;
-                _nodes[f]->_v = 5;
-                _nodes[g]->_v = 5;
-        break;
-    }
-    updateVoltages();
+	switch (input) {
+		case 0:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 0;
+		break;
+		case 1:
+				_nodes[a]->_v = 0;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 0;
+				_nodes[e]->_v = 0;
+				_nodes[f]->_v = 0;
+				_nodes[g]->_v = 0;
+		break;
+		case 10:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 0;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 0;
+				_nodes[g]->_v = 5;
+		break;
+		case 11:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 0;
+				_nodes[f]->_v = 0;
+				_nodes[g]->_v = 5;
+		break;
+		case 100:
+				_nodes[a]->_v = 0;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 0;
+				_nodes[e]->_v = 0;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 5;
+		break;
+		case 101:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 0;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 0;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 5;
+		break;
+		case 110:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 0;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 5;
+		break;
+		case 111:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 0;
+				_nodes[e]->_v = 0;
+				_nodes[f]->_v = 0;
+				_nodes[g]->_v = 0;
+		break;
+		case 1000:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 5;
+		break;
+		case 1001:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 0;
+				_nodes[e]->_v = 0;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 5;
+		break;
+		case 1010:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 0;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 5;
+		break;
+		case 1011:
+				_nodes[a]->_v = 0;
+				_nodes[b]->_v = 0;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 5;
+		break;
+		case 1100:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 0;
+				_nodes[c]->_v = 0;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 0;
+		break;
+		case 1101:
+				_nodes[a]->_v = 0;
+				_nodes[b]->_v = 5;
+				_nodes[c]->_v = 5;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 0;
+				_nodes[g]->_v = 5;
+		break;
+		case 1110:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 0;
+				_nodes[c]->_v = 0;
+				_nodes[d]->_v = 5;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 5;
+		break;
+		case 1111:
+				_nodes[a]->_v = 5;
+				_nodes[b]->_v = 0;
+				_nodes[c]->_v = 0;
+				_nodes[d]->_v = 0;
+				_nodes[e]->_v = 5;
+				_nodes[f]->_v = 5;
+				_nodes[g]->_v = 5;
+		break;
+	}
+	updateVoltages();
 }
 
 double Decoder::voltage() const {
-    int in = inputToBinaryInt(_nodes[I3]->_v, _nodes[I2]->_v, _nodes[I1]->_v, _nodes[I0]->_v);
-    decodeOutput(in);
-    return 0;
+	int in = inputToBinaryInt(_nodes[I3]->_v, _nodes[I2]->_v, _nodes[I1]->_v, _nodes[I0]->_v);
+	decodeOutput(in);
+	return 0;
 }
 
 

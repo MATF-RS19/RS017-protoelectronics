@@ -253,7 +253,7 @@ void Component::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     penForLines.setColor(QColor(8, 246, 242));
     penForLinesWhite.setColor(QColor(8, 246, 242));
 
-	// Alos printing out properties of the component
+	// Also printing out properties of the component
 	// Since we have 2 more windows except main one (for resistor and dc voltage) we have to find the main one,
 	// because only main window has label propertiesMessage
 
