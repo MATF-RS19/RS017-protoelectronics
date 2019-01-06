@@ -146,7 +146,7 @@ public:
     ~JKFlipFlop() override;
 
     enum pin {
-        J, K, Q, Qc
+        J, CLK ,K, Q, Qc
     };
 
     std::string componentType() const override { return "flipflop"; }
@@ -161,8 +161,11 @@ public:
     std::vector<std::pair<int, int>> connectionPoints(void) const override;
 #endif
 
+    void set() const;
+    void reset() const;
 private:
     std::string toString() const override;
+    mutable bool _old_clk;
 };
 
 

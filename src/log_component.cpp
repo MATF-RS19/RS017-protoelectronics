@@ -185,16 +185,58 @@ void NOTGate::disconnect() {
 
 
 JKFlipFlop::JKFlipFlop()
-    : LogicGate ("JKFlipFlop" + std::to_string(_counter+1))
+    : LogicGate ("JKFlipFlop" + std::to_string(_counter+1)),
+      _old_clk(false)
     {}
 
 JKFlipFlop::~JKFlipFlop() {
     disconnect();
 }
 
+void JKFlipFlop::set() const {
+    _nodes[Q]->_v = 5;
+    _nodes[Qc]->_v = 0;
+    updateVoltages(_nodes[Q]);
+    updateVoltages(_nodes[Qc]);
+}
+
+void JKFlipFlop::reset() const {
+    _nodes[Q]->_v = 0;
+    _nodes[Qc]->_v = 5;
+    updateVoltages(_nodes[Q]);
+    updateVoltages(_nodes[Qc]);
+}
+
 double JKFlipFlop::voltage() const {
-    //TODO David
-    return 0;
+    //take new input values
+    int new_j = getBoolVoltage(_nodes[J]->_v);
+    int new_k = getBoolVoltage(_nodes[K]->_v);
+    int new_clk = getBoolVoltage(_nodes[CLK]->_v);
+
+    //we can set or reset flip-flip
+    //this is down edge of clock: from 1 to 0
+    if (_old_clk && !new_clk) {
+        //set J=1, K=0
+        if(new_j && !new_k) {
+            set();
+        }
+        //reset J=0, K=1
+        else if(!new_j && new_k) {
+            reset();
+        }
+        //change state J=1, K=1
+        else if(new_j && new_k) {
+            //state was set
+            if (getBoolVoltage(_nodes[Q]->_v)) {
+                reset();
+            } else {
+                set();
+            }
+        }
+        //keep old state J=0, K=0
+    }
+    _old_clk = new_clk;
+    return _nodes[Q]->_v;
 }
 
 void JKFlipFlop::disconnect(int x, int y) {
