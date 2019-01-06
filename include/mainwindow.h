@@ -4,6 +4,7 @@
 //#include "components.hpp"
 #include "log_component.hpp"
 #include "scene.h" // for itemChange
+#include "dialog.h" // for fileSave
 
 #include <QMainWindow>
 #include <QListWidget>
@@ -30,6 +31,9 @@ public:
 	}
 	~MainWindow() override;
 
+	void setCurrentFile(QString filename);
+	bool getIsSaveFile() const;
+
 protected:
     void keyPressEvent(QKeyEvent *) override;
 
@@ -38,7 +42,7 @@ private slots:
 	void onSaveFile();
 
 private:
-    QGraphicsView* view;
+	QGraphicsView* view;
     QGraphicsScene* scene;
     QListWidget* itemListWidget;
 
@@ -51,6 +55,7 @@ private:
     void createLayout();
 
 	void saveFile();
+	bool isSaveFile = false;
 	QString currentFile;
 };
 

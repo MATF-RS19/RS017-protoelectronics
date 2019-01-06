@@ -7,7 +7,7 @@
 #include <QLineEdit>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
-
+#include "mainwindow.h"
 #include "components.hpp"
 
 // Dialog opens on right click for resistance and dc voltage
@@ -15,7 +15,7 @@ class Dialog: public QDialog {
     Q_OBJECT
 
 public:
-	explicit Dialog(Component* component, QWidget* parent = nullptr);
+	explicit Dialog(Component* component = nullptr, QWidget* parent = nullptr);
 	~Dialog() override;
 
 protected:
@@ -46,6 +46,8 @@ private:
 	bool isResistor = false;
 	bool isDCVoltage = false;
 	bool isClock = false;
+
+	bool isSaveFile = false;
 };
 
 #endif // DIALOG_H

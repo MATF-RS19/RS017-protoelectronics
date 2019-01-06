@@ -7,8 +7,16 @@ Dialog::~Dialog() {}
 Dialog::Dialog(Component* component, QWidget* parent)
 	: QDialog (parent), component(component)
 {
+	// Save file dialog
+	MainWindow * mw = MainWindow::getMainWindow();
+	if(mw->getIsSaveFile()) {
+		nameLabel = new QLabel(tr("File name:"));
+		setWindowTitle(tr("Save file as"));
+		isSaveFile = true;
+	}
+
 	// Making dialog for resistor
-	if(component->componentType()=="resistor") {
+	else if(component->componentType()=="resistor") {
 		nameLabel = new QLabel(tr("Resistance:"));
 		setWindowTitle(tr("Resistor edit"));
 		r = dynamic_cast<Resistor*>(component);
@@ -124,6 +132,16 @@ void Dialog::onOkButtonInDialog() {
 			cl->update();
 			this->close();
 		}
+	}
+
+	else if(isSaveFile) {
+		MainWindow * mw = MainWindow::getMainWindow();
+		QString fileName = this->lineEdit->text();
+		if(!fileName.isEmpty()) {
+			mw->setCurrentFile(this->lineEdit->text());
+		}
+		update();
+		this->close();
 	}
 }
 

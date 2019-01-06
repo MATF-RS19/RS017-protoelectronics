@@ -104,26 +104,34 @@ void MainWindow::onOpenFile() {
 void MainWindow::onSaveFile() {
 	// Save the scheme
 
-	// TODO
-	QString fileName = QFileDialog::getSaveFileName(
-				this,
-				tr("Save as"),
-				"*.json"
-				);
+// TODO
+//	QString fileName = QFileDialog::getSaveFileName(
+//				this,
+//				tr("Save as"),
+//				"*.json"
+//				);
 
-	if(!fileName.isEmpty()) {
-		currentFile = fileName;
-		saveFile();
-	}
+//	if(!fileName.isEmpty()) {
+//		currentFile = fileName;
+//		saveFile();
+//	}
+//	qDebug() << fileName;
 
-	qDebug() << fileName;
+	isSaveFile = true;
 
+	// Create dialog for file saving
+	Dialog* dialog = new Dialog();
+	dialog->setModal(false);
+	dialog->show();
+	dialog->exec();
+
+	qDebug() << currentFile;
+	// saveFile(); - ne radi bas kako treba
 }
 
 void MainWindow::saveFile() {
 	// TODO
 	QString text = "save me";
-
 
 	QFile file(currentFile);
 
@@ -148,4 +156,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event){
 			qApp->quit();
 	}
 	QMainWindow::keyPressEvent(event);
+}
+
+void MainWindow::setCurrentFile(QString filename) {
+	currentFile = filename;
+}
+
+bool MainWindow::getIsSaveFile() const {
+	return isSaveFile;
 }
