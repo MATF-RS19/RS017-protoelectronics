@@ -592,38 +592,37 @@ QRectF JKFlipFlop::boundingRect() const {
 void JKFlipFlop::paint(QPainter* painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
-	LogicGate::paint(painter, option, widget);
 
 	// Setting color for drawing lines
 	painter->setPen(penForLines);
 
 	// Input lines
-	painter->drawLine(0, 45, 20, 45);
-	painter->drawLine(0, 90, 20, 90);
-	painter->drawLine(0, 135, 20, 135);
+    painter->drawLine(0, 40, 20, 40);
+    painter->drawLine(0, 90, 20, 90);
+    painter->drawLine(0, 140, 20, 140);
 
 	// Output liness
-	painter->drawLine(140, 45, 160, 45);
-	painter->drawLine(140, 135, 160, 135);
+    painter->drawLine(140, 40, 160, 40);
+    painter->drawLine(140, 140, 160, 140);
 
 	// Body
 	QRectF rect(20, 15, 120, 150);
 	painter->drawRect(rect);
 
 	// Letters
-	painter->setFont(QFont("Times", 30, QFont::Bold));
-	painter->drawText(rect, Qt::AlignLeft, "J");
-	painter->drawText(rect, Qt::AlignRight, "Q");
-	painter->drawText(rect, Qt::AlignBottom , "K");
-	painter->drawText(rect, Qt::AlignBottom | Qt::AlignRight, "Qc");
+    painter->setFont(QFont("Times", 25, QFont::Bold));
+    painter->drawText(rect, Qt::AlignLeft, " J");
+    painter->drawText(rect, Qt::AlignRight, "Q ");
+    painter->drawText(rect, Qt::AlignBottom , " K");
+    painter->drawText(rect, Qt::AlignBottom | Qt::AlignRight, "Qc ");
 
 	// Connection points
 	painter->setPen(penForDots);
-	QPointF in1(1, 45);
+    QPointF in1(1, 40);
 	QPointF in2(1, 90);
-	QPointF in3(1, 135);
-	QPointF out1(159, 45);
-	QPointF out2(159, 135);
+    QPointF in3(1, 140);
+    QPointF out1(159, 40);
+    QPointF out2(159, 140);
 	painter->drawPoint(in1);
 	painter->drawPoint(in2);
 	painter->drawPoint(in3);
@@ -639,6 +638,8 @@ void JKFlipFlop::paint(QPainter* painter, const QStyleOptionGraphicsItem *option
 std::vector<std::pair<int, int>> JKFlipFlop::connectionPoints(void) const {
 	std::vector<std::pair<int, int>> dots;
 	dots.reserve(5);
+    //TODO verovatno je promenjeno jer sam tacke pomerio za 0.5
+    //J, K, Q i Qc. Clock je ostao isti
 
 	// Find local coordinates of connection point
 	QPointF localPoint1(boundingRect().x(),
@@ -701,16 +702,8 @@ std::string NOTGate::toString() const {
 }
 
 
-SevenSegmentComponent::SevenSegmentComponent(const std::string &name)
-    :LogicGate(name)
-{}
-
-SevenSegmentComponent::~SevenSegmentComponent() {
-    disconnect();
-}
-
 Decoder::Decoder()
-    :SevenSegmentComponent("Decoder" + std::to_string(_counter+1))
+    :LogicGate("Decoder" + std::to_string(_counter+1))
 {}
 
 Decoder::~Decoder() {
@@ -719,7 +712,7 @@ Decoder::~Decoder() {
 
 void Decoder::updateVoltages() const {
     for(unsigned i = a; i <= g; ++i) {
-        SevenSegmentComponent::updateVoltages(_nodes[i]);
+        LogicGate::updateVoltages(_nodes[i]);
     }
 }
 
@@ -890,7 +883,7 @@ double Decoder::voltage() const {
 
 
 LCDDisplay::LCDDisplay()
-    :SevenSegmentComponent("LCD display" + std::to_string(_counter+1))
+    :LogicGate("LCD display" + std::to_string(_counter+1))
 {}
 
 LCDDisplay::~LCDDisplay() {

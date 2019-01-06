@@ -170,16 +170,13 @@ private:
     mutable bool _old_clk;
 };
 
-class SevenSegmentComponent : public LogicGate {
-public:
-    SevenSegmentComponent(const std::string &name);
-    virtual ~SevenSegmentComponent() override;
-};
 
-class Decoder : public SevenSegmentComponent, public Counter<Decoder> {
+class Decoder : public LogicGate, public Counter<Decoder> {
 public:
     Decoder();
     ~Decoder() override;
+
+    std::string componentType() const override { return "decoder"; }
 
     enum pin {
         I3, I2, I1, I0,
@@ -198,10 +195,12 @@ private:
     void updateVoltages() const;
 };
 
-class LCDDisplay : public SevenSegmentComponent, public Counter<LCDDisplay> {
+class LCDDisplay : public LogicGate, public Counter<LCDDisplay> {
 public:
     LCDDisplay();
     ~LCDDisplay() override;
+
+    std::string componentType() const override { return "lcd"; }
 
     enum pin {
         a, b, c, d, e, f, g
