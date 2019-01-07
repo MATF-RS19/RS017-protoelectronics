@@ -176,6 +176,7 @@ void MainWindow::onOpenFile() {
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->connect(gate->connectionPoints());
         this->scene->addItem(gate);
+        gate->setBoundingRect(points[2].toInt());
     });
 
 }
@@ -258,12 +259,13 @@ void MainWindow::onSaveFile() {
                           //TODO
                           //ovako se menja sirina zice
                           //wire->setBoundingRect(150);
-                          wire_components.push_back(points);
 
                           //sirina, visina koju treba sacuvati
                           //i Pos naravno
-                          qDebug() << wire->boundingRect().width();
-                          qDebug() << wire->boundingRect().height();
+                          //qDebug() << wire->boundingRect().width();
+                          //qDebug() << wire->boundingRect().height();
+                          points.push_back(wire->boundingRect().width());
+                          wire_components.push_back(points);
                        }
                        if (type == "switch"){
                             //Additional information about switcher
@@ -310,7 +312,8 @@ void MainWindow::onSaveFile() {
           //      "*.json"
             //    );
     //if(!fileName.isEmpty()) {
-        currentFile = QString("sema5.json");
+        std::string fileName ="sema" + std::to_string(counterOfFiles++)+".json";
+        currentFile = QString(fileName.c_str());
         saveFile(document);
     //}
 

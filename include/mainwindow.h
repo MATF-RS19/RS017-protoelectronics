@@ -53,6 +53,7 @@ private:
 
     void saveFile(QJsonDocument);
 	QString currentFile;
+    unsigned counterOfFiles = 0;
 };
 
 #endif // MAINWINDOW_H
