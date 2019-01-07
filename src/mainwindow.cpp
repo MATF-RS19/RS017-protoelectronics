@@ -128,12 +128,15 @@ void MainWindow::onSaveFile() {
          for (int i = 0; i < allItems.size(); ++i) {
               QGraphicsItem *component = allItems[i];
               if(component->parentItem() == nullptr){
+                       // Save coordinates
                        qreal x = component->x();
                        qreal y = component->y();
                        QJsonArray points;
+                       //Add to array in every case
                        points.push_back(x);
                        points.push_back(y);
                        Component *rItem = qgraphicsitem_cast<Component*> (component);
+                       // Find type of component
                        std::string type = rItem->componentType();
                        if (type == "or"){
                           or_components.push_back(points);
@@ -157,15 +160,20 @@ void MainWindow::onSaveFile() {
                           not_components.push_back(points);
                        }
                        if(type == "voltage"){
+                          // Additional information about voltage
                           points.push_back(rItem->voltage());
                           dcvoltage_components.push_back(points);
                        }
                        if(type == "resistor"){
-                          Resistor* rItem = static_cast<Resistor*>(rItem);
-                          points.push_back(rItem->resistance());
+                          //Additional information about resistor
+                          Resistor *resistant = static_cast<Resistor*>(rItem);
+                          points.push_back(resistant->resistance());
                           resistor_components.push_back(points);
                        }
                        if(type == "clock"){
+                          //Additional infomration about clock
+                          Clock* clock = static_cast<Clock*>(rItem);
+                          points.push_back(clock->timeInterval());
                           clock_components.push_back(points);
                        }
                        if (type == "ground"){
@@ -175,8 +183,9 @@ void MainWindow::onSaveFile() {
                           wire_components.push_back(points);
                        }
                        if (type == "switch"){
-                            Switch* rItem = static_cast<Switch*>(rItem);
-                            points.push_back(rItem->isOpened());
+                            //Additional information about switcher
+                            Switch *switcher = static_cast<Switch*>(rItem);
+                            points.push_back(switcher->isOpened());
                             switch_components.push_back(points);
                        }
                        if (type == "flipflop"){
@@ -192,6 +201,8 @@ void MainWindow::onSaveFile() {
               }
             }
             QJsonObject topQuery;
+            //Save in Json format (map)
+            // { type : [ information ]}
             topQuery["or"] = or_components;
             topQuery["nor"] = nor_components;
             topQuery["and"] = and_components;
@@ -209,29 +220,21 @@ void MainWindow::onSaveFile() {
             topQuery["lcd"] = lcd_components;
             topQuery["flipflop"] = flipflop_components;
             QJsonDocument document(topQuery);
-            //qDebug() << document.toJson();
 
-	// TODO
     //QString fileName = QFileDialog::getSaveFileName(
       //          new MainWindow(),
         //        tr("Save as"),
           //      "*.json"
             //    );
-    //qDebug() << "A";
     //if(!fileName.isEmpty()) {
         currentFile = QString("sema5.json");
         saveFile(document);
     //}
 
-    //qDebug() << fileName;
-
 }
 
 
 void MainWindow::saveFile(QJsonDocument document) {
-	// TODO
-    //QString text = "save me";
-
 
 	QFile file(currentFile);
 
