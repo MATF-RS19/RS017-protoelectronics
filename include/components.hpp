@@ -293,6 +293,8 @@ public:
 	// Wire has her own boundingRect since it's changing as we make wire longer
 	QRectF boundingRect() const override;
 
+    void setBoundingRect(double width);
+
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 	QRectF changingBoundingRec;

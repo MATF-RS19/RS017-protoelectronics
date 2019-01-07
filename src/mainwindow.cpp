@@ -254,7 +254,16 @@ void MainWindow::onSaveFile() {
                           ground_components.push_back(points);
                        }
                        if (type == "wire"){
+                          Wire *wire = static_cast<Wire*>(rItem);
+                          //TODO
+                          //ovako se menja sirina zice
+                          //wire->setBoundingRect(150);
                           wire_components.push_back(points);
+
+                          //sirina, visina koju treba sacuvati
+                          //i Pos naravno
+                          qDebug() << wire->boundingRect().width();
+                          qDebug() << wire->boundingRect().height();
                        }
                        if (type == "switch"){
                             //Additional information about switcher

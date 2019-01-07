@@ -572,14 +572,21 @@ std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
     return dots;
 }
 
+void Wire::setBoundingRect(double width) {
+    endWire.setX(width);
+    changingBoundingRec.setWidth(width);
+    update();
+}
+
 void Wire::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 	// Double click on wire makes her longer
-	if(event->button() == Qt::LeftButton) {
-		double width = changingBoundingRec.width();
-        double scaleNumber = 10;
-        changingBoundingRec.setWidth(scaleNumber + width);
-        endWire.setX(scaleNumber + width);
-		update();
+    double width = changingBoundingRec.width();
+    double scaleNumber = 10;
+    if(event->button() == Qt::LeftButton) {
+        if (event->modifiers() == Qt::ControlModifier) {
+            if (width - scaleNumber >= 10)
+                setBoundingRect(width - scaleNumber - 0.5);
+        } else setBoundingRect(width + scaleNumber);
 	}
 	QGraphicsItem::mouseDoubleClickEvent(event);
 }
