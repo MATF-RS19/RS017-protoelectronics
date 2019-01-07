@@ -155,6 +155,9 @@ public:
     Component& operator=(const Component&) = delete;
 
 	std::string name() const;
+    int rotationAngle() const;
+    void setRotationAngle(int angle);
+    void rotate(int angle);
 
     //All nodes that component have
 	std::vector<std::shared_ptr<Node>> nodes() const;
@@ -226,7 +229,8 @@ friend std::ostream& operator<<(std::ostream& out, const Component& c);
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
-	virtual std::string toString() const;
+    virtual std::string toString() const;
+    int _rotationAngle;
 
 #ifdef QTPAINT
     QPen penForLines;
@@ -243,6 +247,7 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
+
 #endif
 };
 

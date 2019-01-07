@@ -170,7 +170,7 @@ void Node::disconnectFromComponent(Component* const e) {
 
 //Component
 Component::Component(const std::string &name)
-	:_name(name)
+    :_name(name), _rotationAngle(0)
 {
     _nodes.clear();
     _nodes.reserve(3);
@@ -222,12 +222,15 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
 void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {	
 	// If mouse right button is pressed over component we rotate it
 	if(event->button() == Qt::RightButton) {
-        QPointF center = boundingRect().center();
-        QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(90).translate(-center.x(), -center.y());
-        setTransform(rotation, true);
+        //QPointF center = boundingRect().center();
+        //QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(90).translate(-center.x(), -center.y());
+        //setTransform(rotation, true);
 
-        disconnect();
-        connect(connectionPoints());
+        //disconnect();
+        //connect(connectionPoints());
+        //int angle = (this->rotationAngle() + 90) % 360;
+        //this->setRotationAngle(angle);
+        this->rotate(90);
     }
     QGraphicsItem::mousePressEvent(event);
 }
@@ -314,6 +317,21 @@ std::string Component::name() const {
 	return _name;
 }
 
+int Component::rotationAngle() const {
+    return _rotationAngle;
+}
+void Component::setRotationAngle(int angle){
+    _rotationAngle = (_rotationAngle+angle) % 360;
+}
+void Component::rotate(int angle){
+    QPointF center = boundingRect().center();
+    QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(angle).translate(-center.x(), -center.y());
+    setTransform(rotation, true);
+
+    disconnect();
+    connect(connectionPoints());
+    this->setRotationAngle(angle);
+}
 std::vector<std::shared_ptr<Node>> Component::nodes() const {
 	return _nodes;
 }

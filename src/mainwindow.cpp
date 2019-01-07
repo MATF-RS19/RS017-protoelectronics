@@ -176,7 +176,7 @@ void MainWindow::onOpenFile() {
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->connect(gate->connectionPoints());
         this->scene->addItem(gate);
-        gate->setBoundingRect(points[2].toInt());
+        gate->setBoundingRect(points[3].toInt());
     });
 
 }
@@ -208,9 +208,12 @@ void MainWindow::onSaveFile() {
             qreal y = component->y();
             QJsonArray points;
             //Add to array in every case
+            //Position
             points.push_back(x);
             points.push_back(y);
             Component *rItem = qgraphicsitem_cast<Component*> (component);
+            //Angle of rotation
+            points.push_back(rItem->rotationAngle());
             // Find type of component
             std::string type = rItem->componentType();
             if (type == "or"){
