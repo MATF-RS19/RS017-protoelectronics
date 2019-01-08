@@ -1,6 +1,6 @@
 TEST = test
 CC = g++
-CPPFLAGS = -Wall -Wextra -std=c++11 -I ../include -I ../libs
+CPPFLAGS = -Wall -Wextra -g -std=c++11 -I ../include -I ../libs
 
 
 

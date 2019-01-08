@@ -155,6 +155,9 @@ public:
     Component& operator=(const Component&) = delete;
 
 	std::string name() const;
+    int rotationAngle() const;
+    void setRotationAngle(int angle);
+    void rotate(int angle);
 
     //All nodes that component have
 	std::vector<std::shared_ptr<Node>> nodes() const;
@@ -226,7 +229,8 @@ friend std::ostream& operator<<(std::ostream& out, const Component& c);
 protected:
 	//component is connected to nodes
     std::vector<std::shared_ptr<Node>> _nodes;
-	virtual std::string toString() const;
+    virtual std::string toString() const;
+    int _rotationAngle;
 
 #ifdef QTPAINT
     QPen penForLines;
@@ -243,6 +247,7 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event);
+
 #endif
 };
 
@@ -292,6 +297,8 @@ public:
 
 	// Wire has her own boundingRect since it's changing as we make wire longer
 	QRectF boundingRect() const override;
+
+    void setBoundingRect(double width);
 
 protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
@@ -351,7 +358,7 @@ public:
 
     ~Switch() override;
 
-    std::string componentType() const override {return ( _state == CLOSE )? "wire" : "switch";}
+    std::string componentType() const override {return "switch";}
 
     void addNode(int x, int y) override;
 
@@ -430,6 +437,7 @@ public:
 
 	int timeInterval() const;
 	void setTimeInterval(int timeInterval);
+    double oldVoltage() const;
 
 	~Clock() override;
 

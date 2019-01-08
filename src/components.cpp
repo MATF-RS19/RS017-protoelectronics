@@ -170,7 +170,7 @@ void Node::disconnectFromComponent(Component* const e) {
 
 //Component
 Component::Component(const std::string &name)
-	:_name(name)
+    :_name(name), _rotationAngle(0)
 {
     _nodes.clear();
     _nodes.reserve(3);
@@ -222,12 +222,15 @@ QVariant Component::itemChange(GraphicsItemChange change, const QVariant &value)
 void Component::mousePressEvent(QGraphicsSceneMouseEvent* event) {	
 	// If mouse right button is pressed over component we rotate it
 	if(event->button() == Qt::RightButton) {
-        QPointF center = boundingRect().center();
-        QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(90).translate(-center.x(), -center.y());
-        setTransform(rotation, true);
+        //QPointF center = boundingRect().center();
+        //QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(90).translate(-center.x(), -center.y());
+        //setTransform(rotation, true);
 
-        disconnect();
-        connect(connectionPoints());
+        //disconnect();
+        //connect(connectionPoints());
+        //int angle = (this->rotationAngle() + 90) % 360;
+        //this->setRotationAngle(angle);
+        this->rotate(90);
     }
     QGraphicsItem::mousePressEvent(event);
 }
@@ -314,6 +317,23 @@ std::string Component::name() const {
 	return _name;
 }
 
+int Component::rotationAngle() const {
+    return _rotationAngle;
+}
+void Component::setRotationAngle(int angle){
+    _rotationAngle = (_rotationAngle+angle) % 360;
+}
+#ifdef QTPAINT
+void Component::rotate(int angle){
+    QPointF center = boundingRect().center();
+    QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(angle).translate(-center.x(), -center.y());
+    setTransform(rotation, true);
+
+    disconnect();
+    connect(connectionPoints());
+    this->setRotationAngle(angle);
+}
+#endif
 std::vector<std::shared_ptr<Node>> Component::nodes() const {
 	return _nodes;
 }
@@ -572,14 +592,21 @@ std::vector<std::pair<int, int>> Wire::connectionPoints(void) const {
     return dots;
 }
 
+void Wire::setBoundingRect(double width) {
+    endWire.setX(width);
+    changingBoundingRec.setWidth(width);
+    update();
+}
+
 void Wire::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 	// Double click on wire makes her longer
-	if(event->button() == Qt::LeftButton) {
-		double width = changingBoundingRec.width();
-        double scaleNumber = 10;
-        changingBoundingRec.setWidth(scaleNumber + width);
-        endWire.setX(scaleNumber + width);
-		update();
+    double width = changingBoundingRec.width();
+    double scaleNumber = 10;
+    if(event->button() == Qt::LeftButton) {
+        if (event->modifiers() == Qt::ControlModifier) {
+            if (width - scaleNumber >= 10)
+                setBoundingRect(width - scaleNumber);
+        } else setBoundingRect(width + scaleNumber);
 	}
 	QGraphicsItem::mouseDoubleClickEvent(event);
 }
@@ -753,7 +780,7 @@ void Resistor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 	// If we double click on resistor new dialog for property changing pops out
 	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
-		dialog->setModal(false);
+        //dialog->setModal(false);
         dialog->show();
 
 		update();
@@ -852,7 +879,6 @@ void DCVoltage::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 	// If we double click on dc voltage new dialog for property changing pops out
 	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
-		dialog->setModal(false);
 		dialog->show();
 
 		update();
@@ -967,6 +993,9 @@ int Clock::timeInterval() const {
 void Clock::setTimeInterval(int timeInterval) {
 	_timeInterval = timeInterval;
 }
+double Clock::oldVoltage() const{
+    return _oldVoltage;
+}
 
 std::string Clock::toString() const {
     std::stringstream str;
@@ -985,7 +1014,6 @@ void Clock::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 
 	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
-		dialog->setModal(false);
 		dialog->show();
 
 		// Start timer again with new _timeInterval value
@@ -1002,7 +1030,6 @@ void Clock::timerEvent(QTimerEvent *event) {
 	else
 		setVoltage(0.0);
 	update();
-	// TODO MOZDA OVDE TREBA DODATI da iskoristi event kao i pre
 }
 #endif
 
