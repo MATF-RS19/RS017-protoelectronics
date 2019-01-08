@@ -323,6 +323,7 @@ int Component::rotationAngle() const {
 void Component::setRotationAngle(int angle){
     _rotationAngle = (_rotationAngle+angle) % 360;
 }
+#ifdef QTPAINT
 void Component::rotate(int angle){
     QPointF center = boundingRect().center();
     QTransform rotation = QTransform().translate(center.x(), center.y()).rotate(angle).translate(-center.x(), -center.y());
@@ -332,6 +333,7 @@ void Component::rotate(int angle){
     connect(connectionPoints());
     this->setRotationAngle(angle);
 }
+#endif
 std::vector<std::shared_ptr<Node>> Component::nodes() const {
 	return _nodes;
 }
@@ -603,7 +605,7 @@ void Wire::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if(event->button() == Qt::LeftButton) {
         if (event->modifiers() == Qt::ControlModifier) {
             if (width - scaleNumber >= 10)
-                setBoundingRect(width - scaleNumber - 0.5);
+                setBoundingRect(width - scaleNumber);
         } else setBoundingRect(width + scaleNumber);
 	}
 	QGraphicsItem::mouseDoubleClickEvent(event);
@@ -778,7 +780,7 @@ void Resistor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 	// If we double click on resistor new dialog for property changing pops out
 	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
-		dialog->setModal(false);
+        //dialog->setModal(false);
         dialog->show();
 
 		update();
@@ -877,7 +879,6 @@ void DCVoltage::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 	// If we double click on dc voltage new dialog for property changing pops out
 	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
-		dialog->setModal(false);
 		dialog->show();
 
 		update();
@@ -1013,7 +1014,6 @@ void Clock::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 
 	if(event->button() == Qt::LeftButton) {
 		Dialog* dialog = new Dialog(this);
-		dialog->setModal(false);
 		dialog->show();
 
 		// Start timer again with new _timeInterval value
@@ -1030,7 +1030,6 @@ void Clock::timerEvent(QTimerEvent *event) {
 	else
 		setVoltage(0.0);
 	update();
-	// TODO MOZDA OVDE TREBA DODATI da iskoristi event kao i pre
 }
 #endif
 

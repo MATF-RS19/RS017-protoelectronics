@@ -98,7 +98,7 @@ void MainWindow::onOpenFile() {
                 this,
                 tr("Open File"),
                 "/Users",
-                "All files (*.*);;Text File (*.txt)"
+                "Text File (*.json)"
                 );
 
     qDebug() << filename;
@@ -208,7 +208,7 @@ void MainWindow::onOpenFile() {
         Switch *gate = new Switch();
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->connect(gate->connectionPoints());
-        if (!points[2].toBool()){
+        if (!points[3].toBool()){
             gate->close();
         }
         this->scene->addItem(gate);
@@ -239,8 +239,10 @@ void MainWindow::onOpenFile() {
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->connect(gate->connectionPoints());
         this->scene->addItem(gate);
-        gate->setBoundingRect(points[3].toInt());
         this->rotateComponent(gate,points[2].toInt());
+        gate->setBoundingRect(points[3].toInt());
+        gate->disconnect();
+        gate->connect(gate->connectionPoints());
     });
     QJsonArray voltage_components= data["voltage"].toArray();
     std::for_each(voltage_components.begin(),voltage_components.end(),[this](QJsonValueRef value){
