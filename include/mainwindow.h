@@ -50,6 +50,10 @@ private:
     void createListWidget();
     void createSceneAndView();
     void createLayout();
+    template<typename T>
+    void rotateComponent(T* component, int angle){
+        component->rotate(angle);
+    }
 
     void saveFile(QJsonDocument);
 	QString currentFile;

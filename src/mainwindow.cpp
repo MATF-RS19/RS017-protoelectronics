@@ -93,8 +93,7 @@ void MainWindow::createLayout(){
 
 void MainWindow::onOpenFile() {
     // Open already existing scheme
-
-    // TODO
+    this->scene->clear();
     QString filename = QFileDialog::getOpenFileName(
                 this,
                 tr("Open File"),
@@ -115,18 +114,20 @@ void MainWindow::onOpenFile() {
     QJsonArray and_components = data["and"].toArray();
     std::for_each(and_components.begin(),and_components.end(),[this](QJsonValueRef value){
         QJsonArray points = value.toArray();
-        ANDGate *and_gate = new ANDGate();
-        and_gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
-        and_gate->connect(and_gate->connectionPoints());
-        this->scene->addItem(and_gate);
+        ANDGate *gate = new ANDGate();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->connect(gate->connectionPoints());
+        this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
     });
     QJsonArray nand_components = data["nand"].toArray();
     std::for_each(nand_components.begin(),nand_components.end(),[this](QJsonValueRef value){
         QJsonArray points = value.toArray();
-        NANDGate *nand_gate = new NANDGate();
-        nand_gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
-        nand_gate->connect(nand_gate->connectionPoints());
-        this->scene->addItem(nand_gate);
+        NANDGate *gate = new NANDGate();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->connect(gate->connectionPoints());
+        this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
     });
 
     QJsonArray or_components = data["or"].toArray();
@@ -136,6 +137,7 @@ void MainWindow::onOpenFile() {
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->connect(gate->connectionPoints());
         this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
     });
     QJsonArray nor_components = data["nor"].toArray();
     std::for_each(nor_components.begin(),nor_components.end(),[this](QJsonValueRef value){
@@ -144,6 +146,7 @@ void MainWindow::onOpenFile() {
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->connect(gate->connectionPoints());
         this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
     });
     QJsonArray xor_components = data["xor"].toArray();
     std::for_each(xor_components.begin(),xor_components.end(),[this](QJsonValueRef value){
@@ -152,6 +155,7 @@ void MainWindow::onOpenFile() {
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->connect(gate->connectionPoints());
         this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
     });
     QJsonArray nxor_components = data["nxor"].toArray();
     std::for_each(nxor_components.begin(),nxor_components.end(),[this](QJsonValueRef value){
@@ -160,6 +164,7 @@ void MainWindow::onOpenFile() {
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->connect(gate->connectionPoints());
         this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
     });
     QJsonArray not_components = data["not"].toArray();
     std::for_each(not_components.begin(),not_components.end(),[this](QJsonValueRef value){
@@ -168,6 +173,64 @@ void MainWindow::onOpenFile() {
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->connect(gate->connectionPoints());
         this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
+    });
+    QJsonArray lcd_components = data["lcd"].toArray();
+    std::for_each(lcd_components.begin(),lcd_components.end(),[this](QJsonValueRef value){
+        QJsonArray points = value.toArray();
+        LCDDisplay *gate = new LCDDisplay();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->connect(gate->connectionPoints());
+        this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
+    });
+    QJsonArray decoder_components = data["decoder"].toArray();
+    std::for_each(decoder_components.begin(),decoder_components.end(),[this](QJsonValueRef value){
+        QJsonArray points = value.toArray();
+        Decoder *gate = new Decoder();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->connect(gate->connectionPoints());
+        this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
+    });
+    QJsonArray flipflop_components = data["flipflop"].toArray();
+    std::for_each(flipflop_components.begin(),flipflop_components.end(),[this](QJsonValueRef value){
+        QJsonArray points = value.toArray();
+        JKFlipFlop *gate = new JKFlipFlop();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->connect(gate->connectionPoints());
+        this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
+    });
+    QJsonArray switch_components = data["switch"].toArray();
+    std::for_each(switch_components.begin(),switch_components.end(),[this](QJsonValueRef value){
+        QJsonArray points = value.toArray();
+        Switch *gate = new Switch();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->connect(gate->connectionPoints());
+        if (!points[2].toBool()){
+            gate->close();
+        }
+        this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
+    });
+    QJsonArray ground_components = data["ground"].toArray();
+    std::for_each(ground_components.begin(),ground_components.end(),[this](QJsonValueRef value){
+        QJsonArray points = value.toArray();
+        Ground *gate = new Ground();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->connect(gate->connectionPoints());
+        this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
+    });
+    QJsonArray clock_components = data["clock"].toArray();
+    std::for_each(clock_components.begin(),clock_components.end(),[this](QJsonValueRef value){
+        QJsonArray points = value.toArray();
+        Clock *gate = new Clock();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->Component::connect(gate->connectionPoints());
+        this->scene->addItem(gate);
+        this->rotateComponent(gate,points[2].toInt());
     });
     QJsonArray wire_components= data["wire"].toArray();
     std::for_each(wire_components.begin(),wire_components.end(),[this](QJsonValueRef value){
@@ -177,6 +240,27 @@ void MainWindow::onOpenFile() {
         gate->connect(gate->connectionPoints());
         this->scene->addItem(gate);
         gate->setBoundingRect(points[3].toInt());
+        this->rotateComponent(gate,points[2].toInt());
+    });
+    QJsonArray voltage_components= data["voltage"].toArray();
+    std::for_each(voltage_components.begin(),voltage_components.end(),[this](QJsonValueRef value){
+        QJsonArray points = value.toArray();
+        DCVoltage *gate = new DCVoltage();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->connect(gate->connectionPoints());
+        this->scene->addItem(gate);
+        gate->setVoltage(points[3].toInt());
+        this->rotateComponent(gate,points[2].toInt());
+    });
+    QJsonArray resistor_components= data["resistor"].toArray();
+    std::for_each(resistor_components.begin(),resistor_components.end(),[this](QJsonValueRef value){
+        QJsonArray points = value.toArray();
+        Resistor *gate = new Resistor();
+        gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
+        gate->connect(gate->connectionPoints());
+        this->scene->addItem(gate);
+        gate->setResistance(points[3].toInt());
+        this->rotateComponent(gate,points[2].toInt());
     });
 
 }

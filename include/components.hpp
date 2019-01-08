@@ -358,7 +358,7 @@ public:
 
     ~Switch() override;
 
-    std::string componentType() const override {return ( _state == CLOSE )? "wire" : "switch";}
+    std::string componentType() const override {return "switch";}
 
     void addNode(int x, int y) override;
 
