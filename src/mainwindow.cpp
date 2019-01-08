@@ -226,7 +226,7 @@ void MainWindow::onOpenFile() {
     QJsonArray clock_components = data["clock"].toArray();
     std::for_each(clock_components.begin(),clock_components.end(),[this](QJsonValueRef value){
         QJsonArray points = value.toArray();
-        Clock *gate = new Clock();
+        Clock *gate = new Clock(5,points[3].toInt());
         gate->setPos(QPointF(points[0].toInt(),points[1].toInt()));
         gate->Component::connect(gate->connectionPoints());
         this->scene->addItem(gate);
