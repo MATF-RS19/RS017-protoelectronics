@@ -26,9 +26,11 @@ void LogicGate::disconnect(int x, int y) {
 
 void LogicGate::disconnect() {
     if (_nodes.size() == 3) {
+        reconnect(_nodes[0]->x(), _nodes[0]->y(), 1000, 1000);
+        reconnect(_nodes[1]->x(), _nodes[1]->y(), 1001, 1001);
         //Remove possible voltage on output node
-        _nodes.back()->_v = 0;
-        updateVoltages(_nodes.back());
+        _nodes[2]->_v = 0;
+        updateVoltages(_nodes[2]);
     }
     Component::disconnect();
 }
